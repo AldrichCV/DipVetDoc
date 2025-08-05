@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\FacebookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\PetController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -56,3 +57,6 @@ Route::get('auth/google/callback', function () {
 
 Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
 Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);
+
+Route::get('/my_appointments', [UserController::class, 'appointments'])->name('my_appointments');
+Route::post('/my_appointments', [UserController::class, 'store'])->name('appointments.store');

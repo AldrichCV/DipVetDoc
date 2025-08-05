@@ -12,11 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pets', function (Blueprint $table) {
-            $table->id();
+            $table->id(); // Primary key
+            $table->string('pet_code')->unique(); // Custom readable ID (e.g., PET-0001)
             $table->string('name');
             $table->string('species');
             $table->string('breed')->nullable();
-            $table->enum('sex', ['Male', 'Female'])->nullable();
+            $table->enum('sex', ['Male', 'Female']);
             $table->date('date_of_birth')->nullable();
             $table->timestamps();
         });
