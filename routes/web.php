@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Controllers\Auth\FacebookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PetController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
+
 
 Route::get('/', function () {
     return view('HomePage');})->name('home');
@@ -26,3 +31,28 @@ require __DIR__.'/auth.php';
 Route::get('/user_dashboard', function () {
     return view('user_dashboard');
 })->middleware(['auth']);
+
+Route::get('auth/google', function () {
+    return Socialite::driver('google')->redirect();
+})->name('google.login');
+
+// Handle callback from Google
+Route::get('auth/google/callback', function () {
+    $googleUser = Socialite::driver('google')->user();
+
+    $user = User::firstOrCreate(
+        ['email' => $googleUser->getEmail()],
+        [
+            'name' => $googleUser->getName(),
+            'password' => bcrypt(Str::random(24)),
+            'google_id' => $googleUser->getId(),
+        ]
+    );
+
+    Auth::login($user);
+
+    return redirect()->intended('/dashboard');
+});
+
+Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
+Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);

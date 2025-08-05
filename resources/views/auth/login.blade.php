@@ -81,9 +81,9 @@
                     <!-- Google Icon -->
                     Google
                 </a>
-                <a href="#" class="social-button">
+                <a href="{{ url('/auth/facebook') }}" class="social-button">
                     <!-- Twitter Icon -->
-                    Twitter
+                    Facebook
                 </a>
             </div>
         </div>
