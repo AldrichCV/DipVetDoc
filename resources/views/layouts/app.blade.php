@@ -16,7 +16,14 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+
+            @auth
+                @if (auth()->user()->role === 'user')
+                    @include('layouts.user_navigation')
+                @else
+                    @include('layouts.navigation')
+                @endif
+            @endauth
 
             <!-- Page Heading -->
             @isset($header)

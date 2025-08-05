@@ -26,6 +26,7 @@ class LoginRequest extends FormRequest
         return match ($role) {
             'admin' => '/dashboard',
             'staff' => '/staff/portal',
+            'user'=> '/user_dashboard',
             default => '/',
         };
     }
