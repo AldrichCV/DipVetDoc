@@ -9,7 +9,8 @@ class PetController extends Controller
 {
     public function index()
     {
-        $pets = Pet::all(); // Or paginate if needed
-        return view('pets', compact('pets')); // Adjust path if needed
+        $pets = Pet::select('pet_code', 'name', 'species', 'breed', 'sex', 'date_of_birth')->distinct()->get();
+        return view('pets', compact('pets'));
     }
+
 }

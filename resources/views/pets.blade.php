@@ -24,7 +24,7 @@
                             <tbody>
                                 @forelse ($pets as $pet)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-2 border">{{ $pet->id }}</td>
+                                        <td class="px-4 py-2 border">{{ $pet->pet_code }}</td>
                                         <td class="px-4 py-2 border">{{ $pet->name }}</td>
                                         <td class="px-4 py-2 border">{{ $pet->species }}</td>
                                         <td class="px-4 py-2 border">{{ $pet->breed }}</td>

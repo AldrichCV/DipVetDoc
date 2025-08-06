@@ -75,4 +75,5 @@ class UserController extends Controller
 
         return 'PET' . $today . '-' . str_pad($countToday, 3, '0', STR_PAD_LEFT);
     }
+
 }
