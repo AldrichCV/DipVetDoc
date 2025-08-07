@@ -16,6 +16,7 @@ class AppointmentController extends Controller
     {
         return view('appointments.create');
     }
+    
 
     /**
      * Handle the form submission for creating a new appointment.
@@ -48,12 +49,41 @@ class AppointmentController extends Controller
     /**
      * Display a list of all appointments booked by the current user.
      */
-    public function index()
-    {
-        // Get appointments for the authenticated user only
-        $appointments = Appointment::where('user_id', Auth::id())->latest()->get();
-
-        // Return the view with the appointments data
-        return view('appointments.index', compact('appointments'));
+      public function index()
+{
+    if (Auth::user()->role === 'admin') {
+   
+        $appointments = Appointment::all();
+    } else {
+       
+        $appointments = Auth::user()->appointments; 
     }
+
+    return view('appointments.index', compact('appointments'));
+}
+
+public function changeStatus($id)
+{
+    $appointment = Appointment::findOrFail($id);
+
+    // Only use valid ENUM values
+    switch ($appointment->status) {
+        case 'pending':
+            $appointment->status = 'approved';
+            break;
+        case 'approved':
+            $appointment->status = 'cancelled';
+            break;
+        case 'cancelled':
+        default:
+            $appointment->status = 'pending';
+            break;
+    }
+
+    $appointment->save();
+
+    return back()->with('success', 'Appointment status updated.');
+}
+
+
 }

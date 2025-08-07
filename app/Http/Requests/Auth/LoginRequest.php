@@ -32,6 +32,18 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    public function redirectPath(): string
+    {
+        $role = auth()->user()->role ?? 'user';
+
+        return match ($role) {
+            'admin' => '/admin_dashboard',
+            'staff' => '/staff/portal',
+            'user'=> '/user_dashboard',
+            default => '/',
+        };
+    }
+
     /**
      * Attempt to authenticate the request's credentials.
      *

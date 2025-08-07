@@ -42,28 +42,36 @@
                             </td>
 
                             {{-- Display status with color-coded badge --}}
-                            <td class="px-4 py-2">
-                                @php
-                                    // Define color classes for different statuses
-                                    $statusColors = [
-                                        'pending' => 'bg-yellow-100 text-yellow-800',
-                                        'approved' => 'bg-green-100 text-green-800',
-                                        'cancelled' => 'bg-red-100 text-red-800',
-                                        'completed' => 'bg-blue-100 text-blue-800',
-                                    ];
+                          <td class="px-4 py-2">
+                            @php
+                                $statusColors = [
+                                    'pending' => 'bg-yellow-100 text-yellow-800',
+                                    'approved' => 'bg-green-100 text-green-800',
+                                    'cancelled' => 'bg-red-100 text-red-800',
+                                    'completed' => 'bg-blue-100 text-blue-800',
+                                ];
 
-                                    // Normalize status string
-                                    $status = strtolower($appointment->status);
+                                $status = strtolower($appointment->status);
+                                $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800';
+                            @endphp
 
-                                    // Get badge class based on status or use default gray
-                                    $badgeClass = $statusColors[$status] ?? 'bg-gray-100 text-gray-800';
-                                @endphp
-
-                                {{-- Status badge --}}
+                            @if (auth()->user()->role === 'admin')
+                                {{-- Admin: Change Status Button --}}
+                                <form action="{{ route('appointments.changeStatus', $appointment->id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                        class="px-3 py-1 rounded-full text-xs font-semibold {{ $badgeClass }} hover:opacity-80 transition">
+                                        {{ ucfirst($status) }}
+                                    </button>
+                                </form>
+                            @else
+                                {{-- User: Read-only Status Badge --}}
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $badgeClass }}">
                                     {{ ucfirst($status) }}
                                 </span>
-                            </td>
+                            @endif
+                        </td>
                         </tr>
                     @empty
                         {{-- If no appointments exist --}}

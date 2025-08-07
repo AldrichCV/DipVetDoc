@@ -13,11 +13,17 @@ class PetController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        // Fetch all pets from the database
-         $pets = Auth::user()->pets; // Assuming one-to-many relationship: User hasMany Pets
-        return view('pets.index', compact('pets'));
+{
+    if (Auth::user()->role === 'admin') {
+        // Admin sees all pets
+        $pets = Pet::all();
+    } else {
+        // Regular user sees only their own pets
+        $pets = Auth::user()->pets; // User hasMany Pets
     }
+
+    return view('pets.index', compact('pets'));
+}
 
     /**
      * Show the form for creating a new resource.

@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pets', function (Blueprint $table) {
+        Schema::create('pet', function (Blueprint $table) {
             $table->id(); // Primary key: auto-incrementing ID
 
             // Foreign key column referencing the 'id' in 'users' table
@@ -41,6 +41,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pets'); // Drops the pets table
+        Schema::dropIfExists('pet'); // Drops the pets table
     }
 };

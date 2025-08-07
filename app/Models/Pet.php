@@ -9,6 +9,7 @@ class Pet extends Model
 {
     // Defines which attributes can be mass assigned using create() or update()
     // This helps protect against mass-assignment vulnerabilities
+    protected $table = 'pet';
     protected $fillable = [
         'user_id', // Foreign key linking to the user who owns the pet
         'name',    // Name of the pet

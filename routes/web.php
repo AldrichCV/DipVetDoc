@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PetController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,3 +43,17 @@ Route::middleware(['auth'])->group(function () {
 
 // Authentication routes
 require __DIR__.'/auth.php';
+
+Route::get('/admin_dashboard', function () {
+    return view('admin_dashboard');
+})->middleware(['auth'])->name('admin');
+
+
+Route::get('/user_dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('user_dashboard');
+
+Route::get('/users', [AdminController::class, 'index'])->middleware(['auth'])->name('users');
+
+Route::patch('/appointments/{id}/change-status', [AppointmentController::class, 'changeStatus'])
+    ->name('appointments.changeStatus');
