@@ -19,6 +19,18 @@ class LoginRequest extends FormRequest
         return true;
     }
 
+    public function redirectPath(): string
+    {
+        $role = auth()->user()->role ?? 'user';
+
+        return match ($role) {
+            'admin' => '/dashboard',
+            'staff' => '/staff/portal',
+            'user'=> '/user_dashboard',
+            default => '/',
+        };
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
