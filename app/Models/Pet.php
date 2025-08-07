@@ -11,8 +11,15 @@ class Pet extends Model
      * @var list<string>
      */
      protected $fillable = [
-        'pet_code', 'name', 'species', 'breed', 'sex', 'date_of_birth'
-    ];
+    'pet_code',
+    'name',
+    'species',
+    'breed',
+    'sex',
+    'date_of_birth',
+    'owner_id'
+];
+
 
     //
 

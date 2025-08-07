@@ -25,7 +25,7 @@
                         {{ __('Pets') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
+                    <x-nav-link :href="route('my_appointments')" :active="request()->routeIs('my_appointments')">
                         {{ __('Appointments') }}
                     </x-nav-link>
                 </div>

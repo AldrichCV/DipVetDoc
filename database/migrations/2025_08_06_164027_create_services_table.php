@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pets', function (Blueprint $table) {
-            $table->id(); // Primary key
-            $table->string('pet_code')->unique(); // Custom readable ID (e.g., PET-0001)
+        Schema::create('services', function (Blueprint $table) {
+            $table->id();
             $table->string('name');
-            $table->string('species');
-            $table->string('breed')->nullable();
-            $table->enum('sex', ['Male', 'Female']);
-            $table->date('date_of_birth')->nullable();
+            $table->text('description')->nullable();
+            $table->decimal('price', 8, 2)->default(0);
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pets');
+        Schema::dropIfExists('services');
     }
 };
