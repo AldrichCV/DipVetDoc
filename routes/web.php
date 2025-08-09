@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\Auth\FacebookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
@@ -35,27 +36,14 @@ Route::get('/user_dashboard', function () {
     return view('user_dashboard');
 })->middleware(['auth']);
 
-Route::get('auth/google', function () {
-    return Socialite::driver('google')->redirect();
-})->name('google.login');
 
-// Handle callback from Google
-Route::get('auth/google/callback', function () {
-    $googleUser = Socialite::driver('google')->user();
+Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 
-    $user = User::firstOrCreate(
-        ['email' => $googleUser->getEmail()],
-        [
-            'name' => $googleUser->getName(),
-            'password' => bcrypt(Str::random(24)),
-            'google_id' => $googleUser->getId(),
-        ]
-    );
-
-    Auth::login($user);
-
-    return redirect()->intended('/dashboard');
+Route::middleware('web')->group(function () {
+    Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.login');
+    Route::get('auth/google/callback', [GoogleAuthController::class, 'callback']);
 });
+
 
 Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
 Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);
@@ -65,5 +53,13 @@ Route::post('/my_appointments', [AppointmentController::class, 'store'])->name('
 Route::resource('appointments', AppointmentController::class); //contains update and delete
 
 Route::get('/my_pets', [UserController::class, 'pets'])->name('my_pets');
+
+Route::prefix('pets')->name('pets.')->group(function () {
+    Route::get('{pet_code}/edit', [PetController::class, 'edit'])->name('edit');
+    Route::put('{pet_code}', [PetController::class, 'update'])->name('update');
+    Route::delete('{pet_code}', [PetController::class, 'destroy'])->name('destroy');
+});
+
+
 
 Route::get('/appointments', [AdminController::class, 'appointments'])->name('appointments');

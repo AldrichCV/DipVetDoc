@@ -21,11 +21,15 @@
                         {{ __('Users') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('users')" :active="request()->routeIs('users')">
+                        {{ __('Veterinarians') }}
+                    </x-nav-link>
+
                     <x-nav-link :href="route('pets')" :active="request()->routeIs('pets')">
                         {{ __('Pets') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('my_appointments')" :active="request()->routeIs('my_appointments')">
+                    <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
                         {{ __('Appointments') }}
                     </x-nav-link>
                 </div>
