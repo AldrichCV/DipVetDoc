@@ -49,5 +49,11 @@ class AdminController extends Controller
         return view('vet_appointments', compact('appointments'));
     }
 
+    public function veterinarians()
+    {
+        $vets = User::where('role', 'vet')->get();
+        return view('dipvet_veterinarians', compact('vets'));
+    }
+
 }
 

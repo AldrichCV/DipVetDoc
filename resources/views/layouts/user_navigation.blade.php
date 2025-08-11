@@ -19,7 +19,7 @@
                     <x-nav-link :href="route('my_pets')" :active="request()->routeIs('my_pets')">
                         {{ __('My Pets') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('my_appointments')" :active="request()->routeIs('my_appointments')">
+                    <x-nav-link :href="route('my_appointments.index')" :active="request()->routeIs('my_appointments.index')">
                         {{ __('My Appointments') }}
                     </x-nav-link>
                     

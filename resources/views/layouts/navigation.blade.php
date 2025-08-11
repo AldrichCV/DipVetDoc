@@ -10,31 +10,31 @@
 </a>
 
                 </div>
-
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('users')" :active="request()->routeIs('users')">
-                        {{ __('Users') }}
-                    </x-nav-link>
+                    @if(Auth::user()->role === 'admin')
+                        <x-nav-link :href="route('users')" :active="request()->routeIs('users')">
+                            {{ __('Users') }}
+                        </x-nav-link>
 
-                    <x-nav-link :href="route('users')" :active="request()->routeIs('users')">
-                        {{ __('Veterinarians') }}
-                    </x-nav-link>
+                        <x-nav-link :href="route('vet_team')" :active="request()->routeIs('vet_team')">
+                            {{ __('Veterinarians') }}
+                        </x-nav-link>
 
-                    <x-nav-link :href="route('pets')" :active="request()->routeIs('pets')">
-                        {{ __('Pets') }}
-                    </x-nav-link>
+                        <x-nav-link :href="route('pets')" :active="request()->routeIs('pets')">
+                            {{ __('Pets') }}
+                        </x-nav-link>
 
-                    <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
-                        {{ __('Appointments') }}
-                    </x-nav-link>
+                        <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
+                            {{ __('Appointments') }}
+                        </x-nav-link>
+                    @endif
                 </div>
-            </div>
-
+ </div>
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">

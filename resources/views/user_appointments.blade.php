@@ -145,7 +145,7 @@
         <div class="p-6 text-gray-900">
             <h3 class="text-lg font-semibold mb-4">New Appointment</h3>
 
-            <form method="POST" action="{{ route('store_appointments') }}">
+            <form method="POST" action="{{ route('my_appointments.store') }}">
                 @csrf
 
                 <div class="mb-6">

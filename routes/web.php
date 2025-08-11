@@ -12,14 +12,15 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
+require __DIR__.'/auth.php';
 
 Route::get('/', function () {
     return view('HomePage');})->name('home');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
+Route::get('/dashboard', [UserController::class, 'userRedirect'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+    
 Route::get('/users', [AdminController::class, 'index'])->middleware(['auth'])->name('users');
 Route::get('/pets', [PetController::class, 'index'])->middleware(['auth'])->name('pets');
 
@@ -29,13 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-require __DIR__.'/auth.php';
-
-Route::get('/user_dashboard', function () {
-    return view('user_dashboard');
-})->middleware(['auth']);
-
 
 Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 
@@ -48,18 +42,23 @@ Route::middleware('web')->group(function () {
 Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('facebook.login');
 Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);
 
-Route::get('/my_appointments', [AppointmentController::class, 'appointments'])->name('my_appointments');
-Route::post('/my_appointments', [AppointmentController::class, 'store'])->name('store_appointments');
-Route::resource('appointments', AppointmentController::class); //contains update and delete
+#region Appointment and Pets
+//Appointments Route
+Route::prefix('my_appointments')->name('my_appointments.')->group(function () {
+    Route::get('/', [AppointmentController::class, 'appointments'])->name('index');
+    Route::post('/', [AppointmentController::class, 'store'])->name('store');
+});
+Route::resource('appointments', AppointmentController::class);
 
+//Pet Route
 Route::get('/my_pets', [UserController::class, 'pets'])->name('my_pets');
-
 Route::prefix('pets')->name('pets.')->group(function () {
     Route::get('{pet_code}/edit', [PetController::class, 'edit'])->name('edit');
     Route::put('{pet_code}', [PetController::class, 'update'])->name('update');
     Route::delete('{pet_code}', [PetController::class, 'destroy'])->name('destroy');
 });
 
-
+Route::get('/vet_team', [AdminController::class, 'veterinarians'])->name('vet_team');
 
 Route::get('/appointments', [AdminController::class, 'appointments'])->name('appointments');
+#endregion
