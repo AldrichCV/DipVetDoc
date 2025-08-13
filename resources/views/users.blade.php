@@ -24,6 +24,7 @@
                                     <th class="px-4 py-2 border text-left">Email</th>
                                     <th class="px-4 py-2 border text-left">Role</th>
                                     <th class="px-4 py-2 border text-left">Created At</th>
+                                    <th class="px-4 py-2 border text-left">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -32,25 +33,26 @@
                                         <td class="px-4 py-2 border">{{ $user->id }}</td>
                                         <td class="px-4 py-2 border">{{ $user->name }}</td>
                                         <td class="px-4 py-2 border">{{ $user->email }}</td>
-                                        <td class="px-4 py-2 border">
-                                            <form method="POST" action="{{ route('users.updateRole', $user->id) }}">
-                                                @csrf
-                                                @method('PATCH')
-                                                <select name="role" onchange="this.form.submit()"
-                                                    class="cursor-pointer text-xs font-semibold rounded-full px-3 py-1 w-auto
-                                                    border border-blue-600
-                                                    focus:outline-none focus:ring-2 focus:ring-blue-400
-                                                    {{ $user->role === 'staff'
-                                                        ? 'bg-blue-600 text-white'
-                                                        : 'bg-blue-100 text-blue-800'
-                                                    }}"
-                                                    style="appearance:none; -webkit-appearance:none; -moz-appearance:none; padding-right: 1.8rem; min-width: 70px; background-image: url('data:image/svg+xml;charset=US-ASCII,<svg fill=\'%234A90E2\' height=\'8\' viewBox=\'0 0 24 24\' width=\'8\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>'); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 0.65rem auto;">
-                                                    <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User</option>
-                                                    <option value="staff" {{ $user->role === 'staff' ? 'selected' : '' }}>Staff</option>
-                                                </select>
-                                             </form>
+                                        <td class="px-4 py-2 border text-center">
+                                            <span class="inline-block text-xs font-semibold rounded-full px-3 py-1
+                                                {{ $user->role === 'vet'
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-blue-100 text-blue-800'
+                                                }}">
+                                                {{ ucfirst($user->role) }}
+                                            </span>
                                         </td>
-                                        <td class="px-4 py-2 border">{{ $user->created_at->format('Y-m-d') }}</td>
+
+                                        <td class="px-4 py-2 border">{{ $user->created_at->format('M d, Y') }}</td>
+                                      <td class="px-4 py-2 border text-center">
+                                        <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full
+                                            {{ ($user->status ?? '') === 'approved' 
+                                                ? 'bg-green-100 text-green-700' 
+                                                : 'bg-red-100 text-red-700' }}">
+                                            {{ $user->status ?? 'N/A' }}
+                                        </span>
+                                    </td>
+
                                     </tr>
                                 @empty
                                     <tr>

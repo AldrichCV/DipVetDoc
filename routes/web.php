@@ -62,3 +62,20 @@ Route::get('/vet_team', [AdminController::class, 'veterinarians'])->name('vet_te
 
 Route::get('/appointments', [AdminController::class, 'appointments'])->name('appointments');
 #endregion
+
+Route::post('/vets/{vet}/specialization', [UserController::class, 'updateSpecialization'])
+    ->name('vets.updateSpecialization');
+Route::post('/vets/{vet}/toggle-active', [UserController::class, 'toggleActiveStatus']);
+
+// routes/api.php or web.php with middleware 'auth' and 'admin'
+Route::get('/api/vets/active', function () {
+    $activeVets = DB::table('vet_profile as vp')
+        ->join('users as u', 'vp.user_id', '=', 'u.id')
+        ->where('vp.is_active', 1)
+        ->select('u.id', 'u.name','vp.specialization')
+        ->get();
+    return response()->json($activeVets);
+})->name('api.vets.active');
+// web.php (since you are using CSRF and Blade)
+Route::post('/assign-vet', [AdminController::class, 'assignVet'])
+->name('assign');

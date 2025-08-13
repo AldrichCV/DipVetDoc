@@ -20,10 +20,18 @@
                         <x-nav-link :href="route('users')" :active="request()->routeIs('users')">
                             {{ __('Users') }}
                         </x-nav-link>
-
+                        
                         <x-nav-link :href="route('vet_team')" :active="request()->routeIs('vet_team')">
                             {{ __('Veterinarians') }}
+
+                            @if(!empty($pendingCount) && $pendingCount > 0)
+                                <span class="ml-1 inline-block bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                    {{ $pendingCount }}
+                                </span>
+                            @endif
                         </x-nav-link>
+
+
 
                         <x-nav-link :href="route('pets')" :active="request()->routeIs('pets')">
                             {{ __('Pets') }}
@@ -31,10 +39,17 @@
 
                         <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
                             {{ __('Appointments') }}
+
+                              @if(!empty($pendingAppointmentCount) && $pendingAppointmentCount > 0)
+                                <span class="ml-1 inline-block bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                    {{ $pendingAppointmentCount }}
+                                </span>
+                            @endif
                         </x-nav-link>
                     @endif
                 </div>
  </div>
+ 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
@@ -115,3 +130,4 @@
         </div>
     </div>
 </nav>
+

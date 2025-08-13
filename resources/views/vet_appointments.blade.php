@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div x-data="appointmentsComponent()" class="py-12 space-y-8">
+    <div x-data="appointmentsComponent()" class="py-12 space-y-8" @keydown.escape="closeVetModal()">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-12">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
@@ -20,7 +20,6 @@
                                     <th class="px-4 py-2 border text-left">Reason</th>
                                     <th class="px-4 py-2 border text-left">Status</th>
                                     <th class="px-4 py-2 border text-left">Assigned Personnel</th>
-                                    <th class="px-4 py-2 border text-left">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -33,6 +32,7 @@
                                         >
                                             {{ $appointment->pet_name }}
                                         </td>
+                                        
                                         <td class="px-4 py-2 border">{{ $appointment->owner_name }}</td>
                                         <td class="px-4 py-2 border">
                                             {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}
@@ -43,25 +43,45 @@
                                         <td class="px-4 py-2 border">{{ $appointment->reason_name }}</td>
                                         <td class="px-4 py-2 border">
                                             <span
-                                                class="inline-block px-2 py-1 text-xs font-semibold rounded
-                                                       text-white
-                                                       {{ $appointment->status === 'approved' ? 'bg-green-600' : '' }}
-                                                       {{ $appointment->status === 'pending' ? 'bg-yellow-500' : '' }}
-                                                       {{ $appointment->status === 'cancelled' ? 'bg-red-600' : '' }}
-                                                       {{ $appointment->status === 'completed' ? 'bg-blue-600' : '' }}"
-                                            >
+                                                class="inline-block px-3 py-1 text-sm font-semibold rounded-full
+                                                    {{ $appointment->status === 'approved' ? 'bg-green-100 text-green-700 hover:bg-green-200' : '' }}
+                                                    {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : '' }}
+                                                    {{ $appointment->status === 'cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-200' : '' }}
+                                                    {{ $appointment->status === 'completed' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : '' }}">
+
                                                 {{ ucfirst($appointment->status) }}
                                             </span>
                                         </td>
-                                        <td>
-                                            {{ $appointment->assigned_personnel_name ?? '-' }}
-                                            @if(isset($appointment->assigned_personnel_role))
-                                                ({{ $appointment->assigned_personnel_role }})
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-2 border space-x-2">
-                                            <!-- Edit and Delete buttons as before -->
-                                        </td>
+                                            <td class="px-4 py-2 border">
+                                        @php
+                                            // Use only assigned personnel
+                                            $allVets = $appointment->assigned_personnel ?? [];
+                                        @endphp
+
+                                        @forelse ($allVets as $vet)
+                                            <span
+                                                @click="selectActiveVet({{ $appointment->appointment_id }})"
+                                                class="cursor-pointer inline-block px-3 py-1 text-sm font-semibold rounded-full
+                                                    bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1 mb-1"
+                                                title="{{ $vet['role'] ?? '' }}"
+                                            >
+                                                {{ $vet['name'] }}
+                                                @isset($vet['role'])
+                                                    ({{ $vet['role'] }})
+                                                @endisset
+                                            </span>
+                                        @empty
+                                            <span
+                                                @click="selectActiveVet({{ $appointment->appointment_id }})"
+                                                class="cursor-pointer inline-block px-3 py-1 text-sm font-semibold rounded-full
+                                                    bg-red-100 text-red-700 hover:bg-red-200 mr-1 mb-1"
+                                                title="No vets assigned"
+                                            >
+                                                None
+                                            </span>
+                                        @endforelse
+                                    </td>
+
                                     </tr>
                                 @empty
                                     <tr>
@@ -75,7 +95,42 @@
             </div>
         </div>
 
-        <!-- Pet Info Modal outside the table -->
+      <!-- Vet Selector Modal -->
+<div
+    x-show="vetModalVisible"
+    x-cloak
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    @click.self.stop="closeVetModal()" 
+>
+    <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh]">
+        <!-- Modal Title -->
+        <h3 class="text-xl font-semibold mb-4">
+            Select a Veterinarian <span x-text="selectedAppointmentId"></span>
+        </h3>
+
+        <!-- No Vets Available -->
+        <template x-if="vets.length === 0">
+            <p class="text-center text-gray-500">No active vets available.</p>
+        </template>
+
+        <!-- Vet List -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <template x-for="vet in vets" :key="vet.id">
+                <div
+                    class="cursor-pointer border rounded p-4 hover:bg-blue-100 transition shadow-sm"
+                    @click="assignVet(vet.id)"
+                    :title="`Assign ${vet.name}`"
+                >
+                    <h4 class="font-semibold text-lg text-gray-800" x-text="vet.name"></h4>
+                    <p class="text-sm text-gray-600 mt-1" x-text="vet.specialization ?? 'No specialization'"></p>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+
+        <!-- Pet Info Modal -->
         <div
             x-show="petModalVisible"
             x-transition
@@ -106,54 +161,134 @@
                 View Full Info
             </button>
         </div>
-
     </div>
 
-    <script>
-        function appointmentsComponent() {
-            return {
-                petModalVisible: false,
-                petModalData: {},
-                modalTop: 0,
-                modalLeft: 0,
-                showModal: false,
-                selectedAppointment: {},
+  <script>
+function appointmentsComponent() {
+    return {
+        petModalVisible: false,
+        petModalData: {},
+        modalTop: 0,
+        modalLeft: 0,
+        vets: [],
+        vetModalVisible: false,
+        selectedAppointmentId: null,
 
-                showPetModal(event, appointment) {
-                    this.petModalData = appointment;
-                    this.petModalVisible = true;
+        // Open modal with correct appointment ID
+        selectActiveVet(appointmentId) {
+            this.selectedAppointmentId = appointmentId; // store current appointment
+            fetch('/api/vets/active')
+                .then(res => res.json())
+                .then(data => {
+                    this.vets = data;
+                    this.vetModalVisible = true;
+                })
+                .catch(() => {
+                    alert('Failed to load vets.');
+                });
+        },
 
-                    const rect = event.target.getBoundingClientRect();
-                    this.modalTop = rect.bottom + window.scrollY + 5;
-                    this.modalLeft = rect.left + window.scrollX;
+        // Assign vet to selected appointment
+      // Assign vet to selected appointment
+assignVet(vetId) {
+    if (!this.selectedAppointmentId) {
+        Swal.fire('Missing Data', 'Please select an appointment first.', 'warning');
+        return;
+    }
 
-                    const modalWidth = 256;
-                    if ((this.modalLeft + modalWidth) > window.innerWidth) {
-                        this.modalLeft = window.innerWidth - modalWidth - 10;
-                    }
-                },
+    if (!vetId) {
+        Swal.fire('Missing Data', 'Please select a vet first.', 'warning');
+        return;
+    }
 
-                hidePetModal() {
-                    this.petModalVisible = false;
-                },
+    fetch('/assign-vet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json', // forces Laravel to return JSON
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            vet_id: vetId,
+            appointment_id: this.selectedAppointmentId
+        })
+    })
+    .then(async res => {
+        const text = await res.text();
+        const contentType = res.headers.get("content-type");
 
-                keepPetModal() {
-                    this.petModalVisible = true;
-                },
-
-                editAppointment(appointment) {
-                    this.selectedAppointment = appointment;
-                    this.showModal = true;
-                },
-
-                viewFullInfo() {
-                    if (this.petModalData.pet_code) {
-                        window.location.href = `/pets/${this.petModalData.pet_code}`;
-                    } else {
-                        alert('Pet code not available.');
-                    }
+        if (!res.ok) {
+            if (contentType && contentType.includes("application/json")) {
+                const errJson = JSON.parse(text);
+                // ✅ Collect all error messages from Laravel's `errors` object
+                if (errJson.errors) {
+                    const allErrors = Object.values(errJson.errors)
+                        .flat()
+                        .join('<br>'); // join with line breaks
+                    throw new Error(allErrors);
                 }
+                throw new Error(errJson.message || `HTTP ${res.status} - ${res.statusText}`);
+            } else {
+                throw new Error(`Server returned non-JSON response:\n${text}`);
             }
         }
-    </script>
+
+        return JSON.parse(text);
+    })
+    .then(data => {
+        Swal.fire('Success', data.message, 'success').then(() => {
+            this.closeVetModal();
+            location.reload();
+        });
+    })
+    .catch(err => {
+        console.error(err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            html: err.message // ✅ HTML so <br> works
+        });
+    });
+},
+
+        // Close vet modal & reset state
+        closeVetModal() {
+            this.vetModalVisible = false;
+            this.selectedAppointmentId = null;
+        },
+
+        // Pet modal logic
+        showPetModal(event, appointment) {
+            this.petModalData = appointment;
+            this.petModalVisible = true;
+
+            const rect = event.target.getBoundingClientRect();
+            this.modalTop = rect.bottom + window.scrollY + 5;
+            this.modalLeft = rect.left + window.scrollX;
+
+            const modalWidth = 256;
+            if ((this.modalLeft + modalWidth) > window.innerWidth) {
+                this.modalLeft = window.innerWidth - modalWidth - 10;
+            }
+        },
+
+        hidePetModal() {
+            this.petModalVisible = false;
+        },
+
+        keepPetModal() {
+            this.petModalVisible = true;
+        },
+
+        viewFullInfo() {
+            if (this.petModalData.pet_code) {
+                window.location.href = `/pets/${this.petModalData.pet_code}`;
+            } else {
+                alert('Pet code not available.');
+            }
+        }
+    }
+}
+</script>
+
 </x-app-layout>

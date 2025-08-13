@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Appointment extends Model
 {
-   protected $table = 'user_appointments';
+  
+  protected $table = 'user_appointments';
   protected $fillable = [
     'pet_code',
     'client_id',

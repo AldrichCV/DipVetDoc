@@ -86,7 +86,7 @@ class AppointmentController extends Controller
             ]);
         });
 
-        return redirect()->route('my_appointments')->with('success', 'Appointment created successfully.');
+        return redirect()->route('my_appointments.index')->with('success', 'Appointment created successfully.');
     }
 
     protected function generatePetCode(): string
@@ -130,6 +130,8 @@ class AppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Appointment removed successfully.');
     }
+
+ 
 }
 
 
