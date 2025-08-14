@@ -82,7 +82,6 @@ class AppointmentController extends Controller
                 'reason' => $request->reason,
                 'notes' => $request->notes,
                 'status' => 'pending',
-                'vet_id' => null,
             ]);
         });
 
