@@ -52,27 +52,42 @@
                                                 {{ ucfirst($appointment->status) }}
                                             </span>
                                         </td>
-                                            <td class="px-4 py-2 border">
-                                        @php
-                                            // Use only assigned personnel
-                                            $allVets = $appointment->assigned_personnel ?? [];
-                                        @endphp
+                                        <td class="px-4 py-2 border">
+                                        @php $allVets = $appointment->assigned_personnel ?? []; @endphp
 
                                         @forelse ($allVets as $vet)
+                                            <!-- Vet Badge -->
                                             <span
-                                                @click="selectActiveVet({{ $appointment->appointment_id }})"
-                                                class="cursor-pointer inline-block px-3 py-1 text-sm font-semibold rounded-full
+                                                @click.stop="console.log('Badge clicked:', {{ $appointment->appointment_id }}); selectActiveVet({{ $appointment->appointment_id }})"
+                                                class="cursor-pointer inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full
                                                     bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1 mb-1"
                                                 title="{{ $vet['role'] ?? '' }}"
                                             >
-                                                {{ $vet['name'] }}
+                                                <span>{{ $vet['name'] }}</span>
                                                 @isset($vet['role'])
                                                     ({{ $vet['role'] }})
                                                 @endisset
+
+                                            <!-- Remove Button -->
+                                    <button
+                                        type="button"
+                                        class="ml-2 text-red-500 hover:text-red-700 font-bold text-lg pointer-events-auto"
+                                        @click.stop="
+                                            removeAssignedVet(
+                                                {{ $appointment->appointment_id }},
+                                                {{ isset($vet['user_id']) ? $vet['user_id'] : 'null' }},
+                                                $event.target.closest('span')
+                                            );
+                                        "
+                                    >
+                                        &times;
+                                    </button>
+
                                             </span>
                                         @empty
+                                            <!-- No Vet Badge -->
                                             <span
-                                                @click="selectActiveVet({{ $appointment->appointment_id }})"
+                                                @click="console.log('None badge clicked:', {{ $appointment->appointment_id }}); selectActiveVet({{ $appointment->appointment_id }})"
                                                 class="cursor-pointer inline-block px-3 py-1 text-sm font-semibold rounded-full
                                                     bg-red-100 text-red-700 hover:bg-red-200 mr-1 mb-1"
                                                 title="No vets assigned"
@@ -81,7 +96,6 @@
                                             </span>
                                         @endforelse
                                     </td>
-
                                     </tr>
                                 @empty
                                     <tr>
@@ -95,40 +109,39 @@
             </div>
         </div>
 
-      <!-- Vet Selector Modal -->
-<div
-    x-show="vetModalVisible"
-    x-cloak
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    @click.self.stop="closeVetModal()" 
->
-    <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh]">
-        <!-- Modal Title -->
-        <h3 class="text-xl font-semibold mb-4">
-            Select a Veterinarian <span x-text="selectedAppointmentId"></span>
-        </h3>
+        <!-- Vet Selector Modal -->
+        <div
+            x-show="vetModalVisible"
+            x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            @click.self.stop="closeVetModal()" 
+        >
+            <div class="bg-white rounded-lg shadow-lg max-w-3xl w-full p-6 overflow-y-auto max-h-[80vh]">
+                <!-- Modal Title -->
+                <h3 class="text-xl font-semibold mb-4">
+                    Select a Veterinarian <span x-text="selectedAppointmentId"></span>
+                </h3>
 
-        <!-- No Vets Available -->
-        <template x-if="vets.length === 0">
-            <p class="text-center text-gray-500">No active vets available.</p>
-        </template>
+                <!-- No Vets Available -->
+                <template x-if="vets.length === 0">
+                    <p class="text-center text-gray-500">No active vets available.</p>
+                </template>
 
-        <!-- Vet List -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <template x-for="vet in vets" :key="vet.id">
-                <div
-                    class="cursor-pointer border rounded p-4 hover:bg-blue-100 transition shadow-sm"
-                    @click="assignVet(vet.id)"
-                    :title="`Assign ${vet.name}`"
-                >
-                    <h4 class="font-semibold text-lg text-gray-800" x-text="vet.name"></h4>
-                    <p class="text-sm text-gray-600 mt-1" x-text="vet.specialization ?? 'No specialization'"></p>
+                <!-- Vet List -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <template x-for="vet in vets" :key="vet.id">
+                        <div
+                            class="cursor-pointer border rounded p-4 hover:bg-blue-100 transition shadow-sm"
+                            @click="assignVet(vet.id)"
+                            :title="`Assign ${vet.name}`"
+                        >
+                            <h4 class="font-semibold text-lg text-gray-800" x-text="vet.name"></h4>
+                            <p class="text-sm text-gray-600 mt-1" x-text="vet.specialization ?? 'No specialization'"></p>
+                        </div>
+                    </template>
                 </div>
-            </template>
+            </div>
         </div>
-    </div>
-</div>
-
 
         <!-- Pet Info Modal -->
         <div
@@ -163,8 +176,8 @@
         </div>
     </div>
 
-  <script>
-function appointmentsComponent() {
+<script>
+    function appointmentsComponent() {
     return {
         petModalVisible: false,
         petModalData: {},
@@ -189,72 +202,147 @@ function appointmentsComponent() {
         },
 
         // Assign vet to selected appointment
-      // Assign vet to selected appointment
-assignVet(vetId) {
-    if (!this.selectedAppointmentId) {
-        Swal.fire('Missing Data', 'Please select an appointment first.', 'warning');
-        return;
-    }
-
-    if (!vetId) {
-        Swal.fire('Missing Data', 'Please select a vet first.', 'warning');
-        return;
-    }
-
-    fetch('/assign-vet', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json', // forces Laravel to return JSON
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            vet_id: vetId,
-            appointment_id: this.selectedAppointmentId
-        })
-    })
-    .then(async res => {
-        const text = await res.text();
-        const contentType = res.headers.get("content-type");
-
-        if (!res.ok) {
-            if (contentType && contentType.includes("application/json")) {
-                const errJson = JSON.parse(text);
-                // ✅ Collect all error messages from Laravel's `errors` object
-                if (errJson.errors) {
-                    const allErrors = Object.values(errJson.errors)
-                        .flat()
-                        .join('<br>'); // join with line breaks
-                    throw new Error(allErrors);
-                }
-                throw new Error(errJson.message || `HTTP ${res.status} - ${res.statusText}`);
-            } else {
-                throw new Error(`Server returned non-JSON response:\n${text}`);
+        assignVet(vetId) {
+            if (!this.selectedAppointmentId) {
+                Swal.fire('Missing Data', 'Please select an appointment first.', 'warning');
+                return;
             }
-        }
 
-        return JSON.parse(text);
-    })
-    .then(data => {
-        Swal.fire('Success', data.message, 'success').then(() => {
-            this.closeVetModal();
-            location.reload();
-        });
-    })
-    .catch(err => {
-        console.error(err);
-        Swal.fire({
-            icon: 'error',
-            title: 'Validation Error',
-            html: err.message // ✅ HTML so <br> works
-        });
-    });
-},
+            if (!vetId) {
+                Swal.fire('Missing Data', 'Please select a vet first.', 'warning');
+                return;
+            }
+
+            fetch('/assign-vet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json', // forces Laravel to return JSON
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    vet_id: vetId,
+                    appointment_id: this.selectedAppointmentId
+                })
+            })
+            .then(async res => {
+                const text = await res.text();
+                const contentType = res.headers.get("content-type");
+
+                if (!res.ok) {
+                    if (contentType && contentType.includes("application/json")) {
+                        const errJson = JSON.parse(text);
+                        // ✅ Collect all error messages from Laravel's `errors` object
+                        if (errJson.errors) {
+                            const allErrors = Object.values(errJson.errors)
+                                .flat()
+                                .join('<br>'); // join with line breaks
+                            throw new Error(allErrors);
+                        }
+                        throw new Error(errJson.message || `HTTP ${res.status} - ${res.statusText}`);
+                    } else {
+                        throw new Error(`Server returned non-JSON response:\n${text}`);
+                    }
+                }
+
+                return JSON.parse(text);
+            })
+            .then(data => {
+                Swal.fire('Success', data.message, 'success').then(() => {
+                    this.closeVetModal();
+                    location.reload();
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: err.message 
+                });
+            });
+        },
 
         // Close vet modal & reset state
         closeVetModal() {
             this.vetModalVisible = false;
             this.selectedAppointmentId = null;
+        },
+    
+       removeAssignedVet(appointmentId, vetId, badgeEl) {
+            if (!appointmentId || !vetId) {
+                console.warn("Missing appointmentId or vetId");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Data',
+                    text: 'Missing appointment ID or vet ID. Please try again.',
+                    confirmButtonColor: '#d33'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Remove Vet?',
+                text: 'Are you sure you want to remove this vet from the appointment?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, remove',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    return; // user canceled
+                }
+
+                // Remove from UI immediately
+                if (badgeEl) badgeEl.remove();
+
+                // Send to backend
+                fetch(`/assigned-vet/remove`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        appointment_id: appointmentId,
+                        vet_id: vetId
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Remove response:", data);
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Vet removed successfully',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed to Remove Vet',
+                            text: 'The vet could not be removed from this appointment. Please try again.',
+                            confirmButtonColor: '#d33'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Request Failed',
+                        text: 'An error occurred while removing the vet. Please try again later.',
+                        confirmButtonColor: '#d33'
+                    }).then(() => {
+                        location.reload();
+                    });
+                });
+            });
         },
 
         // Pet modal logic
@@ -290,5 +378,4 @@ assignVet(vetId) {
     }
 }
 </script>
-
 </x-app-layout>

@@ -79,3 +79,5 @@ Route::get('/api/vets/active', function () {
 // web.php (since you are using CSRF and Blade)
 Route::post('/assign-vet', [AdminController::class, 'assignVet'])
 ->name('assign');
+Route::post('/assigned-vet/remove', [AdminController::class, 'remove']);
+

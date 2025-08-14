@@ -45,10 +45,14 @@ class AdminController extends Controller
                     'owner.name as owner_name',
                     's.name as reason_name',
                     DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
-                    DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT("name", u.name, "role", u.role))
-                            FROM assigned_vet av
-                            JOIN users u ON av.user_id = u.id
-                            WHERE av.appointment_id = ua.id) as assigned_personnel')
+                    DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                            "user_id", u.id,
+                            "name", u.name,
+                            "role", u.role
+                        ))
+                        FROM assigned_vet av
+                        JOIN users u ON av.user_id = u.id
+                        WHERE av.appointment_id = ua.id) as assigned_personnel')
                 );
         } else {
             $query->where('ua.client_id', auth()->id())
@@ -62,10 +66,14 @@ class AdminController extends Controller
                     'p.date_of_birth',
                     's.name as reason_name',
                     DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
-                    DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT("name", u.name, "role", u.role))
-                            FROM assigned_vet av
-                            JOIN users u ON av.user_id = u.id
-                            WHERE av.appointment_id = ua.id) as assigned_personnel')
+                    DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                            "user_id", u.id,
+                            "name", u.name,
+                            "role", u.role
+                        ))
+                        FROM assigned_vet av
+                        JOIN users u ON av.user_id = u.id
+                        WHERE av.appointment_id = ua.id) as assigned_personnel')
                 );
         }
 
@@ -93,7 +101,7 @@ class AdminController extends Controller
             ->where('u.status', 'pending')
             ->get();
 
-       $approvedVets = DB::table('users as u')
+        $approvedVets = DB::table('users as u')
             ->leftJoin('vet_profile as vp', 'vp.user_id', '=', 'u.id')
             ->select(
                 'u.*',
@@ -108,33 +116,46 @@ class AdminController extends Controller
         return view('dipvet_veterinarians', compact('pendingVets', 'approvedVets'));
     }
 
-// AdminController.php
-public function assignVet(Request $request)
-{
-    if (!$request->expectsJson()) {
-        return response()->json(['message' => 'Only JSON requests allowed'], 406);
+    // AdminController.php
+    public function assignVet(Request $request)
+    {
+        if (!$request->expectsJson()) {
+            return response()->json(['message' => 'Only JSON requests allowed'], 406);
+        }
+
+        $request->validate([
+            'vet_id' => 'required|integer|exists:vet_profile,user_id',
+            'appointment_id' => 'required|integer|exists:user_appointments,id',
+        ]);
+
+        // Insert into assigned_vet table
+        $inserted = DB::table('assigned_vet')->insert([
+            'user_id' => $request->vet_id,
+            'appointment_id' => $request->appointment_id,
+        ]);
+
+        return response()->json([
+            'success' => (bool) $inserted,
+            'message' => $inserted
+                ? 'Vet assigned successfully.'
+                : 'Failed to assign vet.',
+        ], $inserted ? 200 : 400);
     }
 
-    $request->validate([
-        'vet_id' => 'required|integer|exists:vet_profile,user_id',
-        'appointment_id' => 'required|integer|exists:user_appointments,id',
-    ]);
+    public function remove(Request $request)
+    {
+        $request->validate([
+            'vet_id' => 'required|integer|exists:vet_profile,user_id',
+            'appointment_id' => 'required|integer|exists:user_appointments,id',
+        ]);
 
-    // Insert into assigned_vet table
-    $inserted = DB::table('assigned_vet')->insert([
-        'user_id' => $request->vet_id,
-        'appointment_id' => $request->appointment_id,
-    ]);
+        DB::table('assigned_vet')
+            ->where('appointment_id', $request->appointment_id)
+            ->where('user_id', $request->vet_id)
+            ->delete();
 
-    return response()->json([
-        'success' => (bool) $inserted,
-        'message' => $inserted
-            ? 'Vet assigned successfully.'
-            : 'Failed to assign vet.',
-    ], $inserted ? 200 : 400);
-}
-
-
+        return response()->json(['success' => true]);
+    }
 }
 
 
