@@ -86,7 +86,7 @@
 
         <!-- Right: Image -->
         <div class="login-image-container">
-            <img src="{{ asset('dipvetAssets/images/login-image.jpg') }}" alt="Login Image">
+            <img src="{{ asset('dipvetAssets/images/loginPic.jpg') }}" alt="Login Image">
         </div>
     </div>
 

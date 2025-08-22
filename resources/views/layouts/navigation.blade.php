@@ -56,6 +56,12 @@
                                 </span>
                             @endif
                         </x-nav-link>
+
+                        <x-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')">
+                            {{ __('Consultations') }}
+                        </x-nav-link>
+
+
                       @endif
                 </div>
  </div>

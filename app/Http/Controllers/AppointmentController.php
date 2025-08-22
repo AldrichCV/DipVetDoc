@@ -122,20 +122,33 @@ class AppointmentController extends Controller
          return redirect()->back()->with('success', 'Appointment updated successfully.');
     }
 
-    public function updateStatus(Appointment $appointment, $status)
-{
-    $validStatuses = ['approved', 'cancelled', 'pending', 'completed'];
+    public function updateStatus(Request $request, Appointment $appointment, $status)
+    {
+        $validStatuses = ['approved', 'cancelled', 'pending', 'completed'];
+        if (!in_array($status, $validStatuses)) {
+            return redirect()->back()->with('error', 'Invalid status.');
+        }
 
-    if (!in_array($status, $validStatuses)) {
-        return redirect()->back()->with('error', 'Invalid status.');
+        $appointment->status = $status;
+        $appointment->save();
+
+        // Insert consultation only if approved
+        if ($status === 'approved') {
+            DB::table('consultations')->insert([
+                'appointment_id' => $appointment->id,
+                'user_id' => $request->user_id,  // comes from hidden input
+                'vet_id' => auth()->id(),
+                'pet_id' => $request->pet_id,
+                'diagnosis' => null,
+                'treatment' => null,
+                'status' => 'ongoing',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Appointment marked as {$status}.");
     }
-
-    $appointment->status = $status;
-    $appointment->save();
-
-    return redirect()->back()->with('success', "Appointment marked as {$status}.");
-}
-
 
     public function destroy($id)
     {

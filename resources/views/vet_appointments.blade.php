@@ -39,7 +39,7 @@
                                     </td>
                                     <td class="px-4 py-2 border">{{ $appointment->reason_name }}</td>
 
-                              <td class="px-4 py-2 border">
+   <td class="px-4 py-2 border">
     <div class="flex items-center">
         <span class="inline-flex items-center gap-2 
             @if(in_array($appointment->status, ['pending', 'approved']))
@@ -52,68 +52,75 @@
             {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : '' }}
             {{ $appointment->status === 'cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-200' : '' }}
             {{ $appointment->status === 'completed' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : '' }}">
-            
+
             <!-- Status text -->
             <span>{{ ucfirst($appointment->status) }}</span>
 
-            <!-- Action buttons depending on status -->
+            <!-- Pending: Approve or Cancel -->
             @if ($appointment->status === 'pending')
-                <!-- Approve -->
                 <form id="approve-form-{{ $appointment->id }}" 
-                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'approved']) }}" 
-                    method="POST" class="hidden">
+                      action="{{ route('my_appointments.updateStatus', [$appointment->id, 'approved']) }}" 
+                      method="POST" class="hidden">
                     @csrf
                     @method('PATCH')
+                    <input type="hidden" name="user_id" value="{{ $appointment->owner_id }}">
+                    <input type="hidden" name="pet_id" value="{{ $appointment->pet_id }}">
                 </form>
                 <button type="button" 
-                    @click="approve({{ $appointment->id }})"
-                    class="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-700 hover:bg-green-300 hover:text-green-900 transition">
+                        @click="approve({{ $appointment->id }})"
+                        class="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-700 hover:bg-green-300 hover:text-green-900 transition">
                     ✓
                 </button>
 
-                <!-- Cancel -->
                 <form id="cancel-form-{{ $appointment->id }}" 
-                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'cancelled']) }}" 
-                    method="POST" class="hidden">
+                      action="{{ route('my_appointments.updateStatus', [$appointment->id, 'cancelled']) }}" 
+                      method="POST" class="hidden">
                     @csrf
                     @method('PATCH')
+                    <input type="hidden" name="user_id" value="{{ $appointment->owner_id }}">
+                    <input type="hidden" name="pet_id" value="{{ $appointment->pet_id }}">
                 </form>
                 <button type="button" 
-                    @click="cancelApp({{ $appointment->id }})"
-                    class="flex items-center justify-center w-5 h-5 rounded-full bg-red-200 text-red-700 hover:bg-red-300 hover:text-red-900 transition">
+                        @click="cancelApp({{ $appointment->id }})"
+                        class="flex items-center justify-center w-5 h-5 rounded-full bg-red-200 text-red-700 hover:bg-red-300 hover:text-red-900 transition">
                     ✕
                 </button>
-            
+
+            <!-- Approved: Complete or Cancel -->
             @elseif ($appointment->status === 'approved')
-                <!-- Completed -->
                 <form id="complete-form-{{ $appointment->id }}" 
-                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'completed']) }}" 
-                    method="POST" class="hidden">
+                      action="{{ route('my_appointments.updateStatus', [$appointment->id, 'completed']) }}" 
+                      method="POST" class="hidden">
                     @csrf
                     @method('PATCH')
+                    <input type="hidden" name="user_id" value="{{ $appointment->owner_id }}">
+                    <input type="hidden" name="pet_id" value="{{ $appointment->pet_id }}">
                 </form>
                 <button type="button" 
-                    @click="completeApp({{ $appointment->id }})"
-                    class="flex items-center justify-center w-5 h-5 rounded-full bg-blue-200 text-blue-700 hover:bg-blue-300 hover:text-blue-900 transition">
+                        @click="completeApp({{ $appointment->id }})"
+                        class="flex items-center justify-center w-5 h-5 rounded-full bg-blue-200 text-blue-700 hover:bg-blue-300 hover:text-blue-900 transition">
                     ✓
                 </button>
 
-                <!-- Cancel -->
                 <form id="cancel-form-{{ $appointment->id }}" 
-                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'cancelled']) }}" 
-                    method="POST" class="hidden">
+                      action="{{ route('my_appointments.updateStatus', [$appointment->id, 'cancelled']) }}" 
+                      method="POST" class="hidden">
                     @csrf
                     @method('PATCH')
+                    <input type="hidden" name="user_id" value="{{ $appointment->owner_id }}">
+                    <input type="hidden" name="pet_id" value="{{ $appointment->pet_id }}">
                 </form>
                 <button type="button" 
-                    @click="cancelApp({{ $appointment->id }})"
-                    class="flex items-center justify-center w-5 h-5 rounded-full bg-red-200 text-red-700 hover:bg-red-300 hover:text-red-900 transition">
+                        @click="cancelApp({{ $appointment->id }})"
+                        class="flex items-center justify-center w-5 h-5 rounded-full bg-red-200 text-red-700 hover:bg-red-300 hover:text-red-900 transition">
                     ✕
                 </button>
             @endif
         </span>
     </div>
 </td>
+
+
 
 
 
@@ -453,62 +460,77 @@
             }
         },
 
-        approve(id) {
-                Swal.fire({
-                    title: "Approve Appointment?",
-                    text: "This will mark the appointment as approved.",
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonColor: "#16a34a", // green
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Yes, approve"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById(`approve-form-${id}`).submit();
-                    }
-                }).catch((err) => {
-                    Swal.fire("Error", "Something went wrong!", "error");
-                    console.error(err);
-                });
-            },
+       approve(id) {
+    const form = document.getElementById(`approve-form-${id}`);
+    const userId = form.querySelector('input[name="user_id"]').value;
+    const petId = form.querySelector('input[name="pet_id"]').value;
 
-            cancelApp(id) {
-                Swal.fire({
-                    title: "Cancel Appointment?",
-                    text: "This will mark the appointment as cancelled.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33", // red
-                    cancelButtonColor: "#6b7280", // gray
-                    confirmButtonText: "Yes, cancel"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById(`cancel-form-${id}`).submit();
-                    }
-                }).catch((err) => {
-                    Swal.fire("Error", "Something went wrong!", "error");
-                    console.error(err);
-                });
-            },
+    Swal.fire({
+        title: "Approve Appointment?",
+        text: "This will mark the appointment as approved.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#16a34a", // green
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, approve"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Optionally, you can send via fetch for more control
+            // or just submit the form (which already has user_id)
+            form.submit();
+        }
+    }).catch((err) => {
+        Swal.fire("Error", "Something went wrong!", "error");
+        console.error(err);
+    });
+},
 
-            completeApp(id) {
-                Swal.fire({
-                    title: "Complete Appointment?",
-                    text: "This will mark the appointment as completed.",
-                    icon: "success",
-                    showCancelButton: true,
-                    confirmButtonColor: "#2563eb", // blue
-                    cancelButtonColor: "#6b7280",
-                    confirmButtonText: "Yes, complete"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById(`complete-form-${id}`).submit();
-                    }
-                }).catch((err) => {
-                    Swal.fire("Error", "Something went wrong!", "error");
-                    console.error(err);
-                });
-            }
+cancelApp(id) {
+    const form = document.getElementById(`cancel-form-${id}`);
+    const userId = form.querySelector('input[name="user_id"]').value;
+    const petId = form.querySelector('input[name="pet_id"]').value;
+
+    Swal.fire({
+        title: "Cancel Appointment?",
+        text: "This will mark the appointment as cancelled.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33", // red
+        cancelButtonColor: "#6b7280", // gray
+        confirmButtonText: "Yes, cancel"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    }).catch((err) => {
+        Swal.fire("Error", "Something went wrong!", "error");
+        console.error(err);
+    });
+},
+
+completeApp(id) {
+    const form = document.getElementById(`complete-form-${id}`);
+    const userId = form.querySelector('input[name="user_id"]').value;
+    const petId = form.querySelector('input[name="pet_id"]').value;
+
+    Swal.fire({
+        title: "Complete Appointment?",
+        text: "This will mark the appointment as completed.",
+        icon: "success",
+        showCancelButton: true,
+        confirmButtonColor: "#2563eb", // blue
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: "Yes, complete"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    }).catch((err) => {
+        Swal.fire("Error", "Something went wrong!", "error");
+        console.error(err);
+    });
+}
+
     }
 }
 </script>

@@ -37,11 +37,13 @@ class AdminController extends Controller
                 ->select(
                     'ua.id as appointment_id',
                     'ua.*',
+                    'p.id as pet_id',
                     'p.name as pet_name',
                     'p.breed',
                     'p.species',
                     'p.sex',
                     'p.date_of_birth',
+                    'owner.id as owner_id',
                     'owner.name as owner_name',
                     's.name as reason_name',
                     DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
@@ -54,34 +56,36 @@ class AdminController extends Controller
                         JOIN users u ON av.user_id = u.id
                         WHERE av.appointment_id = ua.id) as assigned_personnel')
                 );
-    } else if (auth()->user()->role === 'vet') {
-        $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
-            ->whereIn('ua.id', function ($sub) {
-                $sub->select('appointment_id')
-                    ->from('assigned_vet')
-                    ->where('user_id', auth()->id());
-            })
-            ->select(
-                'ua.id as appointment_id',
-                'ua.*',
-                'p.name as pet_name',
-                'p.breed',
-                'p.species',
-                'p.sex',
-                'p.date_of_birth',
-                'owner.name as owner_name',
-                's.name as reason_name',
-                DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
-                DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                        "user_id", u.id,
-                        "name", u.name,
-                        "role", u.role
-                    ))
-                    FROM assigned_vet av
-                    JOIN users u ON av.user_id = u.id
-                    WHERE av.appointment_id = ua.id) as assigned_personnel')
-            );
-    }
+            } else if (auth()->user()->role === 'vet') {
+                $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
+                    ->whereIn('ua.id', function ($sub) {
+                        $sub->select('appointment_id')
+                            ->from('assigned_vet')
+                            ->where('user_id', auth()->id());
+                    })
+                    ->select(
+                        'ua.id as appointment_id',
+                        'ua.*',
+                        'p.id as pet_id',
+                        'p.name as pet_name',
+                        'p.breed',
+                        'p.species',
+                        'p.sex',
+                        'p.date_of_birth',
+                        'owner.id as owner_id', 
+                        'owner.name as owner_name',
+                        's.name as reason_name',
+                        DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
+                        DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                                "user_id", u.id,
+                                "name", u.name,
+                                "role", u.role
+                            ))
+                            FROM assigned_vet av
+                            JOIN users u ON av.user_id = u.id
+                            WHERE av.appointment_id = ua.id) as assigned_personnel')
+                    );
+            }
 
         $appointments = $query->orderBy('ua.appointment_date', 'desc')->get();
 
@@ -162,6 +166,7 @@ class AdminController extends Controller
 
         return response()->json(['success' => true]);
     }
+
 }
 
 
