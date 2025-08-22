@@ -11,98 +11,175 @@
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto w-full mb-6">
                         <table class="w-full border border-gray-200 table-auto">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="px-4 py-2 border text-left">Pet Name</th>
-                                    <th class="px-4 py-2 border text-left">Owner Name</th>
-                                    <th class="px-4 py-2 border text-left">Date</th>
-                                    <th class="px-4 py-2 border text-left">Time</th>
-                                    <th class="px-4 py-2 border text-left">Reason</th>
-                                    <th class="px-4 py-2 border text-left">Status</th>
+                           <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-2 border text-left">Pet Name</th>
+                                <th class="px-4 py-2 border text-left">Owner Name</th>
+                                <th class="px-4 py-2 border text-left">Date</th>
+                                <th class="px-4 py-2 border text-left">Time</th>
+                                <th class="px-4 py-2 border text-left">Reason</th>
+                                <th class="px-4 py-2 border text-left">Status</th>
+
+                                {{-- Hide only if vet --}}
+                                @if(auth()->user()->role !== 'vet')
                                     <th class="px-4 py-2 border text-left">Assigned Personnel</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($appointments as $appointment)
-                                    <tr class="hover:bg-gray-50">
-                                        <td
-                                            class="px-4 py-2 border cursor-pointer text-blue-600 underline"
-                                            @mouseenter="showPetModal($event, {{ json_encode($appointment) }})"
-                                            @mouseleave="hidePetModal()"
-                                        >
-                                            {{ $appointment->pet_name }}
-                                        </td>
-                                        
-                                        <td class="px-4 py-2 border">{{ $appointment->owner_name }}</td>
-                                        <td class="px-4 py-2 border">
-                                            {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}
-                                        </td>
-                                        <td class="px-4 py-2 border">
-                                            {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A') }}
-                                        </td>
-                                        <td class="px-4 py-2 border">{{ $appointment->reason_name }}</td>
-                                        <td class="px-4 py-2 border">
-                                            <span
-                                                class="inline-block px-3 py-1 text-sm font-semibold rounded-full
-                                                    {{ $appointment->status === 'approved' ? 'bg-green-100 text-green-700 hover:bg-green-200' : '' }}
-                                                    {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : '' }}
-                                                    {{ $appointment->status === 'cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-200' : '' }}
-                                                    {{ $appointment->status === 'completed' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : '' }}">
-
-                                                {{ ucfirst($appointment->status) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-2 border">
-                                        @php $allVets = $appointment->assigned_personnel ?? []; @endphp
-
-                                        @forelse ($allVets as $vet)
-                                            <!-- Vet Badge -->
-                                            <span
-                                                @click.stop="console.log('Badge clicked:', {{ $appointment->appointment_id }}); selectActiveVet({{ $appointment->appointment_id }})"
-                                                class="cursor-pointer inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full
-                                                    bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1 mb-1"
-                                                title="{{ $vet['role'] ?? '' }}"
-                                            >
-                                                <span>{{ $vet['name'] }}</span>
-                                                @isset($vet['role'])
-                                                    ({{ $vet['role'] }})
-                                                @endisset
-
-                                            <!-- Remove Button -->
-                                    <button
-                                        type="button"
-                                        class="ml-2 text-red-500 hover:text-red-700 font-bold text-lg pointer-events-auto"
-                                        @click.stop="
-                                            removeAssignedVet(
-                                                {{ $appointment->appointment_id }},
-                                                {{ isset($vet['user_id']) ? $vet['user_id'] : 'null' }},
-                                                $event.target.closest('span')
-                                            );
-                                        "
-                                    >
-                                        &times;
-                                    </button>
-
-                                            </span>
-                                        @empty
-                                            <!-- No Vet Badge -->
-                                            <span
-                                                @click="console.log('None badge clicked:', {{ $appointment->appointment_id }}); selectActiveVet({{ $appointment->appointment_id }})"
-                                                class="cursor-pointer inline-block px-3 py-1 text-sm font-semibold rounded-full
-                                                    bg-red-100 text-red-700 hover:bg-red-200 mr-1 mb-1"
-                                                title="No vets assigned"
-                                            >
-                                                None
-                                            </span>
-                                        @endforelse
+                                @endif
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($appointments as $appointment)
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-2 border">{{ $appointment->pet_name }}</td>
+                                    <td class="px-4 py-2 border">{{ $appointment->owner_name }}</td>
+                                    <td class="px-4 py-2 border">
+                                        {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('M d, Y') }}
                                     </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="7" class="px-4 py-2 text-center border">No appointments found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
+                                    <td class="px-4 py-2 border">
+                                        {{ \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A') }}
+                                    </td>
+                                    <td class="px-4 py-2 border">{{ $appointment->reason_name }}</td>
+
+                              <td class="px-4 py-2 border">
+    <div class="flex items-center">
+        <span class="inline-flex items-center gap-2 
+            @if(in_array($appointment->status, ['pending', 'approved']))
+                pl-3 pr-2
+            @else
+                px-4
+            @endif
+            py-1.5 text-sm font-semibold rounded-full shadow-sm
+            {{ $appointment->status === 'approved' ? 'bg-green-100 text-green-700 hover:bg-green-200' : '' }}
+            {{ $appointment->status === 'pending' ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : '' }}
+            {{ $appointment->status === 'cancelled' ? 'bg-red-100 text-red-700 hover:bg-red-200' : '' }}
+            {{ $appointment->status === 'completed' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : '' }}">
+            
+            <!-- Status text -->
+            <span>{{ ucfirst($appointment->status) }}</span>
+
+            <!-- Action buttons depending on status -->
+            @if ($appointment->status === 'pending')
+                <!-- Approve -->
+                <form id="approve-form-{{ $appointment->id }}" 
+                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'approved']) }}" 
+                    method="POST" class="hidden">
+                    @csrf
+                    @method('PATCH')
+                </form>
+                <button type="button" 
+                    @click="approve({{ $appointment->id }})"
+                    class="flex items-center justify-center w-5 h-5 rounded-full bg-green-200 text-green-700 hover:bg-green-300 hover:text-green-900 transition">
+                    ✓
+                </button>
+
+                <!-- Cancel -->
+                <form id="cancel-form-{{ $appointment->id }}" 
+                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'cancelled']) }}" 
+                    method="POST" class="hidden">
+                    @csrf
+                    @method('PATCH')
+                </form>
+                <button type="button" 
+                    @click="cancelApp({{ $appointment->id }})"
+                    class="flex items-center justify-center w-5 h-5 rounded-full bg-red-200 text-red-700 hover:bg-red-300 hover:text-red-900 transition">
+                    ✕
+                </button>
+            
+            @elseif ($appointment->status === 'approved')
+                <!-- Completed -->
+                <form id="complete-form-{{ $appointment->id }}" 
+                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'completed']) }}" 
+                    method="POST" class="hidden">
+                    @csrf
+                    @method('PATCH')
+                </form>
+                <button type="button" 
+                    @click="completeApp({{ $appointment->id }})"
+                    class="flex items-center justify-center w-5 h-5 rounded-full bg-blue-200 text-blue-700 hover:bg-blue-300 hover:text-blue-900 transition">
+                    ✓
+                </button>
+
+                <!-- Cancel -->
+                <form id="cancel-form-{{ $appointment->id }}" 
+                    action="{{ route('my_appointments.updateStatus', [$appointment->id, 'cancelled']) }}" 
+                    method="POST" class="hidden">
+                    @csrf
+                    @method('PATCH')
+                </form>
+                <button type="button" 
+                    @click="cancelApp({{ $appointment->id }})"
+                    class="flex items-center justify-center w-5 h-5 rounded-full bg-red-200 text-red-700 hover:bg-red-300 hover:text-red-900 transition">
+                    ✕
+                </button>
+            @endif
+        </span>
+    </div>
+</td>
+
+
+
+                                   {{-- Hide entire column if vet --}}
+                                    @if(auth()->user()->role !== 'vet')
+                                        <td class="px-4 py-2 border">
+                                            @php $allVets = $appointment->assigned_personnel ?? []; @endphp
+
+                                            @forelse ($allVets as $vet)
+                                                <span
+                                                    class="cursor-pointer inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full
+                                                        bg-blue-100 text-blue-700 hover:bg-blue-200 mr-1 mb-1"
+                                                    title="{{ $vet['role'] ?? '' }}"
+                                                >
+                                                    <span>{{ $vet['name'] }}</span>
+                                                    @isset($vet['role'])
+                                                        ({{ $vet['role'] }})
+                                                    @endisset
+
+                                                    <!-- Remove button -->
+                                                    <button
+                                                        type="button"
+                                                        class="ml-2 text-red-500 hover:text-red-700 font-bold text-lg pointer-events-auto"
+                                                        @click.stop="
+                                                            removeAssignedVet(
+                                                                {{ $appointment->appointment_id }},
+                                                                {{ isset($vet['user_id']) ? $vet['user_id'] : 'null' }},
+                                                                $event.target.closest('span')
+                                                            );
+                                                        "
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </span>
+                                            @empty
+                                                <span
+                                                    class="inline-block px-3 py-1 text-sm font-semibold rounded-full
+                                                        bg-red-100 text-red-700 hover:bg-red-200 mr-1 mb-1"
+                                                    title="No vets assigned"
+                                                >
+                                                    None
+                                                </span>
+                                            @endforelse
+
+                                            <!-- Assign Vet button -->
+                                            <button
+                                                type="button"
+                                                class="inline-block mt-2 px-3 py-1 text-sm font-semibold rounded-full
+                                                    bg-green-100 text-green-700 hover:bg-green-200"
+                                                @click="selectActiveVet({{ $appointment->appointment_id }})"
+                                            >
+                                                + Assign Vet
+                                            </button>
+                                        </td>
+                                    @endif
+                                </tr>
+                            @empty
+                                <tr>
+                                    {{-- adjust colspan based on role --}}
+                                    <td colspan="{{ auth()->user()->role === 'vet' ? 6 : 7 }}" 
+                                        class="px-4 py-2 text-center border">
+                                        No appointments found.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
                         </table>
                     </div>
                 </div>
@@ -374,7 +451,64 @@
             } else {
                 alert('Pet code not available.');
             }
-        }
+        },
+
+        approve(id) {
+                Swal.fire({
+                    title: "Approve Appointment?",
+                    text: "This will mark the appointment as approved.",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonColor: "#16a34a", // green
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, approve"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(`approve-form-${id}`).submit();
+                    }
+                }).catch((err) => {
+                    Swal.fire("Error", "Something went wrong!", "error");
+                    console.error(err);
+                });
+            },
+
+            cancelApp(id) {
+                Swal.fire({
+                    title: "Cancel Appointment?",
+                    text: "This will mark the appointment as cancelled.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33", // red
+                    cancelButtonColor: "#6b7280", // gray
+                    confirmButtonText: "Yes, cancel"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(`cancel-form-${id}`).submit();
+                    }
+                }).catch((err) => {
+                    Swal.fire("Error", "Something went wrong!", "error");
+                    console.error(err);
+                });
+            },
+
+            completeApp(id) {
+                Swal.fire({
+                    title: "Complete Appointment?",
+                    text: "This will mark the appointment as completed.",
+                    icon: "success",
+                    showCancelButton: true,
+                    confirmButtonColor: "#2563eb", // blue
+                    cancelButtonColor: "#6b7280",
+                    confirmButtonText: "Yes, complete"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(`complete-form-${id}`).submit();
+                    }
+                }).catch((err) => {
+                    Swal.fire("Error", "Something went wrong!", "error");
+                    console.error(err);
+                });
+            }
     }
 }
 </script>

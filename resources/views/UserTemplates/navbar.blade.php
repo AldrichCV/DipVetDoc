@@ -18,8 +18,11 @@
     <li><a href="{{ route('home') }}#gallery">Gallery</a></li>
     <li><a href="{{ route('home') }}#Contact">Reviews</a></li>
 
-
-     <button type="button" class="btn btn-custom" onclick="window.location.href='{{ route('login') }}'">
+<button
+  type="button"
+  onclick="window.location.href='{{ route('login') }}'"
+  class="btn-custom"
+>
   Login
 </button>
 
@@ -41,16 +44,23 @@
 
   /* Button styles */
 .btn-custom {
-  background-color: #08172e;
-  border-color: #08172e;
-  color: white; /* Readable text */
-  border-radius: 30px; /* Adjust as needed */
-}
+    background-color: #0d47a1;
+    border-color: #0d47a1;
+    color: white; /* Readable text */
+    border-radius: 30px; /* Adjust as needed */
+    padding: 0.5rem 1.5rem; /* optional: match previous py-2 px-6 */
+    font-weight: 600; /* optional: match font-semibold */
+    transition: all 0.3s ease-in-out; /* smooth hover transition */
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); /* subtle shadow */
+  }
 
   .btn-custom:hover {
     background-color: #ffffff; /* White on hover */
     border-color: #ffffff;
-    color: #08172e; /* Dark text on hover */
+    color: #0d47a1; /* Dark text on hover */
+    transform: scale(1.05); /* subtle scale effect on hover */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* stronger shadow on hover */
   }
 </style>
 

@@ -122,6 +122,21 @@ class AppointmentController extends Controller
          return redirect()->back()->with('success', 'Appointment updated successfully.');
     }
 
+    public function updateStatus(Appointment $appointment, $status)
+{
+    $validStatuses = ['approved', 'cancelled', 'pending', 'completed'];
+
+    if (!in_array($status, $validStatuses)) {
+        return redirect()->back()->with('error', 'Invalid status.');
+    }
+
+    $appointment->status = $status;
+    $appointment->save();
+
+    return redirect()->back()->with('success', "Appointment marked as {$status}.");
+}
+
+
     public function destroy($id)
     {
         $appointment = Appointment::findOrFail($id);
@@ -129,8 +144,6 @@ class AppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Appointment removed successfully.');
     }
-
- 
 }
 
 

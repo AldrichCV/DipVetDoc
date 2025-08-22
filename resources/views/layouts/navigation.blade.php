@@ -9,6 +9,7 @@
     <img src="{{ asset('dipvetAssets/images/vetlogo1.png') }}" alt="Logo" class="block h-9 w-auto" />
 </a>
 
+                <!-- The counts are stored in the AppServiceProvider -->
                 </div>
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -31,8 +32,6 @@
                             @endif
                         </x-nav-link>
 
-
-
                         <x-nav-link :href="route('pets')" :active="request()->routeIs('pets')">
                             {{ __('Pets') }}
                         </x-nav-link>
@@ -47,6 +46,17 @@
                             @endif
                         </x-nav-link>
                     @endif
+                    @if(Auth::user()->role === 'vet')
+                        <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')">
+                            {{ __('Appointments') }}
+
+                              @if(!empty($pendingAppointmentCount) && $pendingAppointmentCount > 0)
+                                <span class="ml-1 inline-block bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                    {{ $pendingAppointmentCount }}
+                                </span>
+                            @endif
+                        </x-nav-link>
+                      @endif
                 </div>
  </div>
  

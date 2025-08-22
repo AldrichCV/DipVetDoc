@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,11 +40,25 @@ class AppServiceProvider extends ServiceProvider
     function appointmentCount()
     {
         View::composer('layouts.navigation', function ($view) {
-        $pendingAppointmentCount = DB::table('user_appointments')
-            ->where('status', 'pending')
-            ->count();
+            $pendingAppointmentCount = 0;
 
-        $view->with('pendingAppointmentCount', $pendingAppointmentCount);
-    });
+            if (Auth::check()) {
+                if (Auth::user()->role === 'vet') {
+                    // Pending appointments assigned to this vet
+                    $pendingAppointmentCount = DB::table('user_appointments as ua')
+                        ->leftJoin('assigned_vet as av', 'ua.id', '=', 'av.appointment_id')
+                        ->where('ua.status', 'pending')
+                        ->where('av.user_id', Auth::id())
+                        ->count();
+                } elseif (Auth::user()->role === 'admin') {
+                    // All pending appointments
+                    $pendingAppointmentCount = DB::table('user_appointments')
+                        ->where('status', 'pending')
+                        ->count();
+                }
+            }
+
+            $view->with('pendingAppointmentCount', $pendingAppointmentCount);
+        });
     }
 }

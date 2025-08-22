@@ -43,10 +43,12 @@ Route::get('/auth/facebook', [FacebookController::class, 'redirectToFacebook'])-
 Route::get('/auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);
 
 #region Appointment and Pets
+
 //Appointments Route
 Route::prefix('my_appointments')->name('my_appointments.')->group(function () {
     Route::get('/', [AppointmentController::class, 'appointments'])->name('index');
     Route::post('/', [AppointmentController::class, 'store'])->name('store');
+    Route::patch('/{appointment}/status/{status}', [AppointmentController::class, 'updateStatus'])->name('updateStatus');
 });
 Route::resource('appointments', AppointmentController::class);
 
