@@ -89,5 +89,7 @@ use App\Http\Controllers\ConsultationController;
 
 Route::prefix('consultations')->middleware(['auth'])->group(function () {
     Route::get('/', [ConsultationController::class, 'index'])->name('consultations.index');
-    Route::patch('/', [ConsultationController::class, 'update'])->name('consultations.update');
+    
 }); 
+
+Route::resource('consultations', ConsultationController::class);

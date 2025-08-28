@@ -34,29 +34,105 @@
                                 Add Consultation
                             </button>
 
+                            
                             <!-- Modal -->
-                            <div x-show="openConsultationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                <div class="bg-white rounded-lg p-6 w-96">
-                                    <h3 class="text-lg font-bold mb-4">Update Consultation</h3>
-                                    <form action="{{ route('consultations.update', $consultation->id) }}" method="POST">
-                                        @csrf
-                                        @method('PATCH')
-                                        <div class="mb-2">
-                                            <label class="block text-sm font-medium text-gray-700">Diagnosis</label>
-                                            <textarea name="diagnosis" class="w-full border rounded px-2 py-1">{{ $consultation->diagnosis }}</textarea>
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="block text-sm font-medium text-gray-700">Treatment</label>
-                                            <textarea name="treatment" class="w-full border rounded px-2 py-1">{{ $consultation->treatment }}</textarea>
-                                        </div>
-                                        <div class="flex justify-end gap-2 mt-4">
-                                            <button type="button" @click="openConsultationModal = false" class="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400">Cancel</button>
-                                            <button type="submit" class="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700">Save</button>
-                                        </div>
-                                    </form>
-                                </div>
+                    <div 
+                        x-show="openConsultationModal"
+                        x-transition.opacity
+                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 print:static print:bg-transparent"
+                    >
+                        <div 
+                            @click.away="openConsultationModal = false"
+                            class="bg-white rounded-lg shadow-2xl relative p-12 w-[794px] h-[1123px] max-w-full max-h-[95vh] overflow-y-auto print:w-[210mm] print:h-[297mm] print:shadow-none print:rounded-none"
+                        >
+                            <!-- Close button (hidden in print) -->
+                            <button @click="openConsultationModal = false" 
+                                    class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 text-2xl print:hidden">
+                                ✕
+                            </button>
+
+                            <!-- Header -->
+                            <div class="text-center mb-8 border-b pb-4">
+                                <h1 class="text-3xl font-bold uppercase">Consultation Record</h1>
+                                <p class="text-gray-600">Dipolog Veterinary Doctor</p>
                             </div>
+
+                            <!-- Content -->
+                           <form action="{{ route('consultations.store') }}" method="POST" class="space-y-8">
+                                @csrf
+                                <input type="hidden" name="pet_id" value="{{ $consultation->pet_id }}">
+                                <!-- Patient Info -->
+                                <section>
+                                    <h2 class="text-lg font-semibold mb-3 border-b">Patient Information</h2>
+                                    <div class="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-medium">Pet Name</label>
+                                            <input type="text" class="w-full border-b px-2 py-1 bg-gray-100 print:border-0" 
+                                                value="{{ $consultation->pet_name }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium">Species</label>
+                                            <input type="text" class="w-full border-b px-2 py-1 bg-gray-100 print:border-0" 
+                                                value="{{ $consultation->pet_species }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium">Breed</label>
+                                            <input type="text" class="w-full border-b px-2 py-1 bg-gray-100 print:border-0" 
+                                                value="{{ $consultation->pet_breed }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium">Sex</label>
+                                            <input type="text" class="w-full border-b px-2 py-1 bg-gray-100 print:border-0" 
+                                                value="{{ $consultation->pet_sex }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium">Date of Birth</label>
+                                            <input type="text" class="w-full border-b px-2 py-1 bg-gray-100 print:border-0" 
+                                                value="{{ $consultation->date_of_birth }}" readonly>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium">Age</label>
+                                            <input type="text" class="w-full border-b px-2 py-1 bg-gray-100 print:border-0" 
+                                                value="{{ $consultation->pet_age }}" readonly>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <!-- Owner Info -->
+                                <section>
+                                    <h2 class="text-lg font-semibold mb-3 border-b">Owner Information</h2>
+                                    <input type="text" class="w-full border-b px-2 py-1 bg-gray-100 print:border-0" 
+                                        value="{{ $consultation->owner_name }}" readonly>
+                                </section>
+
+                                <!-- Consultation -->
+                                <section>
+                                    <h2 class="text-lg font-semibold mb-3 border-b">Consultation Details</h2>
+                                    <div>
+                                        <label class="block text-sm font-medium">Diagnosis</label>
+                                        <textarea name="diagnosis" class="w-full border rounded px-3 py-2 h-32 print:border-0">{{ $consultation->diagnosis }}</textarea>
+                                    </div>
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium">Treatment</label>
+                                        <textarea name="treatment" class="w-full border rounded px-3 py-2 h-32 print:border-0">{{ $consultation->treatment }}</textarea>
+                                    </div>
+                                </section>
+
+                                <!-- Footer Actions -->
+                                <div class="flex justify-end gap-4 pt-6 border-t print:hidden">
+                                    <button type="button" @click="openConsultationModal = false" 
+                                            class="px-6 py-2 rounded bg-gray-300 hover:bg-gray-400">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" 
+                                            class="px-6 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
                         </div>
+                    </div>
+                    </div>
                     @endforeach
                 </div>
             @endif

@@ -86,7 +86,7 @@
 
         <!-- Right: Image -->
         <div class="login-image-container">
-            <img src="{{ asset('dipvetAssets/images/loginPic.jpg') }}" alt="Login Image">
+            <img src="{{ asset('dipvetAssets/images/trust1.jpg') }}" alt="Login Image">
         </div>
     </div>
 
@@ -201,3 +201,22 @@ body {
 }
 
 </style>
+
+<script>
+    function loginWithGoogle() {
+  const popup = window.open(
+    "/auth/google", 
+    "googleLogin", 
+    "width=500,height=600"
+  );
+
+  // Listen for message from popup
+  window.addEventListener("message", (event) => {
+    if (event.origin !== window.location.origin) return;
+
+    if (event.data.type === "google-auth-success") {
+      console.log("User logged in:", event.data.user);
+      popup.close();
+    }
+  });
+}

@@ -30,7 +30,8 @@ class AdminController extends Controller
     {
         $query = DB::table('user_appointments as ua')
             ->leftJoin('pets as p', 'ua.pet_code', '=', 'p.pet_code')
-            ->leftJoin('services as s', 'ua.reason', '=', 's.id');
+            ->leftJoin('services as s', 'ua.reason', '=', 's.id')
+            ->orderby('ua.appointment_date', 'desc');
 
         if (auth()->user()->role === 'admin') {
             $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
@@ -166,7 +167,6 @@ class AdminController extends Controller
 
         return response()->json(['success' => true]);
     }
-
 }
 
 
