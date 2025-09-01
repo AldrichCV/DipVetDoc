@@ -85,11 +85,14 @@ Route::post('/assigned-vet/remove', [AdminController::class, 'remove']);
 
 Route::get('/consultations', [AdminController::class, 'consultations'])->name('consultations');
 
-use App\Http\Controllers\ConsultationController;
 
 Route::prefix('consultations')->middleware(['auth'])->group(function () {
     Route::get('/', [ConsultationController::class, 'index'])->name('consultations.index');
     
 }); 
 
+
+use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\MedicalController;
 Route::resource('consultations', ConsultationController::class);
+Route::resource('medical', MedicalController::class);

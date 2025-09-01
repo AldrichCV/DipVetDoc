@@ -20,6 +20,10 @@ class Pet extends Model
     'owner_id'
 ];
 
+    public function consultations()
+    {
+        return $this->hasMany(Consultation::class);
+    }
 
     //
 

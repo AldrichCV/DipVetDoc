@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Consultation extends Model
 {
      use HasFactory;
-
+    protected $table = 'consultations'; 
     protected $fillable = [
         'appointment_id',
         'user_id',
@@ -20,6 +20,16 @@ class Consultation extends Model
     ];
 
     // Relationships
+        public function appointment()
+    {
+        return $this->belongsTo(Appointment::class);
+    }
+
+    public function pet()
+    {
+        return $this->belongsTo(Pet::class);
+    }
+
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -30,8 +40,4 @@ class Consultation extends Model
         return $this->belongsTo(User::class, 'vet_id');
     }
 
-    public function pet()
-    {
-        return $this->belongsTo(Pet::class, 'pet_id');
-    }
 }
