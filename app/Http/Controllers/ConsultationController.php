@@ -7,6 +7,8 @@ use App\Models\Consultation;
 use App\Models\Pet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class ConsultationController extends Controller
 {
@@ -70,4 +72,44 @@ class ConsultationController extends Controller
     return redirect()->back()->with('success', 'Consultation created successfully.');
 
     }
+
+   public function download($petId)
+{
+    $consultations = DB::table('medical_consultations as mc')
+        ->join('pets', 'mc.pet_id', '=', 'pets.id')
+        ->join('users as vets', 'mc.vet_id', '=', 'vets.id')
+        ->join('users as owners', 'pets.owner_id', '=', 'owners.id')
+        ->where('pets.id', $petId)
+        ->select(
+            'pets.id as pet_id',
+            'pets.name as pet_name',
+            'pets.species as pet_species',
+            'pets.breed as pet_breed',
+            'pets.sex as pet_sex',
+            'pets.date_of_birth',
+            'owners.name as owner_name',
+            'vets.name as vet_name',
+            'mc.body_weight',
+            'mc.respiratory_rate',
+            'mc.temperature',
+            'mc.complaint',
+            'mc.medication',
+            'mc.prescription',
+            'mc.created_at'
+        )
+        ->get();
+
+    if ($consultations->isEmpty()) {
+        return redirect()->back()->with('error', 'No consultations found.');
+    }
+
+    $pet = $consultations->first();
+
+    $pdf = Pdf::loadView('pdf.consultations', [
+        'pet' => $pet,
+        'consultations' => $consultations
+    ]);
+
+    return $pdf->download($pet->pet_name . '-consultations.pdf');
+}
 }

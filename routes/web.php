@@ -96,3 +96,5 @@ use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\MedicalController;
 Route::resource('consultations', ConsultationController::class);
 Route::resource('medical', MedicalController::class);
+Route::get('consultations/{consultation}/download', [ConsultationController::class, 'download'])
+    ->name('consultations.download');

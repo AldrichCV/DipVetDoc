@@ -248,12 +248,17 @@
                                                 </div>
 
                                                 <!-- Footer actions -->
-                                                <div class="mt-8 border-t pt-6 flex justify-end">
+                                                <div class="mt-8 border-t pt-6 flex justify-end gap-2">
                                                     <button type="button"
                                                         @click="mode = 'new'"
                                                         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                                                         + New Consultation
                                                     </button>
+
+                                                    <a href="{{ route('consultations.download', $firstConsult->pet_id) }}"
+                                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                                        Download
+                                                    </a>
                                                 </div>
                                             </section>
                                         </div>
