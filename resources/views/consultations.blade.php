@@ -1,266 +1,413 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
-            {{ __('Consultations') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+                {{ __('Consultations') }}
+            </h2>
+            <div class="text-sm text-gray-600">
+                {{ $consultations->count() }} {{ Str::plural('consultation', $consultations->count()) }}
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             @if ($consultations->isEmpty())
-                <p class="text-center text-gray-500 text-lg italic">No consultations found.</p>
+                <div class="text-center py-16">
+                    <div class="mx-auto h-24 w-24 text-gray-300 mb-4">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No consultations found</h3>
+                    <p class="text-gray-500">Get started by adding your first consultation record.</p>
+                </div>
             @else
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                     @foreach ($consultations as $petId => $petConsultations)
                         @php
                             $firstConsult = $petConsultations->first();
-                            $dates = $petConsultations->map(function ($c) {
-                                return \Carbon\Carbon::parse($c->created_at)
-                                    ->timezone('Asia/Manila')
-                                    ->format('Y-m-d');
-                            })->unique();
+                            $consultationCount = $petConsultations->count();
+                            $lastConsultDate = $petConsultations->sortByDesc('created_at')->first()->created_at;
                         @endphp
 
-                        <div x-data="{ openConsultationModal: false, selected: null, mode: 'view' }"
-                             class="bg-white border rounded-lg p-6 shadow hover:shadow-md transition flex flex-col justify-between">
+                        <div x-data="{ 
+                                openConsultationModal: false, 
+                                selected: null, 
+                                mode: 'view',
+                                activeTab: 'history'
+                             }"
+                             class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
 
-                            <!-- Pet & Owner -->
-                            <h3 class="text-lg font-bold text-gray-800 mb-2 text-center">
-                                {{ $firstConsult->pet_name }}
-                            </h3>
-                            <p class="text-gray-600 text-sm text-center">
-                                <strong>Owner:</strong> {{ $firstConsult->owner_name }}
-                            </p>
+                            <!-- Card Header -->
+                            <div class="p-4 sm:p-6 border-b border-gray-100">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex-1 min-w-0">
+                                        <h3 class="text-lg font-semibold text-gray-900 truncate">
+                                            {{ $firstConsult->pet_name }}
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            {{ $firstConsult->pet_species }} • {{ $firstConsult->pet_breed }}
+                                        </p>
+                                    </div>
+                                    <div class="flex-shrink-0 ml-3">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {{ $consultationCount }} {{ Str::plural('visit', $consultationCount) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                        <span class="truncate">{{ $firstConsult->owner_name }}</span>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span>Last visit: {{ \Carbon\Carbon::parse($lastConsultDate)->format('M j, Y') }}</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <!-- Open Modal Button -->
-                            <button @click="openConsultationModal = true"
-                                    class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                View
-                            </button>
+                            <!-- Card Actions -->
+                            <div class="p-4 sm:p-6 bg-gray-50">
+                                <button @click="openConsultationModal = true; activeTab = 'history'"
+                                        class="w-full px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                                    View Records
+                                </button>
+                            </div>
 
-                            <!-- Modal -->
+                            <!-- Enhanced Modal -->
                             <div x-show="openConsultationModal"
-                                 x-transition.opacity
-                                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 print:static print:bg-transparent"
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4 print:static print:bg-transparent print:p-0"
                                  x-data
                                  x-init="$watch('openConsultationModal', value => {
                                     if(value) { document.body.style.overflow = 'hidden'; } 
                                     else { document.body.style.overflow = ''; }
                                  })">
 
-                                <div class="bg-white rounded-lg shadow-2xl relative w-[794px] h-[1123px] max-w-full max-h-[95vh] overflow-y-auto 
-                                            print:w-[210mm] print:h-[297mm] print:shadow-none print:rounded-none">
+                                <div class="bg-white rounded-xl shadow-2xl relative w-full max-w-4xl max-h-[90vh] overflow-hidden 
+                                            print:w-[210mm] print:h-[297mm] print:shadow-none print:rounded-none print:max-w-none print:max-h-none">
 
-                                    <!-- Close button -->
-                                    <button @click="openConsultationModal = false" 
-                                            class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 text-2xl print:hidden">
-                                        ✕
-                                    </button>
-
-                                    <!-- Content wrapper -->
-                                    <div class="p-12">
-                                        <!-- Header -->
-                                        <div class="text-center mb-10 border-b pb-4">
-                                            <h1 class="text-3xl font-bold uppercase">Consultation Record</h1>
-                                            <p class="text-gray-600">Dipolog Veterinary Doctor</p>
+                                    <!-- Modal Header -->
+                                    <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 print:hidden">
+                                        <div>
+                                            <h2 class="text-xl font-semibold text-gray-900">{{ $firstConsult->pet_name }}</h2>
+                                            <p class="text-sm text-gray-600 mt-1">Medical Records</p>
                                         </div>
+                                        <button @click="openConsultationModal = false" 
+                                                class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
 
-                                        <!-- Sections Wrapper -->
-                                        <div class="space-y-10">
-                                            
-                                            <!-- Patient Info -->
-                                            <section>
-                                                <h2 class="text-lg font-semibold mb-3 border-b pb-2">Patient Information</h2>
-                                                <div class="grid grid-cols-2 gap-6">
-                                                    <div>
-                                                        <label class="block text-sm font-medium">Pet Name</label>
-                                                        <input type="text" class="w-full border-b px-2 py-1 bg-gray-100" 
-                                                            value="{{ $firstConsult->pet_name }}" readonly>
+                                    <!-- Tab Navigation -->
+                                    <div class="border-b border-gray-200 print:hidden">
+                                        <nav class="flex px-4 sm:px-6">
+                                            <button @click="activeTab = 'info'"
+                                                    :class="activeTab === 'info' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                                    class="py-3 px-4 border-b-2 font-medium text-sm transition-colors">
+                                                Patient Info
+                                            </button>
+                                            <button @click="activeTab = 'history'"
+                                                    :class="activeTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                                    class="py-3 px-4 border-b-2 font-medium text-sm transition-colors">
+                                                Consultation History
+                                            </button>
+                                            <button @click="activeTab = 'new'; mode = 'new'"
+                                                    :class="activeTab === 'new' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                                    class="py-3 px-4 border-b-2 font-medium text-sm transition-colors">
+                                                + New Consultation
+                                            </button>
+                                        </nav>
+                                    </div>
+
+                                    <!-- Modal Content -->
+                                    <div class="overflow-y-auto flex-1" style="max-height: calc(90vh - 140px);">
+                                        
+                                        <!-- Patient Information Tab -->
+                                        <div x-show="activeTab === 'info'" class="p-4 sm:p-6">
+                                            <div class="max-w-2xl">
+                                                <h3 class="text-lg font-semibold text-gray-900 mb-6">Patient Information</h3>
+                                                
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                                    <div class="space-y-4">
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Pet Name</label>
+                                                            <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                                                {{ $firstConsult->pet_name }}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Species</label>
+                                                            <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                                                {{ $firstConsult->pet_species }}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Breed</label>
+                                                            <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                                                {{ $firstConsult->pet_breed }}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium">Species</label>
-                                                        <input type="text" class="w-full border-b px-2 py-1 bg-gray-100" 
-                                                            value="{{ $firstConsult->pet_species }}" readonly>
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium">Breed</label>
-                                                        <input type="text" class="w-full border-b px-2 py-1 bg-gray-100" 
-                                                            value="{{ $firstConsult->pet_breed }}" readonly>
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium">Sex</label>
-                                                        <input type="text" class="w-full border-b px-2 py-1 bg-gray-100" 
-                                                            value="{{ $firstConsult->pet_sex }}" readonly>
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm font-medium">Date of Birth</label>
-                                                        <input type="text" class="w-full border-b px-2 py-1 bg-gray-100" 
-                                                            value="{{ \Carbon\Carbon::parse($firstConsult->date_of_birth)->format('F d, Y') }}" readonly>
+                                                    
+                                                    <div class="space-y-4">
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Sex</label>
+                                                            <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                                                {{ $firstConsult->pet_sex }}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                                                            <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                                                {{ \Carbon\Carbon::parse($firstConsult->date_of_birth)->format('F d, Y') }}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Owner</label>
+                                                            <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
+                                                                {{ $firstConsult->owner_name }}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </section>
+                                            </div>
+                                        </div>
 
-                                            <!-- Owner Info -->
-                                            <section>
-                                                <h2 class="text-lg font-semibold mb-3 border-b pb-2">Owner Information</h2>
-                                                <input type="text" class="w-full border-b px-2 py-1 bg-gray-100" 
-                                                    value="{{ $firstConsult->owner_name }}" readonly>
-                                            </section>
+                                        <!-- Consultation History Tab -->
+                                        <div x-show="activeTab === 'history'" class="p-4 sm:p-6">
+                                            @php
+                                                $realConsultations = $petConsultations->filter(function ($c) {
+                                                    return !empty($c->consultation_id);
+                                                });
 
-                                            <!-- Consultation History -->
-                                            <section class="flex flex-col h-full">
-                                                <h2 class="text-lg font-semibold mb-3 border-b pb-2">Previous Consultations</h2>
+                                                $petDates = $realConsultations->map(function ($c) {
+                                                    return [
+                                                        'id' => $c->consultation_id,
+                                                        'date' => \Carbon\Carbon::parse($c->created_at)
+                                                                    ->timezone('Asia/Manila')
+                                                                    ->format('Y-m-d'),
+                                                        'label' => \Carbon\Carbon::parse($c->created_at)
+                                                                    ->format('M j, Y'),
+                                                        'full_date' => \Carbon\Carbon::parse($c->created_at)
+                                                                    ->format('F j, Y g:i A'),
+                                                    ];
+                                                })->sortByDesc('date');
+                                            @endphp
 
-                                                <!-- Date buttons -->
-                                                @php
-                                                    $realConsultations = $petConsultations->filter(function ($c) {
-                                                        return !empty($c->consultation_id);
-                                                    });
-
-                                                    $petDates = $realConsultations->map(function ($c) {
-                                                        return [
-                                                            'id' => $c->consultation_id,
-                                                            'date' => \Carbon\Carbon::parse($c->created_at)
-                                                                        ->timezone('Asia/Manila')
-                                                                        ->format('Y-m-d'),
-                                                            'label' => \Carbon\Carbon::parse($c->created_at)
-                                                                        ->format('F j, Y'),
-                                                        ];
-                                                    })->sortByDesc('date');
-                                                @endphp
-
-                                                @if($petDates->isNotEmpty())
-                                                    <div class="flex flex-wrap gap-2 mb-4 justify-start">
+                                            @if($petDates->isNotEmpty())
+                                                <div class="mb-6">
+                                                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Consultation History</h3>
+                                                    
+                                                    <!-- Date Selection -->
+                                                    <div class="flex flex-wrap gap-2 mb-6">
                                                         @foreach($petDates as $consultation)
                                                             <button 
-                                                                @click="selected = '{{ $consultation['date'] }}'; mode = 'view'"
-                                                                :class="selected === '{{ $consultation['date'] }}' && mode === 'view'
-                                                                    ? 'bg-blue-600 text-white' 
-                                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
-                                                                class="px-3 py-1 rounded-lg text-sm transition">
+                                                                @click="selected = '{{ $consultation['date'] }}'"
+                                                                :class="selected === '{{ $consultation['date'] }}'
+                                                                    ? 'bg-blue-600 text-white shadow-sm' 
+                                                                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'"
+                                                                class="px-4 py-2 border rounded-lg text-sm font-medium transition-colors">
                                                                 {{ $consultation['label'] }}
                                                             </button>
                                                         @endforeach
                                                     </div>
-                                                @endif
+                                                </div>
 
-                                                <!-- Details Wrapper (consistent layout) -->
-                                                <div class="mt-6 flex-1 overflow-y-auto space-y-6">
-                                                    <!-- View Mode -->
-                                                    <template x-if="mode === 'view'">
+                                                <!-- Consultation Details -->
+                                                <div class="space-y-6">
+                                                    @foreach($petConsultations as $c)
+                                                        @php
+                                                            $cDate = \Carbon\Carbon::parse($c->created_at)
+                                                                ->timezone('Asia/Manila')
+                                                                ->format('Y-m-d');
+                                                        @endphp
+                                                        <div x-show="selected === '{{ $cDate }}'" 
+                                                             class="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
+                                                            
+                                                            <!-- Consultation Header -->
+                                                            <div class="flex items-center justify-between pb-4 border-b border-gray-100">
+                                                                <h4 class="text-lg font-semibold text-gray-900">
+                                                                    Consultation Details
+                                                                </h4>
+                                                                <div class="text-sm text-gray-500">
+                                                                    {{ \Carbon\Carbon::parse($c->created_at)->format('F j, Y g:i A') }}
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Vital Signs -->
+                                                            <div>
+                                                                <h5 class="text-sm font-semibold text-gray-900 mb-3">Vital Signs</h5>
+                                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                                    <div class="bg-gray-50 rounded-lg p-3">
+                                                                        <label class="block text-xs font-medium text-gray-600 mb-1">Body Weight</label>
+                                                                        <div class="text-sm font-medium text-gray-900">
+                                                                            {{ $c->body_weight ? $c->body_weight . ' kg' : 'Not recorded' }}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="bg-gray-50 rounded-lg p-3">
+                                                                        <label class="block text-xs font-medium text-gray-600 mb-1">Respiratory Rate</label>
+                                                                        <div class="text-sm font-medium text-gray-900">
+                                                                            {{ $c->respiratory_rate ? $c->respiratory_rate . ' bpm' : 'Not recorded' }}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="bg-gray-50 rounded-lg p-3">
+                                                                        <label class="block text-xs font-medium text-gray-600 mb-1">Temperature</label>
+                                                                        <div class="text-sm font-medium text-gray-900">
+                                                                            {{ $c->temperature ? $c->temperature . '°C' : 'Not recorded' }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Clinical Information -->
+                                                            <div class="space-y-4">
+                                                                <div>
+                                                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Chief Complaint</label>
+                                                                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-900 min-h-[60px]">
+                                                                        {{ $c->complaint ?: 'No complaint recorded' }}
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Medication</label>
+                                                                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-900 min-h-[60px]">
+                                                                        {{ $c->medication ?: 'No medication recorded' }}
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Prescription</label>
+                                                                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-900 min-h-[60px]">
+                                                                        {{ $c->prescription ?: 'No prescription recorded' }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Veterinarian Info -->
+                                                            <div class="pt-4 border-t border-gray-100">
+                                                                <div class="flex items-center text-sm text-gray-600">
+                                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                                    </svg>
+                                                                    <span><strong>Veterinarian:</strong> {{ $c->vet_name }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div class="text-center py-12">
+                                                    <div class="mx-auto h-16 w-16 text-gray-300 mb-4">
+                                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                    </div>
+                                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No consultation history</h3>
+                                                    <p class="text-gray-500">Start by adding the first consultation record.</p>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <!-- New Consultation Tab -->
+                                        <div x-show="activeTab === 'new'" class="p-4 sm:p-6">
+                                            <div class="max-w-2xl">
+                                                <h3 class="text-lg font-semibold text-gray-900 mb-6">New Consultation</h3>
+                                                
+                                                <form action="{{ route('medical.store') }}" method="POST" class="space-y-6">
+                                                    @csrf
+                                                    <input type="hidden" name="pet_id" value="{{ $firstConsult->pet_id }}">
+
+                                                    <!-- Vital Signs -->
+                                                    <div>
+                                                        <h4 class="text-sm font-semibold text-gray-900 mb-4">Vital Signs</h4>
+                                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-2">Body Weight (kg)</label>
+                                                                <input type="number" name="body_weight" step="0.01" min="0"
+                                                                    placeholder="e.g. 5.25"
+                                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-2">Respiratory Rate (bpm)</label>
+                                                                <input type="number" name="respiratory_rate" step="1" min="0"
+                                                                    placeholder="e.g. 30"
+                                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                                            </div>
+                                                            <div>
+                                                                <label class="block text-sm font-medium text-gray-700 mb-2">Temperature (°C)</label>
+                                                                <input type="number" name="temperature" step="0.1" min="20" max="45"
+                                                                    placeholder="e.g. 38.5"
+                                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Clinical Information -->
+                                                    <div class="space-y-4">
                                                         <div>
-                                                            @foreach($petConsultations as $c)
-                                                                @php
-                                                                    $cDate = \Carbon\Carbon::parse($c->created_at)
-                                                                        ->timezone('Asia/Manila')
-                                                                        ->format('Y-m-d');
-                                                                @endphp
-                                                                <div x-show="selected === '{{ $cDate }}'" class="border p-4 rounded-lg space-y-4">
-                                                                    <div class="grid grid-cols-2 gap-4">
-                                                                        <div>
-                                                                            <label class="block text-sm font-medium">Body Weight</label>
-                                                                            <input type="text" class="w-full border px-2 py-1 bg-gray-50" value="{{ $c->body_weight ?? 'N/A' }}" readonly>
-                                                                        </div>
-                                                                        <div>
-                                                                            <label class="block text-sm font-medium">Respiratory Rate</label>
-                                                                            <input type="text" class="w-full border px-2 py-1 bg-gray-50" value="{{ $c->respiratory_rate ?? 'N/A' }}" readonly>
-                                                                        </div>
-                                                                        <div>
-                                                                            <label class="block text-sm font-medium">Temperature</label>
-                                                                            <input type="text" class="w-full border px-2 py-1 bg-gray-50" value="{{ $c->temperature ?? 'N/A' }}" readonly>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div>
-                                                                        <label class="block text-sm font-medium">Complaint</label>
-                                                                        <textarea readonly class="w-full border rounded px-3 py-2 h-20 bg-gray-50">{{ $c->complaint ?? 'N/A' }}</textarea>
-                                                                    </div>
-                                                                    <div>
-                                                                        <label class="block text-sm font-medium">Medication</label>
-                                                                        <textarea readonly class="w-full border rounded px-3 py-2 h-20 bg-gray-50">{{ $c->medication ?? 'N/A' }}</textarea>
-                                                                    </div>
-                                                                    <div>
-                                                                        <label class="block text-sm font-medium">Prescription</label>
-                                                                        <textarea readonly class="w-full border rounded px-3 py-2 h-20 bg-gray-50">{{ $c->prescription ?? 'N/A' }}</textarea>
-                                                                    </div>
-                                                                    <div class="text-sm text-gray-600">
-                                                                        <p><strong>Vet:</strong> {{ $c->vet_name }}</p>
-                                                                        <p><strong>Date:</strong> {{ \Carbon\Carbon::parse($c->created_at)->format('F j, Y g:i A') }}</p>
-                                                                    </div>
-                                                                </div>
-                                                            @endforeach
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Chief Complaint</label>
+                                                            <textarea name="complaint" rows="3"
+                                                                placeholder="Describe the main reason for this visit..."
+                                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"></textarea>
                                                         </div>
-                                                    </template>
-
-                                                    <!-- New Consultation Form -->
-                                                    <template x-if="mode === 'new'">
-                                                        <div class="border p-4 rounded-lg space-y-4">
-                                                            <form action="{{ route('medical.store') }}" method="POST" class="space-y-4">
-                                                                @csrf
-                                                                <input type="hidden" name="pet_id" value="{{ $firstConsult->pet_id }}">
-
-                                                                <div class="grid grid-cols-2 gap-4">
-                                                                    <div>
-                                                                        <label class="block text-sm font-medium">Body Weight (kg)</label>
-                                                                        <input type="number" name="body_weight" step="0.01" min="0"
-                                                                            placeholder="e.g. 5.25"
-                                                                            class="w-full border px-2 py-1 rounded">
-                                                                    </div>
-                                                                    <div>
-                                                                        <label class="block text-sm font-medium">Respiratory Rate (breaths/min)</label>
-                                                                        <input type="number" name="respiratory_rate" step="1" min="0"
-                                                                            placeholder="e.g. 30"
-                                                                            class="w-full border px-2 py-1 rounded">
-                                                                    </div>
-                                                                    <div>
-                                                                        <label class="block text-sm font-medium">Temperature (°C)</label>
-                                                                        <input type="number" name="temperature" step="0.1" min="20" max="45"
-                                                                            placeholder="e.g. 38.5"
-                                                                            class="w-full border px-2 py-1 rounded">
-                                                                    </div>
-                                                                </div>
-
-                                                                <div>
-                                                                    <label class="block text-sm font-medium">Complaint</label>
-                                                                    <textarea name="complaint" class="w-full border rounded px-3 py-2 h-20"></textarea>
-                                                                </div>
-                                                                <div>
-                                                                    <label class="block text-sm font-medium">Medication</label>
-                                                                    <textarea name="medication" class="w-full border rounded px-3 py-2 h-20"></textarea>
-                                                                </div>
-                                                                <div>
-                                                                    <label class="block text-sm font-medium">Prescription</label>
-                                                                    <textarea name="prescription" class="w-full border rounded px-3 py-2 h-20"></textarea>
-                                                                </div>
-
-                                                                <div class="flex justify-end gap-2">
-                                                                    <button type="button" @click="mode = 'view'" 
-                                                                        class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition">
-                                                                        Cancel
-                                                                    </button>
-                                                                    <button type="submit"
-                                                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                                                        Save
-                                                                    </button>
-                                                                </div>
-                                                            </form>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Medication</label>
+                                                            <textarea name="medication" rows="3"
+                                                                placeholder="List medications administered or prescribed..."
+                                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"></textarea>
                                                         </div>
-                                                    </template>
-                                                </div>
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Prescription & Instructions</label>
+                                                            <textarea name="prescription" rows="3"
+                                                                placeholder="Provide detailed prescription and care instructions..."
+                                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"></textarea>
+                                                        </div>
+                                                    </div>
 
-                                                <!-- Footer actions -->
-                                                <div class="mt-8 border-t pt-6 flex justify-end gap-2">
-                                                    <button type="button"
-                                                        @click="mode = 'new'"
-                                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                                        + New Consultation
-                                                    </button>
+                                                    <!-- Form Actions -->
+                                                    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+                                                        <button type="button" @click="activeTab = 'history'" 
+                                                            class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium">
+                                                            Cancel
+                                                        </button>
+                                                        <button type="submit"
+                                                            class="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors font-medium">
+                                                            Save Consultation
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                                    <a href="{{ route('consultations.download', $firstConsult->pet_id) }}"
-                                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                                        Download
-                                                    </a>
-                                                </div>
-                                            </section>
+                                    <!-- Modal Footer -->
+                                    <div class="border-t border-gray-200 p-4 sm:p-6 bg-gray-50 print:hidden">
+                                        <div class="flex flex-col sm:flex-row justify-between gap-3">
+                                            <div class="text-sm text-gray-600">
+                                                <span class="font-medium">{{ $consultationCount }}</span> total consultations
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <a href="{{ route('consultations.download', $firstConsult->pet_id) }}"
+                                                   class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                    </svg>
+                                                    Download PDF
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
