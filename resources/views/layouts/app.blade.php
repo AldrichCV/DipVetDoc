@@ -2,10 +2,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-          <link rel="icon" type="image/png" href="{{ asset('dipvetAssets/images/vetlogo1.png') }}">
+        <link rel="icon" type="image/png" href="{{ asset('dipvetAssets/images/vetlogo1.png') }}">
 
         <title>DipVetDoc | Dipolog Veterinary Doctor</title>
 
@@ -34,6 +35,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- Toastify CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+        <!-- Toastify JS -->
+        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     </head>
     <body class="font-sans antialiased">

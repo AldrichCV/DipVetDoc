@@ -1,608 +1,393 @@
-
-<body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1 class="login-title">Register an account</h1>
-            <p class="login-subtitle">
-                Or <a href="{{ route('login') }}">sign in to your account</a>
-            </p>
-        </div>
-
-        <!-- Session Status -->
-        @if (session('status'))
-            <div class="error-message">{{ session('status') }}</div>
-        @endif
-
-        <!-- Validation Errors -->
-        @if ($errors->any())
-            <div class="error-message">
-                <ul class="error-list">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('register') }}" id="registerForm" novalidate>
-            @csrf
-
-            <div class="form-group">
-                <label for="name" class="form-label">Name</label>
-                <div class="input-wrapper">
-                    <input
-                        id="name"
-                        class="form-input"
-                        type="text"
-                        name="name"
-                        value="{{ old('name') }}"
-                        required
-                        autofocus
-                        autocomplete="name"
-                    />
-                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19.4 15a7.963 7.963 0 01-14.8 0"/>
-                        </svg>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="email" class="form-label">Email address</label>
-                <div class="input-wrapper">
-                    <input
-                        id="email"
-                        class="form-input"
-                        type="email"
-                        name="email"
-                        value="{{ old('email') }}"
-                        required
-                        autocomplete="username"
-                    />
-                      <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
-                        </svg>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <div class="input-wrapper" style="position: relative;">
-                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
-                    <input
-                        id="password"
-                        class="form-input"
-                        type="password"
-                        name="password"
-                        required
-                        autocomplete="new-password"
-                    />
-                    <button
-                        type="button"
-                        class="password-toggle"
-                        onclick="togglePassword()"
-                        aria-label="Toggle password visibility"
-                        tabindex="-1"
-                    >
-                        <svg
-                            id="eyeIcon"
-                            width="20"
-                            height="20"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="password_confirmation" class="form-label">Confirm Password</label>
-                <div class="input-wrapper">
-                    <input
-                        id="password_confirmation"
-                        class="form-input"
-                        type="password"
-                        name="password_confirmation"
-                        required
-                        autocomplete="new-password"
-                    />
-                     <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
-                </div>
-            </div>
-
-            <!-- Role Toggle -->
-            <div class="form-group">
-                <label class="form-label">Register As</label>
-                <div class="toggle-group">
-                    <input
-                        type="radio"
-                        id="role_client"
-                        name="role"
-                        value="user"
-                        {{ old('role', 'user') == 'user' ? 'checked' : '' }}
-                    />
-                    <label for="role_client">Client</label>
-
-                    <input
-                        type="radio"
-                        id="role_staff"
-                        name="role"
-                        value="vet"
-                        {{ old('role') == 'vet' ? 'checked' : '' }}
-                    />
-                    <label for="role_staff">Vet</label>
-                </div>
-                @error('role')
-                    <p class="error-message" style="margin-top: 0.25rem;">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Vet-specific fields (hidden initially) -->
-            <div id="vetFields" style="display: none;">
-                <div class="form-group">
-                    <label for="license_number" class="form-label">Veterinary License Number</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 3.5c0 .83-.67 1.5-1.5 1.5S4 4.33 4 3.5 4.67 2 5.5 2 7 2.67 7 3.5z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M18 3.5c0 .83.67 1.5 1.5 1.5S21 4.33 21 3.5 20.33 2 19.5 2 18 2.67 18 3.5z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6.5 5.5C8 7 9 8 11 9.2c2 1.2 2.5 2 3.5 2.2" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.5 5.5c-1.5 1.5-2.5 2.5-4.5 3.7-2 1.2-2.5 2-3.5 2.2" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 12.9c0 2.5-1 5-3 6.5s-1 4.6 1 5.1c2 .5 3.5-1 5-2.5s3-2.8 3-5.1c0-2.3-1.2-4-3-5.4" />
-                            <circle cx="18.5" cy="16" r="1.9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15.8 14.7c1 .2 1.6.6 2.2 1.3" />
-                        </svg>
-
-                        <input
-                            id="license_number"
-                            class="form-input"
-                            type="text"
-                            name="license_number"
-                            value="{{ old('license_number') }}"
-                            placeholder="Enter your vet license number"
-                        />
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="clinic_name" class="form-label">Clinic Name</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 7v10a2 2 0 002 2h3m10-12h3a2 2 0 012 2v10a2 2 0 01-2 2h-3m-6 0h6M9 21H5a2 2 0 01-2-2V7a2 2 0 012-2h4"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 3h6v4H9z"/>
-                        </svg>
-                        <input
-                            id="clinic_name"
-                            class="form-input"
-                            type="text"
-                            name="clinic_name"
-                            value="{{ old('clinic_name') }}"
-                            placeholder="Enter your clinic name"
-                        />
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="form-options">
-                <div class="checkbox-wrapper">
-                    <input
-                        type="checkbox"
-                        id="terms"
-                        name="terms"
-                        required
-                        {{ old('terms') ? 'checked' : '' }}
-                    />
-                    <label for="terms" class="checkbox-label">I agree to the Terms and Conditions</label>
-                </div>
-            </div>
-
-            <button type="submit" class="login-button">Register</button>
-        </form>
-    </div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Veterinary Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
-        function togglePassword() {
-            const password = document.getElementById('password');
-            const confirmPassword = document.getElementById('password_confirmation');
-            const eyeIcon = document.getElementById('eyeIcon');
-
-            const isPassword = password.type === 'password';
-
-            // Toggle type for both password fields
-            password.type = isPassword ? 'text' : 'password';
-            confirmPassword.type = isPassword ? 'text' : 'password';
-
-            // Optionally change the eye icon style
-            if (isPassword) {
-                // Open eye
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-                        -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                `;
-            } else {
-                // Closed eye
-                eyeIcon.innerHTML = `
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 
-                        0-8.268-2.943-9.542-7a9.956 9.956 
-                        0 012.641-4.362m3.695-2.132A9.956 
-                        9.956 0 0112 5c4.478 0 8.268 2.943 
-                        9.542 7a9.956 9.956 0 01-4.233 
-                        5.042M15 12a3 3 0 11-6 0 3 3 0 
-                        016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 3l18 18"/>
-                `;
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
             }
         }
-
-        function toggleVetFields() {
-            const vetFields = document.getElementById('vetFields');
-            const licenseInput = document.getElementById('license_number');
-            const clinicInput = document.getElementById('clinic_name');
-            const roleStaff = document.getElementById('role_staff');
-
-            if (roleStaff.checked) {
-                vetFields.style.display = 'block';
-                licenseInput.setAttribute('required', 'required');
-                clinicInput.setAttribute('required', 'required');
-            } else {
-                vetFields.style.display = 'none';
-                licenseInput.removeAttribute('required');
-                clinicInput.removeAttribute('required');
-            }
-        }
-
-        // Initialize on page load and add event listeners to radios
-        document.addEventListener('DOMContentLoaded', () => {
-            toggleVetFields();
-            document.getElementById('role_client').addEventListener('change', toggleVetFields);
-            document.getElementById('role_staff').addEventListener('change', toggleVetFields);
-        });
-
-        // Error handler for Vet role
-        document.getElementById('registerForm').addEventListener('submit', function (e) {
-            const roleStaff = document.getElementById('role_staff').checked;
-            const licenseInput = document.getElementById('license_number');
-            const clinicInput = document.getElementById('clinic_name');
-
-            // Remove previous error styles
-            [licenseInput, clinicInput].forEach(input => {
-                input.classList.remove('error');
-            });
-
-            if (roleStaff) {
-                let hasError = false;
-
-                if (!licenseInput.value.trim()) {
-                    licenseInput.classList.add('error');
-                    hasError = true;
-                }
-                if (!clinicInput.value.trim()) {
-                    clinicInput.classList.add('error');
-                    hasError = true;
-                }
-
-                if (hasError) {
-                    e.preventDefault(); // Stop form submission
-                    alert('Please fill out the required vet information before registering.');
-                }
-            }
-        });
-
     </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8" 
+         x-data="{ 
+             loaded: false,
+             showElements: false 
+         }" 
+         x-init="
+             setTimeout(() => { loaded = true }, 50);
+             setTimeout(() => { showElements = true }, 150);
+         ">
+        <div class="w-full max-w-md space-y-8">
+            <!-- Header -->
+            <div class="text-center"
+                 x-show="loaded"
+                 x-transition:enter="transition ease-out duration-600"
+                 x-transition:enter-start="opacity-0 transform -translate-y-6 scale-98"
+                 x-transition:enter-end="opacity-100 transform translate-y-0 scale-100">
+                <div class="mx-auto h-12 w-12 bg-primary-500 rounded-xl flex items-center justify-center mb-4 transform hover:scale-110 transition-transform duration-200">
+                    <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+                <p class="text-sm text-gray-600">
+                    Already have an account? 
+                    <a href="{{ route('login') }}" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+                        Sign in here
+                    </a>
+                </p>
+            </div>
+
+            <!-- Form Container -->
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8"
+                 x-show="showElements"
+                 x-transition:enter="transition ease-out duration-700 delay-75"
+                 x-transition:enter-start="opacity-0 transform translate-y-6 scale-98"
+                 x-transition:enter-end="opacity-100 transform translate-y-0 scale-100">
+                <!-- Session Status -->
+                @if (session('status'))
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-sm text-red-600">{{ session('status') }}</p>
+                    </div>
+                @endif
+
+                <!-- Validation Errors -->
+                @if ($errors->any())
+                    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <ul class="text-sm text-red-600 space-y-1">
+                            @foreach ($errors->all() as $error)
+                                <li class="flex items-start">
+                                    <svg class="h-4 w-4 text-red-500 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                    {{ $error }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('register') }}" 
+                      x-data="{
+                          showPassword: false,
+                          role: '{{ old('role', 'user') }}',
+                          showVetFields: {{ old('role') == 'vet' ? 'true' : 'false' }},
+                          formVisible: false,
+                          togglePassword() {
+                              this.showPassword = !this.showPassword;
+                          },
+                          updateRole(newRole) {
+                              this.role = newRole;
+                              this.showVetFields = newRole === 'vet';
+                          }
+                      }" 
+                      x-init="setTimeout(() => { formVisible = true }, 250)"
+                      novalidate>
+                    @csrf
+
+                    <div class="space-y-6">
+                        <!-- Name Field -->
+                        <div x-show="formVisible"
+                             x-transition:enter="transition ease-out duration-600 delay-[50ms]"
+                             x-transition:enter-start="opacity-0 transform translate-y-3"
+                             x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Name
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <input id="name" 
+                                       name="name" 
+                                       type="text" 
+                                       value="{{ old('name') }}"
+                                       required 
+                                       autofocus 
+                                       autocomplete="name"
+                                       class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors sm:text-sm @error('name') border-red-300 @enderror"
+                                       placeholder="Enter your full name">
+                            </div>
+                            @error('name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Email Field -->
+                        <div x-show="formVisible"
+                             x-transition:enter="transition ease-out duration-600 delay-[100ms]"
+                             x-transition:enter-start="opacity-0 transform translate-y-3"
+                             x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                    </svg>
+                                </div>
+                                <input id="email" 
+                                       name="email" 
+                                       type="email" 
+                                       value="{{ old('email') }}"
+                                       required 
+                                       autocomplete="username"
+                                       class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors sm:text-sm @error('email') border-red-300 @enderror"
+                                       placeholder="Enter your email address">
+                            </div>
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Password Field -->
+                        <div x-show="formVisible"
+                             x-transition:enter="transition ease-out duration-600 delay-[150ms]"
+                             x-transition:enter-start="opacity-0 transform translate-y-3"
+                             x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                </div>
+                                <input id="password" 
+                                       name="password" 
+                                       :type="showPassword ? 'text' : 'password'"
+                                       required 
+                                       autocomplete="new-password"
+                                       class="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors sm:text-sm @error('password') border-red-300 @enderror"
+                                       placeholder="Create a strong password">
+                                <button type="button" 
+                                        @click="togglePassword()"
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                    <svg x-show="!showPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <svg x-show="showPassword" class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.641-4.362m3.695-2.132A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.956 9.956 0 01-4.233 5.042M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            @error('password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div x-show="formVisible"
+                             x-transition:enter="transition ease-out duration-600 delay-[200ms]"
+                             x-transition:enter-start="opacity-0 transform translate-y-3"
+                             x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+                                Confirm Password
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                </div>
+                                <input id="password_confirmation" 
+                                       name="password_confirmation" 
+                                       :type="showPassword ? 'text' : 'password'"
+                                       required 
+                                       autocomplete="new-password"
+                                       class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors sm:text-sm"
+                                       placeholder="Confirm your password">
+                            </div>
+                        </div>
+
+                        <!-- Role Selection -->
+                        <div x-show="formVisible"
+                             x-transition:enter="transition ease-out duration-600 delay-[250ms]"
+                             x-transition:enter-start="opacity-0 transform translate-y-3"
+                             x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                Register As
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="relative">
+                                    <input type="radio" 
+                                           name="role" 
+                                           value="user" 
+                                           x-model="role"
+                                           @change="updateRole('user')"
+                                           {{ old('role', 'user') == 'user' ? 'checked' : '' }}
+                                           class="sr-only peer">
+                                    <div class="flex items-center justify-center px-4 py-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-primary-500 peer-checked:bg-primary-50 hover:bg-gray-50 transition-all">
+                                        <div class="text-center">
+                                            <svg class="h-6 w-6 mx-auto mb-1 text-gray-400 peer-checked:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            </svg>
+                                            <span class="text-sm font-medium text-gray-700 peer-checked:text-primary-700">Client</span>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="radio" 
+                                           name="role" 
+                                           value="vet" 
+                                           x-model="role"
+                                           @change="updateRole('vet')"
+                                           {{ old('role') == 'vet' ? 'checked' : '' }}
+                                           class="sr-only peer">
+                                    <div class="flex items-center justify-center px-4 py-3 bg-white border-2 border-gray-200 rounded-lg cursor-pointer peer-checked:border-primary-500 peer-checked:bg-primary-50 hover:bg-gray-50 transition-all">
+                                        <div class="text-center">
+                                            <svg class="h-6 w-6 mx-auto mb-1 text-gray-400 peer-checked:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            <span class="text-sm font-medium text-gray-700 peer-checked:text-primary-700">Veterinarian</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            @error('role')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Vet-specific fields -->
+                        <div x-show="showVetFields" 
+                             x-transition:enter="transition ease-out duration-400"
+                             x-transition:enter-start="opacity-0 transform translate-y-2 scale-98"
+                             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-300"
+                             x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 transform -translate-y-2 scale-98"
+                             class="space-y-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            
+                            <div class="flex items-center mb-4">
+                                <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span class="text-sm font-medium text-blue-800">Additional Information Required</span>
+                            </div>
+
+                            <!-- License Number -->
+                            <div>
+                                <label for="license_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Veterinary License Number
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <input id="license_number" 
+                                           name="license_number" 
+                                           type="text" 
+                                           value="{{ old('license_number') }}"
+                                           :required="showVetFields"
+                                           class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors sm:text-sm @error('license_number') border-red-300 @enderror"
+                                           placeholder="Enter your veterinary license number">
+                                </div>
+                                @error('license_number')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Clinic Name -->
+                            <div>
+                                <label for="clinic_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Clinic Name
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                    </div>
+                                    <input id="clinic_name" 
+                                           name="clinic_name" 
+                                           type="text" 
+                                           value="{{ old('clinic_name') }}"
+                                           :required="showVetFields"
+                                           class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors sm:text-sm @error('clinic_name') border-red-300 @enderror"
+                                           placeholder="Enter your clinic name">
+                                </div>
+                                @error('clinic_name')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="flex items-start"
+                             x-show="formVisible"
+                             x-transition:enter="transition ease-out duration-600 delay-[300ms]"
+                             x-transition:enter-start="opacity-0 transform translate-y-3"
+                             x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <div class="flex items-center h-5">
+                                <input id="terms" 
+                                       name="terms" 
+                                       type="checkbox" 
+                                       required
+                                       {{ old('terms') ? 'checked' : '' }}
+                                       class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="terms" class="text-gray-700">
+                                    I agree to the 
+                                    <a href="#" class="font-medium text-primary-600 hover:text-primary-500">Terms and Conditions</a>
+                                    and 
+                                    <a href="#" class="font-medium text-primary-600 hover:text-primary-500">Privacy Policy</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" 
+                                x-show="formVisible"
+                                x-transition:enter="transition ease-out duration-600 delay-[350ms]"
+                                x-transition:enter-start="opacity-0 transform translate-y-4 scale-98"
+                                x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:scale-[1.01] active:scale-[0.99]">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="text-center"
+                 x-show="showElements"
+                 x-transition:enter="transition ease-out duration-500 delay-300"
+                 x-transition:enter-start="opacity-0 transform translate-y-2"
+                 x-transition:enter-end="opacity-100 transform translate-y-0">
+                <p class="text-xs text-gray-500">
+                    By creating an account, you agree to our terms of service and privacy policy.
+                </p>
+            </div>
+        </div>
+    </div>
 </body>
-
-<style>
-        /* Your provided styles below... */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #f9fafb;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .login-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .login-title {
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 0.5rem;
-        }
-
-        .login-subtitle {
-            color: #6b7280;
-            font-size: 0.875rem;
-        }
-
-        .login-subtitle a {
-            color: #4f46e5;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .login-subtitle a:hover {
-            color: #3730a3;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            padding-left: 2.5rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .form-input.error {
-            border-color: #dc2626;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1.25rem;
-            height: 1.25rem;
-            color: #9ca3af;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: #9ca3af;
-            padding: 0;
-        }
-
-        .password-toggle:hover {
-            color: #6b7280;
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .checkbox-wrapper input[type="checkbox"] {
-            width: 1rem;
-            height: 1rem;
-            accent-color: #4f46e5;
-        }
-
-        .checkbox-label {
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-
-        .forgot-password {
-            font-size: 0.875rem;
-            color: #4f46e5;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .forgot-password:hover {
-            color: #3730a3;
-        }
-
-        .login-button {
-            width: 100%;
-            background-color: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 0.75rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.15s ease-in-out;
-            margin-bottom: 1.5rem;
-        }
-
-        .login-button:hover {
-            background-color: #3730a3;
-        }
-
-        .login-button:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-        }
-
-        .error-message {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-        }
-
-        .error-list {
-            list-style: disc;
-            margin-left: 1.25rem;
-        }
-
-        .divider {
-            position: relative;
-            margin: 1.5rem 0;
-            text-align: center;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background-color: #e5e7eb;
-        }
-
-        .divider span {
-            background-color: white;
-            color: #6b7280;
-            font-size: 0.875rem;
-            padding: 0 1rem;
-        }
-
-        .social-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-        }
-
-        .social-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background-color: white;
-            color: #6b7280;
-            text-decoration: none;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: background-color 0.15s ease-in-out;
-        }
-
-        .social-button:hover {
-            background-color: #f9fafb;
-        }
-
-        /* Toggle badges styling */
-        .toggle-group {
-            display: flex;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            overflow: hidden;
-            cursor: pointer;
-            user-select: none;
-            margin-bottom: 1.5rem;
-            height: 44px; /* similar height to inputs */
-        }
-
-        .toggle-group label {
-            flex: 1;
-            text-align: center;
-            line-height: 44px;
-            font-weight: 500;
-            color: #6b7280;
-            background-color: white;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .toggle-group input[type="radio"] {
-            display: none;
-        }
-
-        .toggle-group input[type="radio"]:checked + label {
-            background-color: #4f46e5;
-            color: white;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 1.5rem;
-            }
-            
-            .social-buttons {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+</html>
