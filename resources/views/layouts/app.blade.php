@@ -44,15 +44,7 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-
-            @auth
-                @if (auth()->user()->role === 'user')
-                    @include('layouts.user_navigation')
-                @else
-                    @include('layouts.navigation')
-                @endif
-            @endauth
-
+                @include('layouts.navigation')
             <!-- Page Heading -->
             @isset($header)
                 <header class="bg-white shadow">

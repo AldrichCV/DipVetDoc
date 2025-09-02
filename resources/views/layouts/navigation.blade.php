@@ -9,88 +9,69 @@
                     </a>
                 </div>
 
+              <!-- Desktop Links -->
                 <div class="hidden space-x-1 sm:-my-px sm:ms-10 sm:flex">
+                    <!-- Dashboard / Home -->
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" 
                         class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50">
-          
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
                         </svg>
-                        {{ __('Dashboard') }}
+                        {{ auth()->user()->role === 'user' ? __('Home') : __('Dashboard') }}
                     </x-nav-link>
 
+                    <!-- Admin-only Links -->
                     @if(Auth::user()->role === 'admin')
-                        <x-nav-link :href="route('users')" :active="request()->routeIs('users')"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50">
-
+                        <x-nav-link :href="route('users')" :active="request()->routeIs('users')" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-50">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                             </svg>
                             {{ __('Users') }}
                         </x-nav-link>
-                        
-                        <x-nav-link :href="route('vet_team')" :active="request()->routeIs('vet_team')"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50">
 
+                        <x-nav-link :href="route('vet_team')" :active="request()->routeIs('vet_team')" class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-50">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                             </svg>
                             {{ __('Veterinarians') }}
-
                             @if(!empty($pendingCount) && $pendingCount > 0)
                                 <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse shadow-lg">
                                     {{ $pendingCount }}
                                 </span>
                             @endif
                         </x-nav-link>
-
-                        <x-nav-link :href="route('pets')" :active="request()->routeIs('pets')"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50">
-             
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                            </svg>
-                            {{ __('Pets') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50">
-                       
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            {{ __('Appointments') }}
-
-                            @if(!empty($pendingAppointmentCount) && $pendingAppointmentCount > 0)
-                                 Enhanced notification badge with animation 
-                                <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse shadow-lg">
-                                    {{ $pendingAppointmentCount }}
-                                </span>
-                            @endif
-                        </x-nav-link>
                     @endif
 
+                    <!-- Pets / My Pets (everyone) -->
+                    <x-nav-link :href="auth()->user()->role === 'user' ? route('my_pets') : route('pets')" 
+                        :active="request()->routeIs(auth()->user()->role === 'user' ? 'my_pets' : 'pets')" 
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-50">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        {{ auth()->user()->role === 'user' ? __('My Pets') : __('Pets') }}
+                    </x-nav-link>
+
+                    <!-- Appointments / My Appointments -->
+                    <x-nav-link :href="auth()->user()->role === 'user' ? route('my_appointments.index') : route('appointments')" 
+                        :active="request()->routeIs(auth()->user()->role === 'user' ? 'my_appointments.index' : 'appointments')" 
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-50">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ auth()->user()->role === 'user' ? __('My Appointments') : __('Appointments') }}
+                        @if(auth()->user()->role !== 'user' && !empty($pendingAppointmentCount) && $pendingAppointmentCount > 0)
+                            <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse shadow-lg">
+                                {{ $pendingAppointmentCount }}
+                            </span>
+                        @endif
+                    </x-nav-link>
+
+                    <!-- Vet-only Links -->
                     @if(Auth::user()->role === 'vet')
-                        <x-nav-link :href="route('appointments')" :active="request()->routeIs('appointments')"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50">
-                         
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            {{ __('Appointments') }}
-
-                            @if(!empty($pendingAppointmentCount) && $pendingAppointmentCount > 0)
-                               
-                                <span class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse shadow-lg">
-                                    {{ $pendingAppointmentCount }}
-                                </span>
-                            @endif
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')"
-                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50">
-                            
+                        <x-nav-link :href="route('consultations.index')" :active="request()->routeIs('consultations.index')" 
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg hover:bg-gray-50">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
@@ -99,7 +80,6 @@
                     @endif
                 </div>
             </div>
- 
          
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
