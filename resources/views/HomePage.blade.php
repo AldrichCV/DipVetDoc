@@ -229,7 +229,7 @@
                 <div class="relative animate-on-scroll" 
                      x-intersect.once="$el.classList.add('animate-fade-in-right'); $el.classList.remove('animate-on-scroll')">
                     <div class="relative z-10">
-                        <img src="dipvetAssets/images/petIllustration.png?height=500&width=600" 
+                        <img src="dipvetAssets/images/dipvetIllustration.png?height=500&width=600" 
                              alt="Veterinary Care" 
                              class="w-full h-auto rounded-2xl shadow-2xl">
                     </div>

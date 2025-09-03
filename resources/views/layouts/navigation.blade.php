@@ -2,19 +2,18 @@
     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center space-x-4">
-                <button @click="$dispatch('toggle-sidebar')" class="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 lg:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
+                       
+            <!-- Toggle Button -->
+            <button @click="sidebarExpanded = !sidebarExpanded" 
+                    class="hidden lg:block p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-                <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200">
-                    <img src="{{ asset('dipvetAssets/images/vetlogo1.png') }}" alt="Logo" class="h-10 w-auto" />
-                    <div class="hidden sm:block">
-                        <span class="text-xl font-bold text-blue-600">DipVetDoc</span>
-                        <p class="text-xs text-gray-500 -mt-1">Veterinary Management</p>
-                    </div>
-                </a>
+                <!-- Hamburger Icon -->
+                <x-heroicon-o-bars-3 x-show="!sidebarExpanded" class="w-5 h-5 text-gray-600" />
+
+                <!-- Close Icon -->
+                <x-heroicon-o-x-mark x-show="sidebarExpanded" class="w-5 h-5 text-gray-600" />
+            </button>
+
             </div>
             <div class="flex items-center space-x-4">
                 <div class="hidden md:block relative">
@@ -25,13 +24,22 @@
                     </div>
                     <input type="text" placeholder="Search..." class="block w-64 pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors duration-200">
                 </div>
-                <div class="relative">
+               <div class="relative">
                     <button class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                        <!-- Bell Icon -->
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM10.07 2.82l3.93 3.93-3.93 3.93-3.93-3.93 3.93-3.93z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 
+                                    6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 
+                                    6.165 6 8.388 6 11v3.159c0 .538-.214 
+                                    1.055-.595 1.436L4 17h5m6 0v1a3 3 0 
+                                    11-6 0v-1m6 0H9" />
                         </svg>
+
+                        <!-- Notification Badge -->
                         @if((!empty($pendingCount) && $pendingCount > 0) || (!empty($pendingAppointmentCount) && $pendingAppointmentCount > 0))
-                            <span class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                            <span class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs 
+                                        rounded-full flex items-center justify-center animate-pulse">
                                 {{ ($pendingCount ?? 0) + ($pendingAppointmentCount ?? 0) }}
                             </span>
                         @endif
@@ -103,3 +111,4 @@
         </div>
     </div>
 </nav>
+

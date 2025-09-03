@@ -29,22 +29,28 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 flex">
+    <div x-data="{ sidebarExpanded: true }" class="flex h-screen bg-gray-50">
 
-    <!-- Sidebar (fixed) -->
+    <!-- Sidebar -->
     @auth
-    <aside class="bg-white shadow-lg border-r border-gray-200 w-64 h-screen fixed flex flex-col">
+    <aside 
+        :class="sidebarExpanded ? 'w-64' : 'w-16'" 
+        class="bg-white shadow-lg border-r border-gray-200 h-screen fixed flex flex-col transition-all duration-300 ease-in-out">
         @include('layouts.sidebar')
     </aside>
     @endauth
 
+    <!-- Main content (Navbar + Page content) -->
+    <div 
+        :class="sidebarExpanded ? 'ml-64' : 'ml-16'" 
+        class="flex-1 flex flex-col h-screen overflow-auto transition-all duration-300 ease-in-out">
 
-    <!-- Main content (scrollable) -->
-    <div class="flex-1 flex flex-col ml-64 h-screen overflow-auto">
-     @auth    
-    @include('layouts.navigation')
-@endauth
-        @isset($header)
+        @auth    
+            @include('layouts.navigation')
+        @endauth
+
+
+         @isset($header)
             <header class="bg-white shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
@@ -52,14 +58,17 @@
             </header>
         @endisset
 
-        <main class="flex-1 p-4">
+        <!-- Your page content -->
+        <main class="p-6">
             {{ $slot }}
         </main>
     </div>
-
 </div>
 
 
+    </div>
+
+</div>
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
