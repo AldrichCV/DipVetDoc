@@ -43,9 +43,17 @@
 </footer>
 
 <!-- Scroll Top Button -->
-<a href="#" id="scroll-top" class="fixed bottom-6 right-6 w-12 h-12 flex items-center justify-center bg-white text-[#1E88E5] rounded-full shadow-lg hover:bg-gray-200 transition">
-  <i class="bi bi-arrow-up-short text-2xl"></i>
+<!-- Font Awesome (put in <head> if not already added) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Scroll Top Button -->
+<a href="#" id="scroll-top" 
+   class="fixed bottom-6 right-6 w-12 h-12 flex items-center justify-center 
+          bg-white text-blue-600 rounded-full shadow-lg 
+          hover:bg-gray-100 transition">
+  <i class="fas fa-paw text-2xl"></i>
 </a>
+
 
 <!-- Scripts -->
 <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -58,37 +66,3 @@
 <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
 <script src="{{ asset('assets/js/main.js') }}"></script>
 
-<script>
-function editBooking(button) {
-    var eventId = button.getAttribute('data-event-id');
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', `/getBookingDetails/${eventId}`, true);
-
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            try {
-                var data = JSON.parse(xhr.responseText);
-
-                document.getElementById('EventID').value = data.EventID;
-                document.getElementById('CategoryID').value = data.CategoryID;
-                document.getElementById('contactNumber').value = data.contactNumber;
-                document.getElementById('date').value = data.date;
-                document.getElementById('time').value = data.time;
-                document.getElementById('packageID').value = data.packageID;
-
-                const editModal = new bootstrap.Modal(document.getElementById('editReservationModal'));
-                editModal.show();
-            } catch (e) {
-                console.error('Error parsing response JSON:', e);
-                alert('Failed to load booking details.');
-            }
-        } else {
-            console.error('Failed to fetch booking details. HTTP Status:', xhr.status);
-            alert('An error occurred while fetching booking details.');
-        }
-    };
-
-    xhr.send();
-}
-</script>

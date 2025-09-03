@@ -1,143 +1,610 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Appointments') }}
-        </h2>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" x-data="{ showNewAppointmentModal: false }">
+            <h2 class="font-bold text-2xl text-gray-900 leading-tight">
+                {{ __('Pet Appointments') }}
+            </h2>
+            @if(auth()->user()->role !== 'admin')
+                <button 
+                    @click="showNewAppointmentModal = true"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    New Appointment
+                </button>
+
+                 {{-- Moved new appointment modal inside x-slot for proper Alpine.js scope --}}
+                <div x-show="showNewAppointmentModal" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
+                     style="display: none;"
+                     @keydown.escape="showNewAppointmentModal = false">
+                    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto" 
+                         @click.away="showNewAppointmentModal = false"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-90 translate-y-4"
+                         x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 transform scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 transform scale-90 translate-y-4">
+                        
+                        <div class="flex items-center justify-between p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-2xl">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-xl font-semibold">Schedule New Appointment</h2>
+                            </div>
+                            <button @click="showNewAppointmentModal = false" 
+                                    class="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2 transition-all duration-200">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form method="POST" action="{{ route('my_appointments.store') }}" class="p-6">
+                            @csrf
+
+                            <div class="space-y-8">
+                                <div>
+                                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                        Pet Information
+                                    </h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Pet Name *</label>
+                                            <input type="text" name="name" 
+                                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                                   required placeholder="Enter pet's name">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Species *</label>
+                                            <select name="species" 
+                                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                                    required>
+                                                <option value="">-- Select Species --</option>
+                                                <optgroup label="Companion Animals">
+                                                    <option value="Dog">Dog</option>
+                                                    <option value="Cat">Cat</option>
+                                                    <option value="Rabbit">Rabbit</option>
+                                                    <option value="Guinea Pig">Guinea Pig</option>
+                                                    <option value="Hamster">Hamster</option>
+                                                    <option value="Ferret">Ferret</option>
+                                                    <option value="Bird">Bird</option>
+                                                    <option value="Reptile">Reptile</option>
+                                                    <option value="Fish">Fish</option>
+                                                </optgroup>
+                                                <optgroup label="Livestock">
+                                                    <option value="Cattle">Cattle</option>
+                                                    <option value="Horse">Horse</option>
+                                                    <option value="Pig">Pig</option>
+                                                    <option value="Goat">Goat</option>
+                                                    <option value="Sheep">Sheep</option>
+                                                    <option value="Chicken">Chicken</option>
+                                                    <option value="Duck">Duck</option>
+                                                    <option value="Turkey">Turkey</option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Breed</label>
+                                            <input type="text" name="breed" 
+                                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                   placeholder="Enter breed (optional)">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Sex *</label>
+                                            <select name="sex" 
+                                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                                    required>
+                                                <option value="">-- Select Sex --</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                                            <input 
+                                                type="date" 
+                                                name="date_of_birth" 
+                                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                :max="new Date().toISOString().split('T')[0]"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        Appointment Details
+                                    </h4>
+                                    
+                                    <div x-data="timeValidation()" x-init="initializeNewAppointment()">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Date *</label>
+                                                <input 
+                                                    type="date" 
+                                                    name="appointment_date" 
+                                                    x-model="appointmentDate"
+                                                    @change="updateTimeRange"
+                                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                                    required
+                                                    :min="new Date().toISOString().split('T')[0]"
+                                                >
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Time *</label>
+                                                <input 
+                                                    type="time" 
+                                                    name="appointment_time" 
+                                                    x-model="appointmentTime"
+                                                    :min="minTime"
+                                                    :max="maxTime"
+                                                    @input="validateTime($event)"
+                                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                                    required
+                                                >
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Service *</label>
+                                                <select name="reason" 
+                                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                                        required>
+                                                    <option value="">-- Select Service --</option>
+                                                    <option value="1">Check-up</option>
+                                                    <option value="2">Deworming</option>
+                                                    <option value="3">Home Service</option>
+                                                    <option value="4">Laboratories</option>
+                                                    <option value="5">Non-Surgical Procedures</option>
+                                                    <option value="6">Surgical Procedures</option>
+                                                    <option value="7">Therapies</option>
+                                                    <option value="8">Tick & Flea Preventive</option>
+                                                    <option value="9">Vaccinations</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                                            <textarea name="notes" rows="4" 
+                                                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                                      placeholder="Add any additional notes, special instructions, or concerns about your pet..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200 bg-gray-50/50 px-6 py-4 rounded-b-2xl">
+                                <button type="button" @click="showNewAppointmentModal = false"
+                                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-all duration-200 hover:shadow-sm">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                    <span class="flex items-center justify-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        Schedule Appointment
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @endif
+        </div>
     </x-slot>
 
-<div x-data="appointmentsComponent()" class="py-12 space-y-8">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-12">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-                <div class="overflow-x-auto w-full mb-6">
-                    <table class="w-full border border-gray-200 table-auto">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="px-4 py-2 border text-left">Pet Name</th>
+    <div x-data="appointmentsComponent()" class="py-6 space-y-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <input 
+                                type="text" 
+                                x-model="searchTerm"
+                                placeholder="Search appointments..."
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            >
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <select x-model="statusFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <select x-model="serviceFilter" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">All Services</option>
+                            <option value="1">Check-up</option>
+                            <option value="2">Deworming</option>
+                            <option value="3">Home Service</option>
+                            <option value="4">Laboratories</option>
+                            <option value="5">Non-Surgical Procedures</option>
+                            <option value="6">Surgical Procedures</option>
+                            <option value="7">Therapies</option>
+                            <option value="8">Tick & Flea Preventive</option>
+                            <option value="9">Vaccinations</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="hidden lg:block overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Pet</th>
                                 @if(auth()->user()->role === 'admin')
-                                    <th class="px-4 py-2 border text-left">Owner</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-900">Owner</th>
                                 @endif
-                                <th class="px-4 py-2 border text-left">Schedule</th>
-                                <th class="px-4 py-2 border text-left">Service</th>
-                                <th class="px-4 py-2 border text-left">Status</th>
-                                <th class="px-4 py-2 border text-left">Actions</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Schedule</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Service</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Status</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($appointments as $appointment)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-2 border">{{ $appointment->pet_name }}</td>
+                            <template x-for="appointment in filteredAppointments" :key="appointment.id">
+                                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                    <td class="py-4 px-4">
+                                        <div class="font-medium text-gray-900" x-text="appointment.pet_name"></div>
+                                    </td>
                                     @if(auth()->user()->role === 'admin')
-                                        <td class="px-4 py-2 border">{{ $appointment->owner_name }}</td>
+                                        <td class="py-4 px-4">
+                                            <div class="text-gray-700" x-text="appointment.owner_name"></div>
+                                        </td>
                                     @endif
-                                    <td class="px-4 py-2 border">
-                                        {{ \Carbon\Carbon::parse($appointment->appointment_date . ' ' . $appointment->appointment_time)->format('F j, Y \a\t h:i A') }}
+                                    <td class="py-4 px-4">
+                                        <div class="text-gray-700" x-text="formatDateTime(appointment.appointment_date, appointment.appointment_time)"></div>
                                     </td>
-                                    <td class="px-4 py-2 border">{{ $appointment->reason_name }}</td>
-                                    <td class="px-4 py-2 border">{{ ucfirst($appointment->status) }}</td>
-                                    <td class="px-4 py-2 border space-x-2">
-                                        <button
-                                            @click="editAppointment({{ json_encode($appointment) }})"
-                                            class="text-blue-600 hover:underline">
-                                            Edit
-                                        </button>
-                                        <form action="{{ route('appointments.destroy', $appointment->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:underline">Remove</button>
-                                        </form>
+                                    <td class="py-4 px-4">
+                                        <div class="text-gray-700" x-text="appointment.reason_name"></div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                                              :class="getStatusClass(appointment.status)"
+                                              x-text="appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)">
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <button
+                                                @click="editAppointment(appointment)"
+                                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                                Edit
+                                            </button>
+                                            <form :action="`/appointments/${appointment.id}`" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to remove this appointment?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                    Remove
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="px-4 py-2 text-center border">No appointments found.</td>
-                                </tr>
-                            @endforelse
+                            </template>
                         </tbody>
                     </table>
                 </div>
+
+                <div class="lg:hidden space-y-4">
+                    <template x-for="appointment in filteredAppointments" :key="appointment.id">
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-gray-900" x-text="appointment.pet_name"></h3>
+                                    @if(auth()->user()->role === 'admin')
+                                        <p class="text-sm text-gray-600" x-text="'Owner: ' + appointment.owner_name"></p>
+                                    @endif
+                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                                      :class="getStatusClass(appointment.status)"
+                                      x-text="appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)">
+                                </span>
+                            </div>
+                            
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span x-text="formatDateTime(appointment.appointment_date, appointment.appointment_time)"></span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-600">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span x-text="appointment.reason_name"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button
+                                    @click="editAppointment(appointment)"
+                                    class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    Edit
+                                </button>
+                                <form :action="`/appointments/${appointment.id}`" method="POST" class="flex-1" onsubmit="return confirm('Are you sure you want to remove this appointment?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-md transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                        Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="filteredAppointments.length === 0" class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No appointments found</h3>
+                    <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+                </div>
             </div>
         </div>
+
+        <div x-show="showModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+             style="display: none;">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" 
+                 @click.away="showModal = false"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform scale-95"
+                 x-transition:enter-end="opacity-100 transform scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-95">
+                
+                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Edit Appointment</h2>
+                    <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form :action="`/appointments/${selectedAppointment.id}`" method="POST" class="p-6">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pet Name</label>
+                            <input type="text" name="pet_name" x-bind:value="selectedAppointment.pet_name"
+                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed" readonly>
+                        </div>
+
+                        <div x-data="timeValidation()" x-init="initializeTime(selectedAppointment)">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
+                                    <input 
+                                        type="date" 
+                                        name="appointment_date" 
+                                        x-model="appointmentDate"
+                                        @change="updateTimeRange"
+                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                        required
+                                        :min="new Date().toISOString().split('T')[0]"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Time</label>
+                                    <input 
+                                        type="time" 
+                                        name="appointment_time" 
+                                        x-model="appointmentTime"
+                                        :min="minTime"
+                                        :max="maxTime"
+                                        @input="validateTime($event)"
+                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                        required
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Service</label>
+                            <select name="reason" x-model="selectedAppointment.reason"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                <option value="">-- Select Service --</option>
+                                <option value="1">Check-up</option>
+                                <option value="2">Deworming</option>
+                                <option value="3">Home Service</option>
+                                <option value="4">Laboratories</option>
+                                <option value="5">Non-Surgical Procedures</option>
+                                <option value="6">Surgical Procedures</option>
+                                <option value="7">Therapies</option>
+                                <option value="8">Tick & Flea Preventive</option>
+                                <option value="9">Vaccinations</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                            <textarea name="notes" rows="4" x-model="selectedAppointment.notes"
+                                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                      placeholder="Add any additional notes or special instructions..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200">
+                        <button type="button" @click="showModal = false"
+                                class="flex-1 px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="flex-1 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Removed new appointment modal from here since it's now in x-slot --}}
     </div>
 
-<!-- Modal -->
-<div x-show="showModal" x-transition
-     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-     style="display: none;">
-    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg" @click.away="showModal = false">
-        <h2 class="text-lg font-semibold mb-4">Edit Appointment</h2>
+    <script>
+        function appointmentsComponent() {
+            return {
+                showModal: false,
+                selectedAppointment: {},
+                searchTerm: '',
+                statusFilter: '',
+                serviceFilter: '',
+                appointments: @json($appointments),
 
-        <form :action="`/appointments/${selectedAppointment.id}`" method="POST">
-            @csrf
-            @method('PUT')
+                get filteredAppointments() {
+                    return this.appointments.filter(appointment => {
+                        const matchesSearch = !this.searchTerm || 
+                            appointment.pet_name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                            appointment.owner_name?.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                            appointment.reason_name.toLowerCase().includes(this.searchTerm.toLowerCase());
+                        
+                        const matchesStatus = !this.statusFilter || appointment.status === this.statusFilter;
+                        const matchesService = !this.serviceFilter || appointment.reason == this.serviceFilter;
+                        
+                        return matchesSearch && matchesStatus && matchesService;
+                    });
+                },
 
-            <div class="mb-4">
-                <label class="block mb-1 text-sm">Pet Name</label>
-                <input type="text" name="pet_name" x-bind:value="selectedAppointment.pet_name"
-                       class="w-full border px-3 py-2 rounded bg-gray-100 cursor-not-allowed" readonly>
-            </div>
+                editAppointment(appointment) {
+                    this.selectedAppointment = { ...appointment };
+                    this.showModal = true;
+                },
 
-           
-            <div 
-            x-data="{
+                formatDateTime(date, time) {
+                    const dateTime = new Date(`${date} ${time}`);
+                    return dateTime.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                },
+
+                getStatusClass(status) {
+                    const classes = {
+                        'pending': 'bg-yellow-100 text-yellow-800',
+                        'confirmed': 'bg-blue-100 text-blue-800',
+                        'completed': 'bg-green-100 text-green-800',
+                        'cancelled': 'bg-red-100 text-red-800'
+                    };
+                    return classes[status] || 'bg-gray-100 text-gray-800';
+                }
+            };
+        }
+
+        function timeValidation() {
+            return {
                 appointmentDate: '',
                 appointmentTime: '',
-                minTime: '',
-                maxTime: '',
+                minTime: '08:00',
+                maxTime: '17:30',
+
+                initializeTime(appointment) {
+                    if (appointment) {
+                        this.appointmentDate = appointment.appointment_date;
+                        this.appointmentTime = appointment.appointment_time;
+                        this.updateTimeRange();
+                    }
+                },
+
+                initializeNewAppointment() {
+                    this.appointmentDate = '';
+                    this.appointmentTime = '08:00';
+                    this.minTime = '08:00';
+                    this.maxTime = '17:30';
+                },
 
                 updateTimeRange() {
                     if (!this.appointmentDate) return;
-                    const day = new Date(this.appointmentDate).getDay(); // 0=Sun, 6=Sat
+                    const day = new Date(this.appointmentDate).getDay();
 
                     if (day === 0) {
-                        // Sunday: 9:00 AM - 4:30 PM (last slot 30 mins before 5:00 PM)
                         this.minTime = '09:00';
                         this.maxTime = '16:30';
-                        this.appointmentTime = '09:00';
                     } else {
-                        // Mon-Sat: 8:00 AM - 5:30 PM (last slot 30 mins before 6:00 PM)
                         this.minTime = '08:00';
                         this.maxTime = '17:30';
-                        this.appointmentTime = '08:00';
+                    }
+
+                    if (!this.appointmentTime || this.appointmentTime < this.minTime || this.appointmentTime > this.maxTime) {
+                        this.appointmentTime = this.minTime;
                     }
                 },
 
                 validateTime(event) {
                     const time = event.target.value;
 
-                    // Lunch break restriction
                     if (time >= '12:00' && time <= '12:59') {
                         this.appointmentTime = '13:00';
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Lunch Break',
-                            text: 'Appointments cannot be scheduled between 12:00 PM and 12:59 PM.',
-                            confirmButtonText: 'OK'
-                        });
+                        this.showAlert('warning', 'Lunch Break', 'Appointments cannot be scheduled between 12:00 PM and 12:59 PM.');
                         return;
                     }
 
-                    // Before opening
                     if (time < this.minTime) {
                         this.appointmentTime = this.minTime;
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Too Early',
-                            text: `Opening time is ${this.formatTime(this.minTime)}.`,
-                            confirmButtonText: 'OK'
-                        });
+                        this.showAlert('error', 'Too Early', `Opening time is ${this.formatTime(this.minTime)}.`);
                         return;
                     }
 
-                    // After last slot
                     if (time > this.maxTime) {
                         this.appointmentTime = this.maxTime;
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Too Late',
-                            text: `Last available appointment is at ${this.formatTime(this.maxTime)}.`,
-                            confirmButtonText: 'OK'
-                        });
+                        this.showAlert('error', 'Too Late', `Last available appointment is at ${this.formatTime(this.maxTime)}.`);
                         return;
                     }
                 },
@@ -147,343 +614,22 @@
                     const ampm = hour >= 12 ? 'PM' : 'AM';
                     hour = hour % 12 || 12;
                     return `${hour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+                },
+
+                showAlert(type, title, text) {
+                    // Fallback to browser alert if SweetAlert is not available
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: type,
+                            title: title,
+                            text: text,
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        alert(`${title}: ${text}`);
+                    }
                 }
-            }" 
-            x-init="minTime='08:00'; maxTime='17:30'; appointmentTime='08:00'">
-
-                <!-- Appointment Date -->
-                <div>
-                    <label class="block text-sm font-medium mb-1">Appointment Date</label>
-                    <input 
-                        type="date" 
-                        name="appointment_date" 
-                        x-model="appointmentDate"
-                        @change="updateTimeRange"
-                        class="w-full border border-gray-300 rounded px-3 py-2" 
-                        required
-                        :min="new Date().toISOString().split('T')[0]"
-                    >
-                </div>
-
-                <!-- Appointment Time -->
-                <div>
-                    <label class="block text-sm font-medium mb-1">Appointment Time</label>
-                    <input 
-                        type="time" 
-                        name="appointment_time" 
-                        x-model="appointmentTime"
-                        :min="minTime"
-                        :max="maxTime"
-                        @input="validateTime($event)"
-                        class="w-full border border-gray-300 rounded px-3 py-2" 
-                        required
-                    >
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="block mb-1 text-sm">Service</label>
-                <select name="reason" x-model="selectedAppointment.reason"
-                        class="w-full border border-gray-300 rounded px-3 py-2" required>
-                    <option value="">-- Select --</option>
-                    <option value="1">Check-up</option>
-                    <option value="2">Deworming</option>
-                    <option value="3">Home Service</option>
-                    <option value="4">Laboratories</option>
-                    <option value="5">Non-Surgical Procedures</option>
-                    <option value="6">Surgical Procedures</option>
-                    <option value="7">Therapies</option>
-                    <option value="8">Tick & Flea Preventive</option>
-                    <option value="9">Vaccinations</option>
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Notes (Optional)</label>
-                <textarea name="notes" rows="3" x-model="selectedAppointment.notes"
-                          class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
-            </div>
-
-            <div class="flex justify-end space-x-2">
-                <button type="button" @click="showModal = false"
-                        class="px-4 py-2 border rounded text-gray-600">
-                    Cancel
-                </button>
-                <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-    function appointmentsComponent() {
-        return {
-            showModal: false,
-            selectedAppointment: {},
-            editAppointment(appointment) {
-                this.selectedAppointment = appointment;
-                this.showModal = true;
-            }
-        };
-    }
-</script>
-
-@if(auth()->user()->role !== 'admin')
-<div 
-    x-data="{
-        showNewAppointment: false,
-        appointmentDate: '',
-        appointmentTime: '',
-        minTime: '',
-        maxTime: '',
-        updateTimeRange() {
-            if (!this.appointmentDate) return;
-            const date = new Date(this.appointmentDate);
-            const day = date.getDay(); // 0 = Sunday, 1 = Monday, ... 6 = Saturday
-            if (day === 0) { 
-                this.minTime = '09:00';
-                this.maxTime = '17:00';
-            } else {
-                this.minTime = '08:00';
-                this.maxTime = '18:00';
-            }
-            if (this.appointmentTime && 
-               (this.appointmentTime < this.minTime || this.appointmentTime > this.maxTime)) {
-                this.appointmentTime = '';
-            }
-        },
-        blockLunchHour(event) {
-            if (this.appointmentTime >= '12:00' && this.appointmentTime <= '12:59') {
-                alert('Appointments are not allowed from 12:00 PM to 12:59 PM.');
-                this.appointmentTime = '';
-                event.target.value = '';
-            }
+            };
         }
-    }" 
-    class="max-w-7xl mx-auto sm:px-6 lg:px-12 pb-20"
->
-    <!-- Toggle Button -->
-    <div class="mb-4">
-        <button 
-            @click="showNewAppointment = !showNewAppointment"
-            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-            <span x-show="!showNewAppointment">+ New Appointment</span>
-            <span x-show="showNewAppointment">Hide Form</span>
-        </button>
-    </div>
-
-    <!-- Form -->
-    <div x-show="showNewAppointment" x-transition style="display: none;">
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
-                <h3 class="text-lg font-semibold mb-4">New Appointment</h3>
-
-                <form method="POST" action="{{ route('my_appointments.store') }}">
-                    @csrf
-
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold mb-2">Pet Details</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Pet Name</label>
-                                <input type="text" name="name" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                            </div>
-                          <div>
-                            <label class="block text-sm font-medium mb-1">Species</label>
-                            <select name="species" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                                <option value="">-- Select Species --</option>
-                                <!-- Companion animals -->
-                                <option value="Dog">Dog</option>
-                                <option value="Cat">Cat</option>
-                                <option value="Rabbit">Rabbit</option>
-                                <option value="Guinea Pig">Guinea Pig</option>
-                                <option value="Hamster">Hamster</option>
-                                <option value="Ferret">Ferret</option>
-                                <option value="Bird">Bird</option>
-                                <option value="Reptile">Reptile</option>
-                                <option value="Fish">Fish</option>
-                                
-                                <!-- Livestock / Large animals -->
-                                <option value="Cattle">Cattle</option>
-                                <option value="Horse">Horse</option>
-                                <option value="Pig">Pig</option>
-                                <option value="Goat">Goat</option>
-                                <option value="Sheep">Sheep</option>
-                                <option value="Chicken">Chicken</option>
-                                <option value="Duck">Duck</option>
-                                <option value="Turkey">Turkey</option>
-                            </select>
-                        </div>
-
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Breed</label>
-                                <input type="text" name="breed" class="w-full border border-gray-300 rounded px-3 py-2">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Sex</label>
-                                <select name="sex" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                                    <option value="">-- Select --</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Date of Birth</label>
-                                <input 
-                                    type="date" 
-                                    name="date_of_birth" 
-                                    class="w-full border border-gray-300 rounded px-3 py-2"
-                                    :max="new Date().toISOString().split('T')[0]"
-                                >
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr class="my-6 border-t border-gray-300">
-
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold mb-2">Appointment Details</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                        <div 
-    x-data="{
-        appointmentDate: '',
-        appointmentTime: '',
-        minTime: '',
-        maxTime: '',
-
-        updateTimeRange() {
-            if (!this.appointmentDate) return;
-            const day = new Date(this.appointmentDate).getDay(); // 0=Sun, 6=Sat
-
-            if (day === 0) {
-                // Sunday: 9:00 AM - 4:30 PM (last slot 30 mins before 5:00 PM)
-                this.minTime = '09:00';
-                this.maxTime = '16:30';
-                this.appointmentTime = '09:00';
-            } else {
-                // Mon-Sat: 8:00 AM - 5:30 PM (last slot 30 mins before 6:00 PM)
-                this.minTime = '08:00';
-                this.maxTime = '17:30';
-                this.appointmentTime = '08:00';
-            }
-        },
-
-        validateTime(event) {
-            const time = event.target.value;
-
-            // Lunch break restriction
-            if (time >= '12:00' && time <= '12:59') {
-                this.appointmentTime = '13:00';
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Lunch Break',
-                    text: 'Appointments cannot be scheduled between 12:00 PM and 12:59 PM.',
-                    confirmButtonText: 'OK'
-                });
-                return;
-            }
-
-            // Before opening
-            if (time < this.minTime) {
-                this.appointmentTime = this.minTime;
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Too Early',
-                    text: `Opening time is ${this.formatTime(this.minTime)}.`,
-                    confirmButtonText: 'OK'
-                });
-                return;
-            }
-
-            // After last slot
-            if (time > this.maxTime) {
-                this.appointmentTime = this.maxTime;
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Too Late',
-                    text: `Last available appointment is at ${this.formatTime(this.maxTime)}.`,
-                    confirmButtonText: 'OK'
-                });
-                return;
-            }
-        },
-
-        formatTime(timeStr) {
-            let [hour, minute] = timeStr.split(':').map(Number);
-            const ampm = hour >= 12 ? 'PM' : 'AM';
-            hour = hour % 12 || 12;
-            return `${hour}:${minute.toString().padStart(2, '0')} ${ampm}`;
-        }
-    }" 
-    x-init="minTime='08:00'; maxTime='17:30'; appointmentTime='08:00'">
-
-    <!-- Appointment Date -->
-    <div>
-        <label class="block text-sm font-medium mb-1">Appointment Date</label>
-        <input 
-            type="date" 
-            name="appointment_date" 
-            x-model="appointmentDate"
-            @change="updateTimeRange"
-            class="w-full border border-gray-300 rounded px-3 py-2" 
-            required
-            :min="new Date().toISOString().split('T')[0]"
-        >
-    </div>
-
-    <!-- Appointment Time -->
-    <div>
-        <label class="block text-sm font-medium mb-1">Appointment Time</label>
-        <input 
-            type="time" 
-            name="appointment_time" 
-            x-model="appointmentTime"
-            :min="minTime"
-            :max="maxTime"
-            @input="validateTime($event)"
-            class="w-full border border-gray-300 rounded px-3 py-2" 
-            required
-        >
-    </div>
-</div>
-
-                            
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Service</label>
-                                <select name="reason" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                                    <option value="">-- Select --</option>
-                                    <option value="1">Check-up</option>
-                                    <option value="2">Deworming</option>
-                                    <option value="3">Home Service</option>
-                                    <option value="4">Laboratories</option>
-                                    <option value="5">Non-Surgical Procedures</option>
-                                    <option value="6">Surgical Procedures</option>
-                                    <option value="7">Therapies</option>
-                                    <option value="8">Tick & Flea Preventive</option>
-                                    <option value="9">Vaccinations</option>
-                                </select>
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <label class="block text-sm font-medium mb-1">Notes (Optional)</label>
-                                <textarea name="notes" rows="3" class="w-full border border-gray-300 rounded px-3 py-2"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                            Add Appointment
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
+    </script>
 </x-app-layout>
