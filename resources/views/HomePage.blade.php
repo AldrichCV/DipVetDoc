@@ -229,7 +229,7 @@
                 <div class="relative animate-on-scroll" 
                      x-intersect.once="$el.classList.add('animate-fade-in-right'); $el.classList.remove('animate-on-scroll')">
                     <div class="relative z-10">
-                        <img src="dipvetAssets/images/dipvetIllustration.png?height=500&width=600" 
+                        <img src="dipvetAssets/images/dipvetDraw.png?height=500&width=600" 
                              alt="Veterinary Care" 
                              class="w-full h-auto rounded-2xl shadow-2xl">
                     </div>
@@ -252,26 +252,32 @@
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @php
-                    $cards = [
-                        ['icon' => 'stethoscope', 'color' => 'from-blue-500 to-blue-600', 'title' => 'Health Checkups', 'desc' => 'Comprehensive health examinations to keep your pets in optimal condition with preventive care'],
-                        ['icon' => 'syringe', 'color' => 'from-blue-500 to-blue-600', 'title' => 'Vaccinations', 'desc' => 'Complete vaccination programs to protect your pets from diseases and maintain their immunity'],
-                        ['icon' => 'paw', 'color' => 'from-blue-500 to-blue-600', 'title' => 'Compassionate Care', 'desc' => 'We are a passionate team of veterinary professionals committed to providing compassionate, high-quality care for your pets.']
-                    ];
-                @endphp
+    @php
+        $cards = [
+            ['icon' => 'stethoscope', 'color' => 'from-blue-500 to-blue-600', 'title' => 'Health Checkups', 'desc' => 'Comprehensive health examinations to keep your pets in optimal condition with preventive care'],
+            ['icon' => 'syringe', 'color' => 'from-blue-500 to-blue-600', 'title' => 'Vaccinations', 'desc' => 'Complete vaccination programs to protect your pets from diseases and maintain their immunity'],
+            ['icon' => 'paw', 'color' => 'from-blue-500 to-blue-600', 'title' => 'Compassionate Care', 'desc' => 'We are a passionate team of veterinary professionals committed to providing compassionate, high-quality care for your pets.']
+        ];
+    @endphp
 
-                @foreach ($cards as $index => $card)
-                    <div class="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-on-scroll"
-                         x-intersect.once="setTimeout(() => { $el.classList.add('animate-scale-in', 'animate-delay-{{ ($index + 1) * 100 }}'); $el.classList.remove('animate-on-scroll'); }, {{ $index * 200 }})">
-                        <div class="w-16 h-16 bg-gradient-to-br {{ $card['color'] }} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 animate-on-scroll"
-                             x-intersect.once="setTimeout(() => { $el.classList.add('animate-bounce-in'); $el.classList.remove('animate-on-scroll'); }, {{ ($index * 200) + 300 }})">
-                            <i class="fas fa-{{ $card['icon'] }} text-white text-2xl"></i>
-                        </div>
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4">{{ $card['title'] }}</h3>
-                        <p class="text-gray-600 leading-relaxed">{{ $card['desc'] }}</p>
-                    </div>
-                @endforeach
+    @foreach ($cards as $index => $card)
+        <div class="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 animate-on-scroll"
+             x-intersect.once="setTimeout(() => { $el.classList.add('animate-scale-in', 'animate-delay-{{ ($index + 1) * 100 }}'); $el.classList.remove('animate-on-scroll'); }, {{ $index * 200 }})">
+
+            <!-- Icon + Title side by side -->
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-16 h-16 bg-gradient-to-br {{ $card['color'] }} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 animate-on-scroll"
+                     x-intersect.once="setTimeout(() => { $el.classList.add('animate-bounce-in'); $el.classList.remove('animate-on-scroll'); }, {{ ($index * 200) + 300 }})">
+                    <i class="fas fa-{{ $card['icon'] }} text-white text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">{{ $card['title'] }}</h3>
             </div>
+
+            <p class="text-gray-600 leading-relaxed">{{ $card['desc'] }}</p>
+        </div>
+    @endforeach
+</div>
+
         </div>
     </section>
     

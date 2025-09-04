@@ -4,9 +4,6 @@
             <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
                 {{ __('Consultations') }}
             </h2>
-            <div class="text-sm text-gray-600">
-                {{ $consultations->count() }} {{ Str::plural('consultation', $consultations->count()) }}
-            </div>
         </div>
     </x-slot>
 

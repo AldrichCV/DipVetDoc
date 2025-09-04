@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" x-data="{ showNewAppointmentModal: false }">
-            <h2 class="font-bold text-2xl text-gray-900 leading-tight">
+             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Pet Appointments') }}
             </h2>
             @if(auth()->user()->role !== 'admin')

@@ -12,7 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ConsultationController extends Controller
 {
-  public function index()
+ public function index()
 {
     $consultations = DB::table('user_appointments as ua')
         ->join('assigned_vet as av', 'ua.id', '=', 'av.appointment_id') 
@@ -41,10 +41,12 @@ class ConsultationController extends Controller
             'mc.created_at',
             DB::raw('TIMESTAMPDIFF(YEAR, pets.date_of_birth, CURDATE()) as pet_age')
         )
-        ->where('av.user_id', Auth::id())    // ✅ only pets assigned to this vet
+        ->when(auth()->user()->role !== 'admin', function ($query) {
+            return $query->where('av.user_id', Auth::id()); // only assigned vet
+        })
         ->orderBy('mc.created_at', 'desc')
         ->get()
-        ->groupBy('pet_id');                 // ✅ group consultations by pet
+        ->groupBy('pet_id'); // ✅ group consultations by pet
 
     return view('consultations', compact('consultations'));
 }

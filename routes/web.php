@@ -98,3 +98,5 @@ Route::resource('consultations', ConsultationController::class);
 Route::resource('medical', MedicalController::class);
 Route::get('consultations/{consultation}/download', [ConsultationController::class, 'download'])
     ->name('consultations.download');
+Route::get('/search', [AdminController::class, 'search'])->name('search');
+

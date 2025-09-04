@@ -167,6 +167,30 @@ class AdminController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function search(Request $request)
+{
+    $query = $request->input('q');
+
+    $pets = \App\Models\Pet::where('name', 'like', "%{$query}%")
+                ->orWhere('breed', 'like', "%{$query}%")
+                ->get();
+
+    $owners = \App\Models\User::where('role', 'user')
+                ->where('name', 'like', "%{$query}%")
+                ->get();
+
+    $vets = \App\Models\User::where('role', 'vet')
+                ->where('name', 'like', "%{$query}%")
+                ->get();
+
+    // Merge them into one collection
+    $results = $pets->concat($owners)->concat($vets);
+
+    return view('search_result', compact('query', 'results'));
+}
+
+
 }
 
 
