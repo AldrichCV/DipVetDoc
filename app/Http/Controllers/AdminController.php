@@ -93,12 +93,30 @@ class AdminController extends Controller
         // Decode JSON for assigned personnel
         $appointments->transform(function ($appointment) {
             $appointment->assigned_personnel = json_decode($appointment->assigned_personnel, true) ?? [];
+             $appointment->vet_name = $appointment->assigned_personnel[0]['name'] ?? null;
+             $appointment->specialization = $appointment->assigned_personnel[0]['specialization'] ?? 'General Practice';
             return $appointment;
         });
 
         return view('vet_appointments', compact('appointments'));
     }
 
+        // In VetController.php
+    public function getAvailableVets()
+    {
+        $vets = DB::table('users as u')
+            ->join('vet_profile as vp', 'vp.user_id', '=', 'u.id')
+            ->select(
+                'u.id',
+                'u.name',
+                'vp.specialization'
+            )
+            ->where('u.role', 'vet')
+            ->get();
+
+        return response()->json($vets);
+    }
+    
     public function veterinarians()
     {
         $pendingVets = DB::table('users as u')

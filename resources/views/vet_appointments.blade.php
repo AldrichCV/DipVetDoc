@@ -256,21 +256,33 @@
                                     <span class="text-gray-500 font-medium">Service:</span>
                                     <p class="text-gray-900 mt-1" x-text="appointment.reason_name"></p>
                                 </div>
+                                {{-- Added assigned vet display for mobile --}}
+                                <div class="col-span-2">
+                                    <span class="text-gray-500 font-medium">Assigned Vet:</span>
+                                    <div class="mt-1">
+                                        <template x-if="appointment.vet_name">
+                                            <button @click="showVetDetails(appointment)" 
+                                                    class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                                </svg>
+                                                <span x-text="appointment.vet_name"></span>
+                                            </button>
+                                        </template>
+                                        <template x-if="!appointment.vet_name">
+                                            <button @click="assignVet(appointment)" 
+                                                    class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                Assign Vet
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
 
-                            {{-- Mobile Actions --}}
-                            <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
-                                <button
-                                    @click="editAppointment(appointment)"
-                                    class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
-                                    Edit
-                                </button>
-                                <button
-                                    @click="deleteAppointment(appointment.id)"
-                                    class="flex-1 bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
-                                    Remove
-                                </button>
-                            </div>
+                            {{-- Removed mobile action buttons --}}
                         </div>
                     </div>
                 </template>
@@ -339,7 +351,9 @@
                                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Time</th>
                                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Service</th>
                                 <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
+                                {{-- Added Assigned Vet column --}}
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900">Assigned Vet</th>
+                                {{-- Removed Actions column header --}}
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -358,30 +372,34 @@
                                               x-text="appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)">
                                         </span>
                                     </td>
+                                    
+                                    {{-- Added assigned vet display with conditional rendering --}}
                                     <td class="px-6 py-4">
-                                        <div class="flex items-center gap-2">
-                                            <button
-                                                @click="editAppointment(appointment)"
-                                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors">
+                                        <template x-if="appointment.vet_name">
+                                            <button @click="showVetDetails(appointment)" 
+                                                    class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                                 </svg>
-                                                Edit
+                                                <span x-text="appointment.vet_name"></span>
                                             </button>
-                                            <button
-                                                @click="deleteAppointment(appointment.id)"
-                                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors">
+                                        </template>
+                                        <template x-if="!appointment.vet_name">
+                                            <button @click="assignVet(appointment)" 
+                                                    class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-800 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                 </svg>
-                                                Remove
+                                                Assign Vet
                                             </button>
-                                        </div>
+                                        </template>
                                     </td>
+                                    {{-- Removed Actions column data --}}
                                 </tr>
                             </template>
 
                             <tr x-show="filteredAppointments.length === 0">
+                                {{-- Updated colspan to account for removed Actions column --}}
                                 <td :colspan="@if(auth()->user()->role === 'admin') 7 @else 6 @endif" class="px-6 py-12 text-center">
                                     <div class="text-gray-400 mb-2">
                                         <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -398,7 +416,8 @@
             </div>
         </div>
 
-        <div x-show="showModal" 
+        {{-- Assign Vet Modal --}}
+        <div x-show="showAssignVetModal" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -407,8 +426,8 @@
              x-transition:leave-end="opacity-0"
              class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
              style="display: none;">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" 
-                 @click.away="showModal = false"
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto" 
+                 @click.away="closeAssignVetModal()"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 transform scale-95"
                  x-transition:enter-end="opacity-100 transform scale-100"
@@ -417,92 +436,105 @@
                  x-transition:leave-end="opacity-0 transform scale-95">
                 
                 <div class="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-900">Edit Appointment</h2>
-                    <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <h2 class="text-xl font-semibold text-gray-900">Assign Veterinarian</h2>
+                    <button @click="closeAssignVetModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
 
-                <form :action="`/appointments/${selectedAppointment.id}`" method="POST" class="p-6">
-                    @csrf
-                    @method('PUT')
+                <div class="p-6">
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600">Select a veterinarian for:</p>
+                        <p class="font-medium text-gray-900" x-text="selectedAppointmentForVet.pet_name"></p>
+                    </div>
 
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Pet Name</label>
-                            <input type="text" name="pet_name" x-bind:value="selectedAppointment.pet_name"
-                                   class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed" readonly>
-                        </div>
-
-                        <div x-data="timeValidation()" x-init="initializeTime(selectedAppointment)">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Date</label>
-                                    <input 
-                                        type="date" 
-                                        name="appointment_date" 
-                                        x-model="appointmentDate"
-                                        @change="updateTimeRange"
-                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                        required
-                                        :min="new Date().toISOString().split('T')[0]"
-                                    >
+                    <div class="space-y-3">
+                        <template x-for="vet in availableVets" :key="vet.id">
+                            <button @click="confirmVetAssignment(vet)" 
+                                    class="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900" x-text="vet.name"></p>
+                                        <p class="text-sm text-gray-600" x-text="vet.specialization"></p>
+                                    </div>
                                 </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Appointment Time</label>
-                                    <input 
-                                        type="time" 
-                                        name="appointment_time" 
-                                        x-model="appointmentTime"
-                                        :min="minTime"
-                                        :max="maxTime"
-                                        @input="validateTime($event)"
-                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                        required
-                                    >
-                                </div>
-                            </div>
+        {{-- Vet Details Modal --}}
+        <div x-show="showVetDetailsModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+             style="display: none;">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto" 
+                 @click.away="closeVetDetailsModal()"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform scale-95"
+                 x-transition:enter-end="opacity-100 transform scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-95">
+                
+                <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Veterinarian Details</h2>
+                    <button @click="closeVetDetailsModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
                         </div>
+                        <h3 class="text-lg font-semibold text-gray-900" x-text="selectedVetDetails.name"></h3>
+                        <p class="text-gray-600" x-text="selectedVetDetails.specialization"></p>
+                    </div>
 
+                    <div class="space-y-4 mb-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Service</label>
-                            <select name="reason" x-model="selectedAppointment.reason"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                <option value="">-- Select Service --</option>
-                                <option value="1">Check-up</option>
-                                <option value="2">Deworming</option>
-                                <option value="3">Home Service</option>
-                                <option value="4">Laboratories</option>
-                                <option value="5">Non-Surgical Procedures</option>
-                                <option value="6">Surgical Procedures</option>
-                                <option value="7">Therapies</option>
-                                <option value="8">Tick & Flea Preventive</option>
-                                <option value="9">Vaccinations</option>
-                            </select>
+                            <p class="text-sm font-medium text-gray-700">Status</p>
+                            <span class="inline-flex items-center px-2.5 py-1 text-sm font-medium rounded-full"
+                                  :class="selectedVetDetails.is_active === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                  x-text="selectedVetDetails.is_active"></span>
                         </div>
-
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
-                            <textarea name="notes" rows="4" x-model="selectedAppointment.notes"
-                                      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                                      placeholder="Add any additional notes or special instructions..."></textarea>
+                            <p class="text-sm font-medium text-gray-700">Assigned to</p>
+                            <p class="text-gray-900" x-text="selectedAppointmentForVet.pet_name"></p>
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-gray-200">
-                        <button type="button" @click="showModal = false"
-                                class="flex-1 px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
-                            Cancel
+                    <div class="flex gap-3">
+                        <button @click="reassignVet()" 
+                                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
+                            Reassign Vet
                         </button>
-                        <button type="submit"
-                                class="flex-1 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors">
-                            Save Changes
+                        <button @click="closeVetDetailsModal()" 
+                                class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+                            Close
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -512,12 +544,17 @@
     <script>
         function appointmentsComponent() {
             return {
-                showModal: false,
-                selectedAppointment: {},
+                {{-- Removed showModal and selectedAppointment properties --}}
                 searchTerm: '',
                 statusFilter: '',
                 serviceFilter: '',
                 appointments: @json($appointments),
+                {{-- Added new properties for vet assignment functionality --}}
+                showAssignVetModal: false,
+                showVetDetailsModal: false,
+                selectedAppointmentForVet: {},
+                selectedVetDetails: {},
+                availableVets: @json($availableVets ?? []),
 
                 get filteredAppointments() {
                     return this.appointments.filter(appointment => {
@@ -533,68 +570,129 @@
                     });
                 },
 
-                editAppointment(appointment) {
-                    this.selectedAppointment = { ...appointment };
-                    this.showModal = true;
+                {{-- Added vet assignment methods --}}
+                assignVet(appointment) {
+                    this.selectedAppointmentForVet = appointment;
+                    this.fetchAvailableVets();
+                    this.showAssignVetModal = true;
                 },
 
-                deleteAppointment(appointmentId) {
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            title: 'Remove Appointment?',
-                            text: 'Are you sure you want to remove this appointment? This action cannot be undone.',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#3085d6',
-                            confirmButtonText: 'Yes, remove it',
-                            cancelButtonText: 'Cancel'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Create and submit form
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = `/appointments/${appointmentId}`;
-                                
-                                const csrfToken = document.createElement('input');
-                                csrfToken.type = 'hidden';
-                                csrfToken.name = '_token';
-                                csrfToken.value = '{{ csrf_token() }}';
-                                
-                                const methodField = document.createElement('input');
-                                methodField.type = 'hidden';
-                                methodField.name = '_method';
-                                methodField.value = 'DELETE';
-                                
-                                form.appendChild(csrfToken);
-                                form.appendChild(methodField);
-                                document.body.appendChild(form);
-                                form.submit();
+                closeAssignVetModal() {
+                    this.showAssignVetModal = false;
+                    this.selectedAppointmentForVet = {};
+                },
+
+                fetchAvailableVets() {
+                    fetch('/api/vets/active')
+                        .then(res => res.json())
+                        .then(data => {
+                            console.log('Available vets:', data); // debug
+                            this.availableVets = data;
+                        });
+                },
+
+                /*confirmVetAssignment(vet) {
+                    fetch('/assign-vet', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify({
+                            appointment_id: this.selectedAppointmentForVet.id,
+                            vet_id: vet.id,
+                        }),
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                this.closeAssignVetModal();
+                                window.location.reload();
                             }
                         });
-                    } else {
-                        if (confirm('Are you sure you want to remove this appointment?')) {
-                            const form = document.createElement('form');
-                            form.method = 'POST';
-                            form.action = `/appointments/${appointmentId}`;
+                },*/
+
+                showVetDetails(appointment) {
+                    this.selectedAppointmentForVet = appointment;
+                    this.selectedVetDetails = {
+                        name: appointment.vet_name,
+                        specialization: appointment.specialization || 'General Practice',
+                        is_active: 'Active'
+                    };
+                    this.showVetDetailsModal = true;
+                },
+
+                closeVetDetailsModal() {
+                    this.showVetDetailsModal = false;
+                    this.selectedVetDetails = {};
+                    this.selectedAppointmentForVet = {};
+                },
+
+                reassignVet() {
+                    this.closeVetDetailsModal();
+                    this.assignVet(this.selectedAppointmentForVet);
+                },
+
+                async confirmVetAssignment(vet) {
+                    try {
+                        const response = await fetch(`/appointments/${this.selectedAppointmentForVet.id}/assign-vet`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                vet_id: vet.id,
+                                appointment_id: this.selectedAppointmentForVet.id
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Update the appointment in the local array
+                            const appointmentIndex = this.appointments.findIndex(app => app.id === this.selectedAppointmentForVet.id);
+                            if (appointmentIndex !== -1) {
+                                this.appointments[appointmentIndex].vet_id = vet.id;
+                                this.appointments[appointmentIndex].vet_name = vet.name;
+                                this.appointments[appointmentIndex].vet_specialization = vet.specialization;
+                            }
+
+                            this.closeAssignVetModal();
                             
-                            const csrfToken = document.createElement('input');
-                            csrfToken.type = 'hidden';
-                            csrfToken.name = '_token';
-                            csrfToken.value = '{{ csrf_token() }}';
-                            
-                            const methodField = document.createElement('input');
-                            methodField.type = 'hidden';
-                            methodField.name = '_method';
-                            methodField.value = 'DELETE';
-                            
-                            form.appendChild(csrfToken);
-                            form.appendChild(methodField);
-                            document.body.appendChild(form);
-                            form.submit();
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: `${vet.name} has been assigned to this appointment.`,
+                                    icon: 'success',
+                                    confirmButtonColor: '#059669'
+                                });
+                            } else {
+                                alert(`${vet.name} has been assigned to this appointment.`);
+                            }
+                        } else {
+                            throw new Error(data.error || 'Failed to assign veterinarian');
+                        }
+                    } catch (error) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: 'Error',
+                                text: error.message || 'Failed to assign veterinarian.',
+                                icon: 'error',
+                                confirmButtonColor: '#dc2626'
+                            });
+                        } else {
+                            alert('Failed to assign veterinarian: ' + error.message);
                         }
                     }
                 },
+
+                closeVetModal() {
+                    this.closeAssignVetModal();
+                    this.closeVetDetailsModal();
+                },
+
+                {{-- Removed editAppointment and deleteAppointment methods --}}
 
                 formatDateTime(date, time) {
                     const dateTime = new Date(`${date} ${time}`);

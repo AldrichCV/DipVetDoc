@@ -157,6 +157,36 @@ class AppointmentController extends Controller
 
         return redirect()->back()->with('success', 'Appointment removed successfully.');
     }
+
+    public function assignVet(Request $request, $id)
+    {
+    try {
+        $data = $request->validate([
+            'vet_id'        => 'required|integer|exists:vet_profile,user_id',
+            'appointment_id'=> 'required|integer|exists:user_appointments,id',
+        ]);
+
+        $inserted = DB::table('assigned_vet')->insert([
+            'user_id'       => $data['vet_id'],
+            'appointment_id'=> $data['appointment_id'],
+        ]);
+
+        return response()->json([
+            'success' => (bool) $inserted,
+            'message' => $inserted
+                ? 'Vet assigned successfully.'
+                : 'Failed to assign vet.',
+        ], $inserted ? 200 : 400);
+
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'An error occurred while assigning the vet.',
+            'error'   => $e->getMessage(), // ⚡ useful for debugging
+        ], 500);
+    }
+    }
+
 }
 
 

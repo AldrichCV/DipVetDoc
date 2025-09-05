@@ -10,11 +10,11 @@ export default defineConfig({
         }),
         vue(),
     ],
-    /*server: {
+    server: {
         host: '0.0.0.0',   // allow external devices (like your phone)
         port: 5173,
         hmr: {
             host: '192.168.137.1', // replace with your laptop's hotspot IP
         },
-    },*/
+    },
 });

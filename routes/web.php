@@ -79,8 +79,9 @@ Route::get('/api/vets/active', function () {
     return response()->json($activeVets);
 })->name('api.vets.active');
 // web.php (since you are using CSRF and Blade)
-Route::post('/assign-vet', [AdminController::class, 'assignVet'])
-->name('assign');
+//Route::post('/assign-vet', [AdminController::class, 'assignVet'])->name('assign');
+Route::post('/appointments/{id}/assign-vet', [AppointmentController::class, 'assignVet'])
+    ->name('appointments.assignVet');
 Route::post('/assigned-vet/remove', [AdminController::class, 'remove']);
 
 Route::get('/consultations', [AdminController::class, 'consultations'])->name('consultations');
