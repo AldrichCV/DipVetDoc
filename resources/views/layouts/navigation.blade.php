@@ -13,15 +13,7 @@
                 <!-- Close Icon -->
                 <x-heroicon-o-x-mark x-show="sidebarExpanded" class="w-5 h-5 text-gray-600" />
             </button>
-               @isset($header)
-                    <header class="bg-white border-b border-gray-200">
-                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-                            <h2 class="text-lg font-semibold text-gray-900">
-                                {{ $header }}
-                            </h2>
-                        </div>
-                    </header>
-                @endisset
+               @yield('header')
             </div>
             
             <div class="flex items-center space-x-4">

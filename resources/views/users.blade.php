@@ -1,11 +1,15 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Users') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
+@section('header')
+<div class="flex items-center justify-between">
+    <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+        {{ __('Users') }}
+    </h2>
+</div>
+@endsection
+
+@section('content')
+    <div class="py-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
@@ -21,24 +25,28 @@
                     @endif
 
                     <!-- Search and Filter Section -->
-                    <div class="mb-6" x-data="{ 
-                        searchTerm: '', 
-                        selectedRole: '',
-                        selectedStatus: '',
-                        filteredUsers: @js($users->items()),
+                    <div class="mb-6" 
+                        x-data="{ 
+                            searchTerm: '', 
+                            selectedRole: '',
+                            selectedStatus: '',
+                            filteredUsers: @js($users->items()),
+                            
+                            filterUsers() {
+                                this.filteredUsers = @js($users->items()).filter(user => {
+                                    const matchesSearch = user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
+                                                        user.email.toLowerCase().includes(this.searchTerm.toLowerCase());
+                                    const matchesRole = this.selectedRole === '' || user.role === this.selectedRole;
+                                    const matchesStatus = this.selectedStatus === '' || (user.status || 'N/A') === this.selectedStatus;
+                                    
+                                    return matchesSearch && matchesRole && matchesStatus;
+                                });
+                            }
+                        }" 
+                        x-init="filterUsers()"
+                    >
                         
-                        filterUsers() {
-                            this.filteredUsers = @js($users->items()).filter(user => {
-                                const matchesSearch = user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                                                    user.email.toLowerCase().includes(this.searchTerm.toLowerCase());
-                                const matchesRole = this.selectedRole === '' || user.role === this.selectedRole;
-                                const matchesStatus = this.selectedStatus === '' || (user.status || 'N/A') === this.selectedStatus;
-                                
-                                return matchesSearch && matchesRole && matchesStatus;
-                            });
-                        }
-                    }" x-init="filterUsers()">
-                        
+                        <!-- Filters -->
                         <div class="flex flex-col sm:flex-row gap-4 mb-6">
                             <!-- Search Input -->
                             <div class="flex-1">
@@ -54,7 +62,7 @@
                                         id="search"
                                         x-model="searchTerm"
                                         @input="filterUsers()"
-                                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                                         placeholder="Search by name or email..."
                                     >
                                 </div>
@@ -96,68 +104,153 @@
                             </p>
                         </div>
 
-                        <!-- Users Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <template x-for="user in filteredUsers" :key="user.id">
-                                <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                                    <!-- Card Header -->
-                                    <div class="p-6 pb-4">
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex-1 min-w-0">
-                                                <h3 class="text-lg font-semibold text-gray-900 truncate" x-text="user.name"></h3>
-                                                <p class="text-sm text-gray-600 truncate" x-text="user.email"></p>
+                <div x-data="{ modalOpen: false, selectedUser: null }">
+                    <!-- Users Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="user in filteredUsers" :key="user.id">
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 overflow-hidden group">
+                                <div class="p-6 pb-4">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex-1 min-w-0">
+                                            <!-- Clickable Name -->
+                                            <button 
+                                                class="text-left w-full group/name"
+                                                @click="selectedUser = user; modalOpen = true"
+                                                type="button">
+                                                <h3 class="text-lg font-semibold text-gray-900 truncate group-hover/name:text-blue-600 transition-colors duration-200 flex items-center gap-2" 
+                                                    x-text="user.name">
+                                                </h3>
+                                                <div class="w-0 group-hover/name:w-full h-0.5 bg-blue-600 transition-all duration-200 mt-1"></div>
+                                            </button>
+                                            <!-- Role Badge -->
+                                            <div class="flex items-center gap-2 mt-2">
+                                                <span
+                                                    class="px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 transition-colors duration-200"
+                                                    :class="user.role === 'vet' ? 'bg-blue-600 text-white group-hover:bg-blue-700' : 'bg-blue-100 text-blue-800 group-hover:bg-blue-200'"
+                                                    x-text="user.role.charAt(0).toUpperCase() + user.role.slice(1)">
+                                                </span>
                                             </div>
-                                            
-                                            <!-- Status Badge -->
-                                            <span 
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                                :class="{
-                                                    'bg-green-100 text-green-800': (user.status || 'N/A') === 'approved',
-                                                    'bg-red-100 text-red-800': (user.status || 'N/A') !== 'approved'
-                                                }"
-                                                x-text="user.status || 'N/A'"
-                                            ></span>
                                         </div>
-                                    </div>
 
-                                    <!-- Card Body -->
-                                    <div class="px-6 pb-6">
-                                        <div class="space-y-3">
-                                            <!-- Role -->
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-gray-500">Role</span>
-                                                <span 
-                                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                                        <!-- Status indicator -->
+                                        <div class="relative flex-shrink-0 ml-4">
+                                            <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                                <div 
+                                                    class="w-3 h-3 rounded-full transition-all duration-200"
                                                     :class="{
-                                                        'bg-blue-600 text-white': user.role === 'vet',
-                                                        'bg-blue-100 text-blue-800': user.role !== 'vet'
+                                                        'bg-green-500 shadow-green-200 shadow-lg': (user.status || 'N/A') === 'approved',
+                                                        'bg-red-500 shadow-red-200 shadow-lg': (user.status || 'N/A') !== 'approved'
                                                     }"
-                                                    x-text="user.role.charAt(0).toUpperCase() + user.role.slice(1)"
-                                                ></span>
-                                            </div>
-
-                                            <!-- Created Date -->
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-gray-500">Joined</span>
-                                                <span class="text-sm text-gray-900" x-text="new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })"></span>
-                                            </div>
-
-                                            <!-- Actions -->
-                                            <div class="pt-3 border-t border-gray-100">
-                                                <div class="flex space-x-2">
-                                                    <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200">
-                                                        View
-                                                    </button>
-                                                    <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 px-3 rounded-md transition-colors duration-200">
-                                                        Edit
-                                                    </button>
+                                                    :title="user.status || 'N/A'">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- Email -->
+                                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                                        </svg>
+                                        <span class="truncate" x-text="user.email"></span>
+                                    </div>
                                 </div>
-                            </template>
+
+                                <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 group-hover:bg-gray-100 transition-colors duration-200">
+                                    <div class="flex items-center justify-between text-xs text-gray-500">
+                                        <span>Click name to view details</span>
+                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                <!-- Modal -->
+                <div x-show="modalOpen"
+                    x-transition
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                    style="display: none;">
+                    
+                    <div @click.away="modalOpen = false"
+                        class="bg-white rounded-xl shadow-2xl w-11/12 md:w-2/3 lg:w-1/2 p-6 relative max-h-[90vh] overflow-y-auto">
+
+                        <!-- Close button -->
+                        <button @click="modalOpen = false" 
+                                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
+
+                       <!-- Header with avatar, name, role subtitle, and status badge -->
+                        <div class="flex items-center gap-4 mb-6">
+                            <!-- Avatar -->
+                            <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-xl font-semibold text-gray-500">
+                                <span x-text="selectedUser ? selectedUser.name.charAt(0) : '?'"></span>
+                            </div>
+
+                            <!-- Name + Role + Status -->
+                            <div class="flex flex-col">
+                                <div class="flex items-center gap-2">
+                                    <!-- Name -->
+                                    <h2 class="text-2xl font-bold text-gray-800" x-text="selectedUser ? selectedUser.name : ''"></h2>
+                                    
+                                    <!-- Status Badge -->
+                                    <span 
+                                        class="px-3 py-1 rounded-full text-xs font-semibold"
+                                        :class="{
+                                            'bg-green-100 text-green-800': selectedUser && selectedUser.status === 'approved',
+                                            'bg-red-100 text-red-800': selectedUser && selectedUser.status !== 'approved'
+                                        }"
+                                        x-text="selectedUser 
+                                        ? (selectedUser.status === 'approved' ? 'Active' 
+                                        : (selectedUser.status ? selectedUser.status.charAt(0).toUpperCase() + selectedUser.status.slice(1) : 'N/A')) 
+                                        : 'N/A'">
+                                    </span>
+                                </div>
+
+                                <!-- Role as subtitle -->
+                                <p class="text-gray-500 mt-1" x-text="selectedUser ? selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1) : ''"></p>
+                            </div>
+                        </div>  
+
+                       <!-- User info -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+
+                                    <!-- Full Name (spans full row) -->
+                                    <div class="col-span-1 md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-500">Full Name:</span>
+                                        <span class="text-gray-900"
+                                            x-text="selectedUser
+                                                ? (selectedUser.first_name || selectedUser.last_name
+                                                    ? `${selectedUser.first_name || ''} ${selectedUser.middle_name ? selectedUser.middle_name + ' ' : ''}${selectedUser.last_name || ''}`.trim()
+                                                    : 'N/A')
+                                                : 'N/A'">
+                                        </span>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-500">Email:</span>
+                                        <span class="text-gray-900" x-text="selectedUser && selectedUser.email ? selectedUser.email : 'N/A'"></span>
+                                    </div>
+
+                                    <!-- Contact Number -->
+                                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-500">Contact Number:</span>
+                                        <span class="text-gray-900" x-text="selectedUser && selectedUser.contact_number ? selectedUser.contact_number : 'N/A'"></span>
+                                    </div>
+
+                                    <!-- Address (full width) -->
+                                    <div class="col-span-1 md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-500">Address:</span>
+                                        <span class="text-gray-900" x-text="selectedUser && selectedUser.address ? selectedUser.address : 'N/A'"></span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
 
                         <!-- Empty State -->
                         <div x-show="filteredUsers.length === 0" class="text-center py-12">
@@ -222,4 +315,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+@endsection

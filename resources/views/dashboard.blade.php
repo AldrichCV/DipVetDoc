@@ -1,12 +1,8 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('My Veterinarian Dashboard') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12" x-data="adminVetDashboard()">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+@section('content')
+    <div class="py-4" x-data="adminVetDashboard()">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">
             
             <!-- Quick Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -998,4 +994,4 @@
             }
         }
     </script>
-</x-app-layout>
+    @endsection
