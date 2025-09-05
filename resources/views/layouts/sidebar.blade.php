@@ -78,7 +78,8 @@
     </a>
     @endif
 
-    <!-- Pets -->
+    
+    <!-- Pets 
     <a href="{{ auth()->user()->role === 'user' ? route('my_pets') : route('pets') }}"
        class="flex items-center text-sm font-medium rounded-lg group {{ request()->routeIs(auth()->user()->role === 'user' ? 'my_pets' : 'pets') ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600' : 'text-gray-700 hover:bg-gray-50' }}"
        :class="sidebarExpanded ? 'px-3 py-2.5' : 'px-0 py-2.5 justify-center'">
@@ -87,7 +88,7 @@
         <span x-show="sidebarExpanded || window.innerWidth < 1024" class="ml-3 whitespace-nowrap">
             {{ auth()->user()->role === 'user' ? __('My Pets') : __('Pets') }}
         </span>
-    </a>
+    </a>-->
 
     <!-- Appointments -->
     <a href="{{ auth()->user()->role === 'user' ? route('my_appointments.index') : route('appointments') }}"
