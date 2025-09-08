@@ -190,7 +190,7 @@
 <body class="font-sans antialiased">
 
 <div x-data="homepageComponent()">
-    <section class="relative flex items-center justify-center overflow-hidden pt-20 pb-16" style="background: linear-gradient(135deg, #1E88E5 0%, #1565C0 50%, #0D47A1 100%);">
+    <section class="relative flex items-center justify-center overflow-hidden pt-19 pb-15" style="background: linear-gradient(135deg, #1E88E5 0%, #1565C0 50%, #0D47A1 100%);">
         
         <div class="absolute inset-0 opacity-10">
             <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"></div>
@@ -229,13 +229,14 @@
                 <div class="relative animate-on-scroll" 
                      x-intersect.once="$el.classList.add('animate-fade-in-right'); $el.classList.remove('animate-on-scroll')">
                     <div class="relative z-10">
-                        <img src="dipvetAssets/images/dipvetDraw.png?height=500&width=600" 
+                        <img src="dipvetAssets/images/dipvetIllustration.png?height=500&width=600" 
                              alt="Veterinary Care" 
-                             class="w-full h-auto rounded-2xl shadow-2xl">
+                             class="w-full h-auto">
                     </div>
                     
-                    <div class="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full opacity-80 animate-float"></div>
-                    <div class="absolute -bottom-6 -left-6 w-16 h-16 bg-white rounded-full opacity-60 animate-bounce"></div>
+                    <div class="absolute top-10 -right-8 w-40 h-40 bg-yellow-400 rounded-full opacity-80 animate-float"></div>
+<div class="absolute bottom-10 -left-8 w-32 h-32 bg-white rounded-full opacity-60 animate-bounce"></div>
+
                 </div>
             </div>
         </div>

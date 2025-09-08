@@ -1,13 +1,11 @@
 import './bootstrap';
-
 import Alpine from 'alpinejs';
+import { userStatusControl } from './user_status_control';
 
 window.Alpine = Alpine;
 
+// Register your Alpine component globally
+Alpine.data('userStatusControl', userStatusControl);
+
+// Start Alpine
 Alpine.start();
-
-import { createApp } from 'vue';
-import App from './App.vue';
-
-// mount Vue to #app (or any div you choose in Blade)
-createApp(App).mount('#app');

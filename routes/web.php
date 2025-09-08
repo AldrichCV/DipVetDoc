@@ -32,6 +32,10 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
+Route::patch('/users/{user}/status', [UserController::class, 'updateStatus']);
+Route::patch('/api/users/{user}/deactivate', [UserController::class, 'deactivate']);
+
+
 
 Route::middleware('web')->group(function () {
     Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.login');

@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-    <div class="py-4">
+    <div x-data="userStatusControl" class="py-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
@@ -24,151 +24,125 @@
                         </div>
                     @endif
 
-                    <!-- Search and Filter Section -->
-                    <div class="mb-6" 
-                        x-data="{ 
-                            searchTerm: '', 
-                            selectedRole: '',
-                            selectedStatus: '',
-                            filteredUsers: @js($users->items()),
-                            
-                            filterUsers() {
-                                this.filteredUsers = @js($users->items()).filter(user => {
-                                    const matchesSearch = user.name.toLowerCase().includes(this.searchTerm.toLowerCase()) || 
-                                                        user.email.toLowerCase().includes(this.searchTerm.toLowerCase());
-                                    const matchesRole = this.selectedRole === '' || user.role === this.selectedRole;
-                                    const matchesStatus = this.selectedStatus === '' || (user.status || 'N/A') === this.selectedStatus;
-                                    
-                                    return matchesSearch && matchesRole && matchesStatus;
-                                });
-                            }
-                        }" 
-                        x-init="filterUsers()"
-                    >
-                        
-                        <!-- Filters -->
-                        <div class="flex flex-col sm:flex-row gap-4 mb-6">
-                            <!-- Search Input -->
-                            <div class="flex-1">
-                                <label for="search" class="sr-only">Search users</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <input 
-                                        type="text" 
-                                        id="search"
-                                        x-model="searchTerm"
-                                        @input="filterUsers()"
-                                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Search by name or email..."
-                                    >
-                                </div>
-                            </div>
+                    <div x-data="userStatusControl(@js($users->all()))" class="py-4">
 
-                            <!-- Role Filter -->
-                            <div class="sm:w-48">
-                                <select 
-                                    x-model="selectedRole"
-                                    @change="filterUsers()"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">All Roles</option>
-                                    <option value="vet">Veterinarian</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="user">User</option>
-                                </select>
-                            </div>
+    <!-- Filters -->
+    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+        <!-- Search Input -->
+        <div class="flex-1">
+            <label for="search" class="sr-only">Search users</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <input 
+                    type="text" 
+                    id="search"
+                    x-model="searchTerm"
+                    @input="filterUsers()"
+                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Search by name or email..."
+                >
+            </div>
+        </div>
 
-                            <!-- Status Filter -->
-                            <div class="sm:w-48">
-                                <select 
-                                    x-model="selectedStatus"
-                                    @change="filterUsers()"
-                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">All Status</option>
-                                    <option value="approved">Approved</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="N/A">N/A</option>
-                                </select>
-                            </div>
-                        </div>
+        <!-- Role Filter -->
+        <div class="sm:w-48">
+            <select 
+                x-model="selectedRole"
+                @change="filterUsers()"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+                <option value="">All Roles</option>
+                <option value="vet">Veterinarian</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+            </select>
+        </div>
 
-                        <!-- Users Count -->
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-600">
-                                Showing <span x-text="filteredUsers.length"></span> of {{ $users->total() }} users
-                            </p>
-                        </div>
+        <!-- Status Filter -->
+        <div class="sm:w-48">
+            <select 
+                x-model="selectedStatus"
+                @change="filterUsers()"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="N/A">N/A</option>
+            </select>
+        </div>
+    </div>
 
-                <div x-data="{ modalOpen: false, selectedUser: null }">
+   
                     <!-- Users Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <template x-for="user in filteredUsers" :key="user.id">
-                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 overflow-hidden group">
-                                <div class="p-6 pb-4">
-                                    <div class="flex items-start justify-between mb-3">
-                                        <div class="flex-1 min-w-0">
-                                            <!-- Clickable Name -->
-                                            <button 
-                                                class="text-left w-full group/name"
-                                                @click="selectedUser = user; modalOpen = true"
-                                                type="button">
-                                                <h3 class="text-lg font-semibold text-gray-900 truncate group-hover/name:text-blue-600 transition-colors duration-200 flex items-center gap-2" 
-                                                    x-text="user.name">
-                                                </h3>
-                                                <div class="w-0 group-hover/name:w-full h-0.5 bg-blue-600 transition-all duration-200 mt-1"></div>
-                                            </button>
-                                            <!-- Role Badge -->
-                                            <div class="flex items-center gap-2 mt-2">
-                                                <span
-                                                    class="px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 transition-colors duration-200"
-                                                    :class="user.role === 'vet' ? 'bg-blue-600 text-white group-hover:bg-blue-700' : 'bg-blue-100 text-blue-800 group-hover:bg-blue-200'"
-                                                    x-text="user.role.charAt(0).toUpperCase() + user.role.slice(1)">
-                                                </span>
-                                            </div>
-                                        </div>
+<template x-if="filteredUsers.length > 0">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="user in filteredUsers" :key="user.id">
+            <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-300 overflow-hidden group">
+                <div class="p-6 pb-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1 min-w-0">
+                            <!-- Clickable Name -->
+                            <button 
+                                class="text-left w-full group/name"
+                                @click="selectedUser = user; modalOpen = true"
+                                type="button">
+                                <h3 class="text-lg font-semibold text-gray-900 truncate group-hover/name:text-blue-600 transition-colors duration-200 flex items-center gap-2" 
+                                    x-text="user.name"></h3>
+                                <div class="w-0 group-hover/name:w-full h-0.5 bg-blue-600 transition-all duration-200 mt-1"></div>
+                            </button>
+                            <!-- Role Badge -->
+                            <div class="flex items-center gap-2 mt-2">
+                                <span
+                                    class="px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 transition-colors duration-200"
+                                    :class="user.role === 'vet' ? 'bg-blue-600 text-white group-hover:bg-blue-700' : 'bg-blue-100 text-blue-800 group-hover:bg-blue-200'"
+                                    x-text="user.role.charAt(0).toUpperCase() + user.role.slice(1)">
+                                </span>
+                            </div>
+                        </div>
 
-                                        <!-- Status indicator -->
-                                        <div class="relative flex-shrink-0 ml-4">
-                                            <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <div 
-                                                    class="w-3 h-3 rounded-full transition-all duration-200"
-                                                    :class="{
-                                                        'bg-green-500 shadow-green-200 shadow-lg': (user.status || 'N/A') === 'approved',
-                                                        'bg-red-500 shadow-red-200 shadow-lg': (user.status || 'N/A') !== 'approved'
-                                                    }"
-                                                    :title="user.status || 'N/A'">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Email -->
-                                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
-                                        </svg>
-                                        <span class="truncate" x-text="user.email"></span>
-                                    </div>
-                                </div>
-
-                                <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 group-hover:bg-gray-100 transition-colors duration-200">
-                                    <div class="flex items-center justify-between text-xs text-gray-500">
-                                        <span>Click name to view details</span>
-                                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                        </svg>
-                                    </div>
+                        <!-- Status indicator -->
+                        <div class="relative flex-shrink-0 ml-4">
+                            <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                                <div 
+                                    class="w-3 h-3 rounded-full transition-all duration-200"
+                                    :class="{
+                                        'bg-green-500 shadow-green-200 shadow-lg': (user.status || 'N/A') === 'active',
+                                        'bg-red-500 shadow-red-200 shadow-lg': (user.status || 'N/A') !== 'active'
+                                    }"
+                                    :title="user.status || 'N/A'">
                                 </div>
                             </div>
-                        </template>
+                        </div>
                     </div>
 
-                <!-- Modal -->
+                    <!-- Email -->
+                    <div class="flex items-center gap-2 text-sm text-gray-600">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                        </svg>
+                        <span class="truncate" x-text="user.email"></span>
+                    </div>
+                </div>
+
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 group-hover:bg-gray-100 transition-colors duration-200">
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span>Click name to view details</span>
+                        <svg class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>
+
+       <!-- Modal -->
                 <div x-show="modalOpen"
                     x-transition
                     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -208,8 +182,45 @@
                                     </span>
                                 </div>
 
-                                <!-- Role as subtitle -->
-                                <p class="text-gray-500 mt-1" x-text="selectedUser ? selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1) : ''"></p>
+                                   <!-- Role + Gear Button -->
+                                <div class="flex items-center gap-2 mt-1">
+                                    <p class="text-gray-500" 
+                                    x-text="selectedUser ? selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1) : ''"></p>
+                                    
+                                    <!-- Gear Button -->
+                                    <!-- Gear button to open modal -->
+<button 
+    @click="$dispatch('open-modal', 'deactivate-user')" 
+    class="text-gray-400 hover:text-gray-600"
+>
+    <i class="bi bi-gear-fill w-5 h-5"></i>
+</button>
+
+<!-- Modal Component -->
+<x-modal name="deactivate-user">
+    <div class="p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Deactivate Account</h2>
+        <p class="text-sm text-gray-600 mb-6">
+        Are you sure you want to deactivate 
+        <span class="font-semibold" x-text="selectedUser ? selectedUser.name : ''"></span>?
+        </p>
+
+        <div class="flex justify-end gap-3">
+            <button 
+                @click="$dispatch('close-modal', 'deactivate-user')"    
+                class="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100">
+                Cancel
+            </button>
+            <button 
+                @click="deactivateUser(selectedUser.id)" 
+                class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+                Deactivate
+            </button>
+        </div>
+    </div>
+</x-modal>
+
+                                </div>
                             </div>
                         </div>  
 
@@ -252,15 +263,17 @@
                     </div>
                 </div>
 
-                        <!-- Empty State -->
-                        <div x-show="filteredUsers.length === 0" class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.196-2.196M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.196-2.196M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-                            <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
-                        </div>
-                    </div>
+
+
+<!-- Empty State -->
+<template x-if="filteredUsers.length === 0">
+    <div class="text-center py-12">
+        <i class="bi bi-people mx-auto" style="font-size: 3rem; color: #9ca3af;"></i>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+    </div>
+</template>
+
 
                     <!-- Original Laravel Users (Fallback for non-JS users) -->
                     <noscript>

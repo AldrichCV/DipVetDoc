@@ -22,9 +22,14 @@ class AdminController extends Controller
 
     public function index()
     {
-        $users = User::where('role', '!=', 'admin')->paginate(10); // 10 users per page
-        return view('users', compact('users'));
-    }
+       $users = User::where('role', '!=', 'admin')
+        ->leftJoin('vet_profile', 'users.id', '=', 'vet_profile.user_id')
+        ->select('users.*', 'vet_profile.specialization', 'vet_profile.clinic_name') // pick vet_profile columns you need
+        ->orderBy('users.created_at', 'desc')
+        ->paginate(9);
+
+    return view('users', compact('users'));
+}
 
     public function appointments()
     {
