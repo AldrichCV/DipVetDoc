@@ -6,7 +6,7 @@ export const userStatusControl = (initialUsers = []) => ({
     searchTerm: '',
     selectedRole: '',
     selectedStatus: '',
-    filteredUsers: initialUsers,
+    filteredUsers: initialUsers || [],
 
     // Methods
     filterUsers() {
@@ -25,40 +25,7 @@ export const userStatusControl = (initialUsers = []) => ({
         });
     },
 
-    async updateStatus(userId, status) {
-        try {
-            let response = await fetch(`/api/users/${userId}/status`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ status })
-            });
-
-            let data = await response.json();
-            if (!response.ok) throw data;
-
-            this.modalOpen = false;
-
-            // Update local state
-            const userIndex = this.filteredUsers.findIndex(u => u.id === userId);
-            if (userIndex !== -1) {
-                this.filteredUsers[userIndex].status = data.user.status;
-            }
-
-            if (this.selectedUser && this.selectedUser.id === userId) {
-                this.selectedUser.status = data.user.status;
-            }
-
-            console.log("Status updated:", data);
-
-        } catch (error) {
-            console.error("Failed to update status:", error);
-        }
-    },
-
-      async deactivateUser(userId) {
+    async deactivateUser(userId) {
     try {
         const response = await fetch(`/api/users/${userId}/deactivate`, {
             method: "PATCH",
@@ -86,7 +53,7 @@ export const userStatusControl = (initialUsers = []) => ({
         }
 
         // Close modal
-        this.$dispatch('close-modal', 'deactivate-user');
+        this.$dispatch('close-modal', 'user-status-modal');
 
         // Update local UI
         const userIndex = this.filteredUsers.findIndex(u => u.id === userId);
@@ -110,17 +77,63 @@ export const userStatusControl = (initialUsers = []) => ({
             confirmButtonColor: '#d33'
         });
         
-        this.$dispatch('close-modal', 'deactivate-user');
+        this.$dispatch('close-modal', 'user-status-modal');
     }
 },
 
+    async activateUser(userId) {
+         try {
+        const response = await fetch(`/api/users/${userId}/activate`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ status: "active" })
+        });
 
-    activateUser(userId) {
-        if (!userId) {
-            alert("No user selected!");
-            return;
+        const contentType = response.headers.get('content-type');
+        let data;
+
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            const text = await response.text(); // fallback for HTML errors
+            throw new Error(`Unexpected response from server (HTTP ${response.status}):\n${text}`);
         }
-        console.log("Activating:", userId);
-        this.updateStatus(userId, 'active');
+
+        if (!response.ok) {
+            // If server returns JSON error message
+            const msg = data.message || JSON.stringify(data);
+            throw new Error(`Server returned error (HTTP ${response.status}):\n${msg}`);
+        }
+
+        // Close modal
+        this.$dispatch('close-modal', 'user-status-modal');
+
+        // Update local UI
+        const userIndex = this.filteredUsers.findIndex(u => u.id === userId);
+        if (userIndex !== -1) this.filteredUsers[userIndex].status = 'active';
+        if (this.selectedUser && this.selectedUser.id === userId) this.selectedUser.status = 'active';
+
+        Swal.fire({
+            title: 'User Activated!',
+            text: 'The user has been successfully activated.',
+            icon: 'success',
+            confirmButtonColor: '#3085d6'
+        });
+
+    } catch (error) {
+        console.error("Reactivation error:", error);
+        Swal.fire({
+            title: 'Reactivation Failed!',
+            html: `<strong>Error Details:</strong><br>
+                   <pre style="text-align:left; white-space: pre-wrap;">${error.message}</pre>`,
+            icon: 'error',
+            confirmButtonColor: '#d33'
+        });
+        
+        this.$dispatch('close-modal', 'user-status-modal');
+    }
     }
 });

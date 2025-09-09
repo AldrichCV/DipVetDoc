@@ -5,11 +5,11 @@
             <img src="{{ asset('dipvetAssets/images/vetlogo1.png') }}" alt="Logo" class="h-8 w-8">
             <span x-show="sidebarExpanded" class="font-bold text-blue-600 text-lg">DipVetDoc</span>
         </a>
-        <!-- Collapse/Expand Button -->
+        <!-- Collapse/Expand Button 
         <button @click="sidebarExpanded = !sidebarExpanded" 
                 class="text-gray-500 hover:text-gray-700 focus:outline-none">
             <i class="fa fa-bars"></i>
-        </button>
+        </button>-->
     </div>
 
     <!-- Navigation -->
@@ -36,13 +36,14 @@
             <span x-show="sidebarExpanded" class="ml-3">Users</span>
         </a>
 
+        <!-- Vet Team 
         <a href="{{ route('vet_team') }}" 
            class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-50 
                   {{ request()->routeIs('vet_team') ? 'bg-blue-100 text-blue-600' : 'text-gray-700' }}">
             <i class="fa fa-shield-halved w-6 text-center"></i>
             <span x-show="sidebarExpanded" class="ml-3">Vet Team</span>
         </a>
-        @endif
+        @endif-->
 
         @if(Auth::user()->role === 'vet' || Auth::user()->role === 'admin')
         <a href="{{ route('consultations.index') }}" 

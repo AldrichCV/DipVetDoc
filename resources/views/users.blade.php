@@ -76,8 +76,6 @@
             </select>
         </div>
     </div>
-
-   
                     <!-- Users Grid -->
 <template x-if="filteredUsers.length > 0">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -172,8 +170,8 @@
                                     <span 
                                         class="px-3 py-1 rounded-full text-xs font-semibold"
                                         :class="{
-                                            'bg-green-100 text-green-800': selectedUser && selectedUser.status === 'approved',
-                                            'bg-red-100 text-red-800': selectedUser && selectedUser.status !== 'approved'
+                                            'bg-green-100 text-green-800': selectedUser && selectedUser.status === 'active',
+                                            'bg-red-100 text-red-800': selectedUser && selectedUser.status !== 'active'
                                         }"
                                         x-text="selectedUser 
                                         ? (selectedUser.status === 'approved' ? 'Active' 
@@ -190,36 +188,46 @@
                                     <!-- Gear Button -->
                                     <!-- Gear button to open modal -->
 <button 
-    @click="$dispatch('open-modal', 'deactivate-user')" 
+    @click="$dispatch('open-modal', 'user-status-modal')" 
     class="text-gray-400 hover:text-gray-600"
 >
     <i class="bi bi-gear-fill w-5 h-5"></i>
 </button>
 
-<!-- Modal Component -->
-<x-modal name="deactivate-user">
+<!-- Single Reusable Modal -->
+<x-modal name="user-status-modal">
     <div class="p-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Deactivate Account</h2>
+        <!-- Title -->
+        <h2 class="text-lg font-semibold text-gray-800 mb-4" 
+            x-text="selectedUser && selectedUser.status === 'active' ? 'Deactivate Account' : 'Activate Account'">
+        </h2>
+
+        <!-- Message -->
         <p class="text-sm text-gray-600 mb-6">
-        Are you sure you want to deactivate 
-        <span class="font-semibold" x-text="selectedUser ? selectedUser.name : ''"></span>?
+            Are you sure you want to 
+            <span class="font-semibold" 
+                  x-text="selectedUser && selectedUser.status === 'active' ? 'deactivate' : 'activate'">
+            </span>
+            <span class="font-semibold" x-text="selectedUser ? selectedUser.name : ''"></span>?
         </p>
 
+        <!-- Buttons -->
         <div class="flex justify-end gap-3">
             <button 
-                @click="$dispatch('close-modal', 'deactivate-user')"    
+                @click="$dispatch('close-modal', 'user-status-modal')"    
                 class="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100">
                 Cancel
             </button>
+
             <button 
-                @click="deactivateUser(selectedUser.id)" 
-                class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
-                Deactivate
+                @click="selectedUser && selectedUser.status === 'active' ? deactivateUser(selectedUser.id) : activateUser(selectedUser.id)" 
+                :class="selectedUser && selectedUser.status === 'active' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'" 
+                class="px-4 py-2 rounded-lg text-white">
+                <span x-text="selectedUser && selectedUser.status === 'active' ? 'Deactivate' : 'Activate'"></span>
             </button>
         </div>
     </div>
 </x-modal>
-
                                 </div>
                             </div>
                         </div>  
@@ -256,24 +264,35 @@
                                         <span class="text-sm font-medium text-gray-500">Address:</span>
                                         <span class="text-gray-900" x-text="selectedUser && selectedUser.address ? selectedUser.address : 'N/A'"></span>
                                     </div>
+
+                                    <!-- Specialization (only if vet) -->
+<div 
+    x-show="selectedUser && selectedUser.role === 'vet'" 
+    class="col-span-1 md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2"
+>
+    <span class="text-sm font-medium text-gray-500">Specialization:</span>
+    <span class="text-gray-900" 
+          x-text="selectedUser.specialization ? selectedUser.specialization : 'N/A'"></span>
+</div>
+
                                     
                                 </div>
                             </div>
+                        </div>                                           
+                    <!-- Empty State -->
+                    <template x-if="filteredUsers.length === 0">
+                        <div class="text-center py-12">
+                            <i class="bi bi-people mx-auto" style="font-size: 3rem; color: #9ca3af;"></i>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+                            <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
                         </div>
+                    </template>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="mt-8">
+                        {{ $users->links() }}
                     </div>
                 </div>
-
-
-
-<!-- Empty State -->
-<template x-if="filteredUsers.length === 0">
-    <div class="text-center py-12">
-        <i class="bi bi-people mx-auto" style="font-size: 3rem; color: #9ca3af;"></i>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
-    </div>
-</template>
-
 
                     <!-- Original Laravel Users (Fallback for non-JS users) -->
                     <noscript>
@@ -320,10 +339,7 @@
                         </div>
                     </noscript>
 
-                    <!-- Pagination -->
-                    <div class="mt-8">
-                        {{ $users->links() }}
-                    </div>
+                    
                 </div>
             </div>
         </div>
