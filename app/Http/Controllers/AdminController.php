@@ -20,15 +20,24 @@ class AdminController extends Controller
     return view('AdminPage');
     }
 
-    public function index()
-    {
-       $users = User::where('role', '!=', 'admin')
+   public function index()
+{
+    $users = User::where('role', '!=', 'admin')
         ->leftJoin('vet_profile', 'users.id', '=', 'vet_profile.user_id')
-        ->select('users.*', 'vet_profile.specialization', 'vet_profile.clinic_name') // pick vet_profile columns you need
+        ->select('users.*', 'vet_profile.specialization', 'vet_profile.clinic_name')
         ->orderBy('users.created_at', 'desc')
         ->paginate(9);
 
-    return view('users', compact('users'));
+    // Convert paginated data for Vue
+    $usersData = [
+        'data' => $users->items(),
+        'current_page' => $users->currentPage(),
+        'last_page' => $users->lastPage(),
+        'per_page' => $users->perPage(),
+        'total' => $users->total(),
+    ];
+
+    return view('users', compact('usersData'));
 }
 
     public function appointments()

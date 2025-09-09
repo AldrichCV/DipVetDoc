@@ -1,5 +1,14 @@
 @extends('layouts.app')
-
+@section('header')
+<div class="flex items-center justify-between">
+    <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+        {{ __('Home/Dashboard') }}
+    </h2>
+</div>
+@endsection
+@php
+    $page = 'dashboard';
+@endphp
 @section('content')
     <div class="py-4" x-data="adminVetDashboard()">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-4">

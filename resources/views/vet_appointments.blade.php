@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+    $page = 'appointments';
+@endphp
+
 @section('header')
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" x-data="{ showNewAppointmentModal: false }">
      <h2 class="font-semibold text-xl text-gray-800 leading-tight">

@@ -40,8 +40,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased bg-gray-50">
-    <div x-data="{ sidebarExpanded: true }" class="flex h-screen">
-
+    <div  x-data="{ sidebarExpanded: true }" class="flex h-screen">
+      
         <!-- Sidebar (desktop only) -->
         @auth
         <aside 
@@ -56,7 +56,7 @@
     :class="sidebarExpanded ? 'lg:ml-64' : 'lg:ml-16'"
     class="flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ease-in-out"
 >
-            
+        
             <!-- Navbar (top, desktop only) -->
             @auth
                 <div class="hidden lg:block">
@@ -75,7 +75,7 @@
             </div>
             
             <!-- Page Content -->
-            <main class="p-6 flex-1 overflow-y-auto">
+            <main class="flex-1 overflow-y-auto">
                 @yield('content')
             </main>
         </div>

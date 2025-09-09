@@ -11,7 +11,7 @@
             <i class="fa fa-bars"></i>
         </button>-->
     </div>
-
+    
     <!-- Navigation -->
     <nav class="flex-1 overflow-y-auto px-2 py-4 space-y-2">
         <a href="{{ route('dashboard') }}" 
