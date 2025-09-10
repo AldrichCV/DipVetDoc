@@ -42,8 +42,8 @@
                   {{ request()->routeIs('vet_team') ? 'bg-blue-100 text-blue-600' : 'text-gray-700' }}">
             <i class="fa fa-shield-halved w-6 text-center"></i>
             <span x-show="sidebarExpanded" class="ml-3">Vet Team</span>
-        </a>
-        @endif-->
+        </a>-->
+        @endif
 
         @if(Auth::user()->role === 'vet' || Auth::user()->role === 'admin')
         <a href="{{ route('consultations.index') }}" 

@@ -1,161 +1,216 @@
 <template>
-    <div
-        v-if="user"
-        class="fixed inset-0 z-50 flex items-center justify-center"
+    <!-- User Modal -->
+    <v-dialog
+        :model-value="!!user"
+        @update:model-value="(value) => !value && $emit('close')"
+        max-width="600"
+        persistent
+        transition="fade-transition"
+        class="enhanced-user-modal"
     >
-        <!-- Blurred overlay -->
-        <div
-            class="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            @click="$emit('close')"
-        ></div>
-
-        <!-- Modal content -->
-        <div
-            class="relative bg-white rounded-xl shadow-2xl w-11/12 md:w-2/3 lg:w-1/2 p-6 max-h-[90vh] overflow-y-auto"
-        >
-            <!-- Close button -->
-            <button
-                @click="$emit('close')"
-                class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold"
+        <v-card class="rounded-xl overflow-hidden" elevation="24">
+            <!-- Header Section -->
+            <div
+                class="relative bg-gradient-to-br from-blue-50 to-indigo-100 p-4 pb-6"
             >
-                &times;
-            </button>
+                <div class="flex items-center gap-3">
+                    <!-- Avatar -->
+                    <v-avatar
+                        size="80"
+                        class="border-4 border-white shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-2xl flex items-center justify-center"
+                    >
+                        {{
+                            user?.name ? user.name.charAt(0).toUpperCase() : "?"
+                        }}
+                    </v-avatar>
 
-            <!-- Header with name, role, status -->
-            <div class="flex items-center gap-4 mb-6">
-                <div
-                    class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-xl font-semibold text-gray-500"
-                >
-                    {{ user.name ? user.name.charAt(0) : "?" }}
+                    <!-- User Info + Close Button -->
+                    <div class="flex-1">
+                        <div class="flex items-start justify-between gap-2">
+                            <h2 class="text-2xl font-bold text-gray-800">
+                                {{ user?.name }}
+                            </h2>
+                            <v-btn
+                                icon="mdi-close"
+                                variant="text"
+                                size="small"
+                                class="text-gray-600 hover:text-gray-800 -mt-1"
+                                @click="$emit('close')"
+                            />
+                        </div>
+
+                        <!-- Role + Cog -->
+                        <div class="flex items-center gap-2 mt-1">
+                            <v-chip
+                                color="primary"
+                                variant="tonal"
+                                size="small"
+                                class="font-medium"
+                            >
+                                <v-icon start size="14"
+                                    >mdi-account-badge</v-icon
+                                >
+                                {{ capitalize(user?.role) }}
+                            </v-chip>
+
+                            <v-btn
+                                icon="mdi-cog"
+                                variant="text"
+                                size="small"
+                                class="text-gray-500 hover:text-primary transition-colors duration-200"
+                                @click="openStatus"
+                            />
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="flex flex-col">
-                    <div class="flex items-center gap-2">
-                        <h2 class="text-2xl font-bold text-gray-800">
-                            {{ user.name }}
-                        </h2>
-                        <span
-                            class="px-3 py-1 rounded-full text-xs font-semibold"
-                            :class="
-                                user.status === 'approved'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800'
-                            "
+            <!-- Content Section -->
+            <v-card-text class="p-4">
+                <div class="space-y-3">
+                    <!-- Full Name -->
+                    <v-card
+                        variant="tonal"
+                        color="blue-grey-lighten-5"
+                        class="p-2 border border-gray-100 hover:shadow-sm transition-shadow"
+                    >
+                        <div class="flex items-center gap-2">
+                            <v-icon color="primary" size="18"
+                                >mdi-account</v-icon
+                            >
+                            <div>
+                                <p
+                                    class="text-sm font-medium text-gray-600 mb-0.5"
+                                >
+                                    Full Name
+                                </p>
+                                <p class="text-gray-900 font-semibold">
+                                    {{ getFullName(user) }}
+                                </p>
+                            </div>
+                        </div>
+                    </v-card>
+
+                    <!-- Email and Contact -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <v-card
+                            variant="tonal"
+                            color="green-lighten-5"
+                            class="p-2 border border-gray-100 hover:shadow-sm"
                         >
-                            {{
-                                user.status === "approved"
-                                    ? "Active"
-                                    : capitalize(user.status) || "N/A"
-                            }}
-                        </span>
+                            <div class="flex items-center gap-2">
+                                <v-icon color="success" size="18"
+                                    >mdi-email</v-icon
+                                >
+                                <div class="min-w-0 flex-1">
+                                    <p
+                                        class="text-sm font-medium text-gray-600 mb-0.5"
+                                    >
+                                        Email
+                                    </p>
+                                    <p
+                                        class="text-gray-900 font-medium truncate"
+                                    >
+                                        {{ user?.email || "N/A" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </v-card>
+
+                        <v-card
+                            variant="tonal"
+                            color="orange-lighten-5"
+                            class="p-2 border border-gray-100 hover:shadow-sm"
+                        >
+                            <div class="flex items-center gap-2">
+                                <v-icon color="warning" size="18"
+                                    >mdi-phone</v-icon
+                                >
+                                <div class="min-w-0 flex-1">
+                                    <p
+                                        class="text-sm font-medium text-gray-600 mb-0.5"
+                                    >
+                                        Contact
+                                    </p>
+                                    <p
+                                        class="text-gray-900 font-medium truncate"
+                                    >
+                                        {{ user?.contact_number || "N/A" }}
+                                    </p>
+                                </div>
+                            </div>
+                        </v-card>
                     </div>
 
-                    <!-- Role + Gear button -->
-                    <div class="flex items-center gap-2 mt-1">
-                        <p class="text-gray-500">{{ capitalize(user.role) }}</p>
-                        <button
-                            @click="openUserStatusControl(user)"
-                            class="text-gray-400 hover:text-gray-600"
-                        >
-                            <i class="bi bi-gear-fill w-5 h-5"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                    <!-- Address -->
+                    <v-card
+                        variant="tonal"
+                        color="purple-lighten-5"
+                        class="p-2 border border-gray-100 hover:shadow-sm"
+                    >
+                        <div class="flex items-start gap-2">
+                            <v-icon color="purple" size="18" class="mt-0.5"
+                                >mdi-map-marker</v-icon
+                            >
+                            <div class="min-w-0 flex-1">
+                                <p
+                                    class="text-sm font-medium text-gray-600 mb-0.5"
+                                >
+                                    Address
+                                </p>
+                                <p
+                                    class="text-gray-900 font-medium leading-snug break-words"
+                                >
+                                    {{ user?.address || "N/A" }}
+                                </p>
+                            </div>
+                        </div>
+                    </v-card>
 
-            <!-- User info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                <div
-                    class="col-span-1 md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2"
-                >
-                    <span class="text-sm font-medium text-gray-500"
-                        >Full Name:</span
+                    <!-- Specialization -->
+                    <v-card
+                        v-if="user?.role === 'vet' && user?.specialization"
+                        variant="tonal"
+                        color="teal-lighten-5"
+                        class="p-2 border border-gray-100 hover:shadow-sm"
                     >
-                    <span class="text-gray-900">{{ getFullName(user) }}</span>
+                        <div class="flex items-center gap-2">
+                            <v-icon color="teal" size="18"
+                                >mdi-medical-bag</v-icon
+                            >
+                            <div>
+                                <p
+                                    class="text-sm font-medium text-gray-600 mb-0.5"
+                                >
+                                    Specialization
+                                </p>
+                                <p class="text-gray-900 font-medium">
+                                    {{ user?.specialization }}
+                                </p>
+                            </div>
+                        </div>
+                    </v-card>
                 </div>
-
-                <div
-                    class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2"
-                >
-                    <span class="text-sm font-medium text-gray-500"
-                        >Email:</span
-                    >
-                    <span class="text-gray-900">{{ user.email || "N/A" }}</span>
-                </div>
-
-                <div
-                    class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2"
-                >
-                    <span class="text-sm font-medium text-gray-500"
-                        >Contact Number:</span
-                    >
-                    <span class="text-gray-900">{{
-                        user.contact_number || "N/A"
-                    }}</span>
-                </div>
-
-                <div
-                    class="col-span-1 md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2"
-                >
-                    <span class="text-sm font-medium text-gray-500"
-                        >Address:</span
-                    >
-                    <span class="text-gray-900">{{
-                        user.address || "N/A"
-                    }}</span>
-                </div>
-
-                <div
-                    v-if="user.role === 'vet' && user.specialization"
-                    class="col-span-1 md:col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-200 flex items-center gap-2"
-                >
-                    <span class="text-sm font-medium text-gray-500"
-                        >Specialization:</span
-                    >
-                    <span class="text-gray-900">{{ user.specialization }}</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- UserStatusControl Modal -->
-        <UserStatusControl v-model="showStatusModal" :user="selectedUser">
-            <div class="p-6">
-                <h2 class="text-lg font-semibold text-gray-800 mb-4">
-                    Deactivate Account
-                </h2>
-                <p class="text-sm text-gray-600 mb-6">
-                    Are you sure you want to deactivate
-                    <span class="font-semibold">{{ selectedUser?.name }}</span
-                    >?
-                </p>
-                <div class="flex justify-end gap-3">
-                    <button
-                        @click="showStatusModal = false"
-                        class="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        @click="deactivateUser(selectedUser.id)"
-                        class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
-                    >
-                        Deactivate
-                    </button>
-                </div>
-            </div>
-        </UserStatusControl>
-    </div>
+            </v-card-text>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import UserStatusControl from "./UserStatusControl.vue";
 
 const props = defineProps({
     user: Object,
 });
 
-const emit = defineEmits(["close"]);
+const emit = defineEmits([
+    "close",
+    "open-status-control", // declare the custom event
+]);
+
+const openStatus = () => {
+    emit("open-status-control", props.user);
+};
 
 const showStatusModal = ref(false);
 const selectedUser = ref(null);

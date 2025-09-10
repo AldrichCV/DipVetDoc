@@ -1,24 +1,14 @@
 <template>
-    <div
-        v-if="modelValue"
-        class="fixed inset-0 z-50 overflow-y-auto px-4 py-6 sm:px-0"
-        @keydown.esc.window="close"
+    <v-dialog
+        v-model="internalValue"
+        max-width="600"
+        persistent
+        transition="dialog-transition"
+        :scrim="true"
+        content-class="dialog-top"
     >
-        <!-- Overlay -->
-        <div class="fixed inset-0 bg-gray-500 opacity-75" @click="close"></div>
-
-        <!-- Modal content -->
-        <div
-            ref="modal"
-            :class="[
-                'mb-6 bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full mx-auto',
-                maxWidthClass,
-            ]"
-            tabindex="-1"
-            @keydown.tab.prevent="handleTab"
-            @keydown.shift.tab.prevent="handleShiftTab"
-        >
-            <div class="p-6">
+        <v-card class="rounded-lg overflow-hidden">
+            <v-card-text class="p-6">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">
                     {{
                         user?.status === "inactive"
@@ -26,165 +16,127 @@
                             : "Deactivate Account"
                     }}
                 </h2>
+
                 <p class="text-sm text-gray-600 mb-6">
                     Are you sure you want to
                     <span class="font-semibold">
                         {{
                             user?.status === "inactive"
-                                ? "reactivate"
-                                : "deactivate"
+                                ? "reactivate "
+                                : "deactivate "
                         }}
                     </span>
                     <span class="font-semibold">{{ user?.name }}</span
                     >?
                 </p>
+
                 <div class="flex justify-end gap-3">
-                    <button
-                        @click="close"
-                        class="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
-                    >
+                    <v-btn variant="outlined" color="grey" @click="close">
                         Cancel
-                    </button>
-                    <button
+                    </v-btn>
+
+                    <v-btn
+                        :color="user?.status === 'inactive' ? 'green' : 'red'"
                         @click="
                             user?.status === 'inactive'
                                 ? activateUser(user.id)
                                 : deactivateUser(user.id)
                         "
-                        :class="[
-                            'px-4 py-2 rounded-lg text-white',
-                            user?.status === 'inactive'
-                                ? 'bg-green-600 hover:bg-green-700'
-                                : 'bg-red-600 hover:bg-red-700',
-                        ]"
                     >
                         {{
                             user?.status === "inactive"
                                 ? "Reactivate"
                                 : "Deactivate"
                         }}
-                    </button>
+                    </v-btn>
                 </div>
-            </div>
-        </div>
-    </div>
+            </v-card-text>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from "vue";
+import { ref, watch } from "vue";
+import axios from "axios";
 
 const props = defineProps({
     modelValue: { type: Boolean, default: false },
-    maxWidth: { type: String, default: "2xl" },
     user: Object,
 });
 
 const emit = defineEmits(["update:modelValue"]);
-
-const modal = ref(null);
-
-const maxWidthClass = {
-    sm: "sm:max-w-sm",
-    md: "sm:max-w-md",
-    lg: "sm:max-w-lg",
-    xl: "sm:max-w-xl",
-    "2xl": "sm:max-w-2xl",
-}[props.maxWidth];
-
-// Focus trap helpers
-const focusables = () => {
-    if (!modal.value) return [];
-    const selector =
-        'a, button, input:not([type="hidden"]), textarea, select, details, [tabindex]:not([tabindex="-1"])';
-    return Array.from(modal.value.querySelectorAll(selector)).filter(
-        (el) => !el.disabled
-    );
-};
-const firstFocusable = () => focusables()[0];
-const lastFocusable = () => focusables().slice(-1)[0];
-
-const handleTab = () => {
-    const focusable = focusables();
-    const index = focusable.indexOf(document.activeElement);
-    const next = focusable[(index + 1) % focusable.length];
-    next?.focus();
-};
-const handleShiftTab = () => {
-    const focusable = focusables();
-    const index = focusable.indexOf(document.activeElement);
-    const prev = focusable[index - 1] || focusable[focusable.length - 1];
-    prev?.focus();
-};
-
-const disableScroll = () => document.body.classList.add("overflow-hidden");
-const enableScroll = () => document.body.classList.remove("overflow-hidden");
+const internalValue = ref(props.modelValue);
 
 watch(
     () => props.modelValue,
-    (val) => {
-        if (val) disableScroll();
-        else enableScroll();
-    }
+    (val) => (internalValue.value = val)
 );
+watch(internalValue, (val) => emit("update:modelValue", val));
 
-// Close modal
-const close = () => {
-    emit("update:modelValue", false);
-    enableScroll();
-};
+const close = () => (internalValue.value = false);
+
+// Axios instance with CSRF token
+const token = document.querySelector('meta[name="csrf-token"]').content;
+const api = axios.create({
+    headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-TOKEN": token,
+    },
+});
 
 // Deactivate user
 const deactivateUser = async (userId) => {
     try {
-        const token = document.querySelector('meta[name="csrf-token"]').content;
-        const res = await fetch(`/api/users/${userId}/deactivate`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": token,
-            },
-            body: JSON.stringify({ status: "inactive" }),
+        await api.patch(`/api/users/${userId}/deactivate`, {
+            status: "inactive",
         });
 
-        const data = await res.json();
-        if (!res.ok)
-            throw new Error(data.message || "Failed to deactivate user");
+        // Update local user status
+        if (props.user) props.user.status = "inactive";
 
-        Swal.fire(
-            "User Deactivated!",
-            "The user has been successfully deactivated.",
-            "success"
-        );
+        Swal.fire({
+            title: "User Deactivated!",
+            text: "The user has been successfully deactivated.",
+            icon: "success",
+        });
+
         close();
     } catch (err) {
-        Swal.fire("Error!", err.message, "error");
+        Swal.fire({
+            title: "Error!",
+            text: err.response?.data?.message || err.message,
+            icon: "error",
+        });
     }
 };
 
-// Activate user
 const activateUser = async (userId) => {
     try {
-        const token = document.querySelector('meta[name="csrf-token"]').content;
-        const res = await fetch(`/api/users/${userId}/activate`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": token,
-            },
-            body: JSON.stringify({ status: "active" }),
+        await api.patch(`/api/users/${userId}/activate`, { status: "active" });
+
+        // Update local user status
+        if (props.user) props.user.status = "active";
+
+        Swal.fire({
+            title: "User Reactivated!",
+            text: "The user has been successfully reactivated.",
+            icon: "success",
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to activate user");
-
-        Swal.fire(
-            "User Reactivated!",
-            "The user has been successfully reactivated.",
-            "success"
-        );
         close();
     } catch (err) {
-        Swal.fire("Error!", err.message, "error");
+        Swal.fire({
+            title: "Error!",
+            text: err.response?.data?.message || err.message,
+            icon: "error",
+        });
     }
 };
 </script>
+
+<style>
+/* 🔥 Ensure SweetAlert is always above Vuetify modals */
+.swal2-container {
+    z-index: 99999 !important;
+}
+</style>

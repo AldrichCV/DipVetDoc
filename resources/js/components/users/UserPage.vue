@@ -3,40 +3,16 @@
         <!-- Users Grid -->
         <UsersGrid :users="paginatedUsers" @open-modal="openModal" />
 
-        <!-- Pagination Controls -->
-        <div class="flex justify-center items-center gap-2 mt-6 flex-wrap">
-            <!-- Previous -->
-            <button
-                class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="currentPage === 1"
-                @click="prevPage"
-            >
-                Previous
-            </button>
-
-            <!-- Page numbers -->
-            <button
-                v-for="page in totalPages"
-                :key="page"
-                @click="currentPage = page"
-                :class="[
-                    'px-3 py-1 rounded border',
-                    page === currentPage
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-600 hover:bg-gray-100',
-                ]"
-            >
-                {{ page }}
-            </button>
-
-            <!-- Next -->
-            <button
-                class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="currentPage === totalPages"
-                @click="nextPage"
-            >
-                Next
-            </button>
+        <!-- Vuetify Pagination -->
+        <div class="flex justify-center mt-6">
+            <v-pagination
+                v-model="currentPage"
+                :length="totalPages"
+                color="primary"
+                rounded
+                total-visible="7"
+                @update:model-value="fetchUsers"
+            ></v-pagination>
         </div>
 
         <!-- User Modal -->
@@ -44,72 +20,66 @@
             v-if="modalUser"
             :user="modalUser"
             @close="modalUser = null"
+            @user-updated="onUserUpdated"
         />
     </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
+import axios from "axios";
 import UsersGrid from "./UsersGrid.vue";
 import UserModal from "./UserModal.vue";
 
 // Props
 const props = defineProps({
-    initialUsers: { type: Object, required: true },
+    initialUsers: { type: Object, required: true }, // Laravel paginated response
     page: { type: String, default: "users" },
 });
 
 // State
-const allUsers = ref([...props.initialUsers.data]);
-const filteredUsers = ref([...allUsers.value]);
+const paginatedUsers = ref([...props.initialUsers.data]);
+const totalPages = ref(props.initialUsers.last_page || 1);
+const currentPage = ref(props.initialUsers.current_page || 1);
 const modalUser = ref(null);
 
-// Pagination
-const perPage = 9; // users per page
-const currentPage = ref(1);
-const totalPages = computed(() =>
-    Math.ceil(filteredUsers.value.length / perPage)
-);
-
-// Computed slice for current page
-const paginatedUsers = computed(() => {
-    const start = (currentPage.value - 1) * perPage;
-    const end = start + perPage;
-    return filteredUsers.value.slice(start, end);
+// Axios instance
+const token = document.querySelector('meta[name="csrf-token"]').content;
+const api = axios.create({
+    baseURL: "http://127.0.0.1:8000",
+    headers: {
+        "X-CSRF-TOKEN": token,
+        "Content-Type": "application/json",
+    },
 });
 
-// Watch filteredUsers to reset page if needed
-watch(filteredUsers, () => {
-    if (currentPage.value > totalPages.value) {
-        currentPage.value = totalPages.value || 1;
+// Fetch users
+const fetchUsers = async (page = 1) => {
+    try {
+        const res = await api.get(`/api/users?page=${page}`);
+        paginatedUsers.value = res.data.data;
+        totalPages.value = res.data.last_page;
+        currentPage.value = res.data.current_page;
+    } catch (err) {
+        console.error(err);
+        Swal.fire({
+            title: "Error",
+            text: err.response?.data?.message || err.message,
+            icon: "error",
+        });
     }
-});
-
-// Filters example
-function applyFilters(filters) {
-    filteredUsers.value = allUsers.value.filter((user) => {
-        const matchesSearch =
-            !filters.search ||
-            user.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-            user.email.toLowerCase().includes(filters.search.toLowerCase());
-        const matchesRole = !filters.role || user.role === filters.role;
-        const matchesStatus = !filters.status || user.status === filters.status;
-        return matchesSearch && matchesRole && matchesStatus;
-    });
-    currentPage.value = 1; // reset page on new filter
-}
+};
 
 // Open modal
-function openModal(user) {
+const openModal = (user) => {
     modalUser.value = user;
-}
+};
 
-// Pagination controls
-function nextPage() {
-    if (currentPage.value < totalPages.value) currentPage.value++;
-}
-
-function prevPage() {
-    if (currentPage.value > 1) currentPage.value--;
-}
+// Handle updated user from modal
+const onUserUpdated = (updatedUser) => {
+    const index = paginatedUsers.value.findIndex(
+        (u) => u.id === updatedUser.id
+    );
+    if (index !== -1) paginatedUsers.value[index] = updatedUser;
+};
 </script>
