@@ -1,26 +1,3 @@
-/*import "./bootstrap";
-import Alpine from "alpinejs";
-import { userStatusControl } from "./user_status_control";
-
-import { createApp } from "vue";
-import Consultations from "./components/consultations/Consultations.vue";
-import Users from "./components/users/UserPage.vue";
-
-const app = createApp({});
-app.component("consultations", Consultations);
-app.component("users", Users);
-
-app.mount("#app");
-app.mount("#vue-consultations");
-app.mount("#vue-users");
-
-window.Alpine = Alpine;
-// Register your Alpine component globally
-Alpine.data("userStatusControl", userStatusControl);
-
-// Start Alpine
-Alpine.start();*/
-
 import "./bootstrap";
 import Alpine from "alpinejs";
 import { userStatusControl } from "./user_status_control";
@@ -30,6 +7,8 @@ import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import "vuetify/styles";
+// import axios from "./plugins/axios";
+// app.config.globalProperties.$axios = axios;*/
 
 import Consultations from "./components/consultations/Consultations.vue";
 import Appointments from "./components/appointments/AppointmentPage.vue";

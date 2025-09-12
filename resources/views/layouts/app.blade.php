@@ -124,6 +124,21 @@
         </nav>
         @endauth
     </div>
+    @if(isset($triggerLogoutEvent) && $triggerLogoutEvent)
+<script>
+    // Broadcast logout to other tabs
+    localStorage.setItem("forceLogout", Date.now());
+</script>
+@endif
+
+<script>
+    window.addEventListener("storage", (event) => {
+        if (event.key === "forceLogoutOthers") {
+            window.location.href = "{{ route('logged-out') }}";
+        }
+    });
+</script>
+
 
     <!-- JS Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

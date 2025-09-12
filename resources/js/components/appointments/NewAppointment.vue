@@ -5,7 +5,7 @@
             class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
         >
             <div
-                class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+                class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col"
             >
                 <!-- Modal Header -->
                 <div
@@ -23,16 +23,21 @@
                 </div>
 
                 <!-- FORM -->
-                <form @submit.prevent="submitAppointment" class="p-6">
-                    <!-- Pet Info -->
-                    <div class="space-y-8">
-                        <div>
-                            <h4 class="text-lg font-medium text-gray-900 mb-4">
+                <form
+                    @submit.prevent="submitAppointment"
+                    class="flex-1 flex flex-col"
+                >
+                    <!--  Added responsive layout: desktop split-screen, mobile steps -->
+                    <!-- Desktop: Split Layout -->
+                    <div class="hidden md:flex flex-1">
+                        <!-- Left Side: Pet Information -->
+                        <div class="flex-1 p-6 border-r border-gray-200">
+                            <h4
+                                class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-100"
+                            >
                                 Pet Information
                             </h4>
-                            <div
-                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                            >
+                            <div class="space-y-4">
                                 <input
                                     v-model="form.name"
                                     type="text"
@@ -50,6 +55,26 @@
                                     </option>
                                     <option value="Dog">Dog</option>
                                     <option value="Cat">Cat</option>
+                                    <option value="Rabbit">Rabbit</option>
+                                    <option value="Guinea Pig">
+                                        Guinea Pig
+                                    </option>
+                                    <option value="Hamster">Hamster</option>
+                                    <option value="Ferret">Ferret</option>
+                                    <option value="Parakeet">
+                                        Parakeet (Budgie)
+                                    </option>
+                                    <option value="Lovebird">Lovebird</option>
+                                    <option value="Cockatiel">Cockatiel</option>
+                                    <option value="Canary">Canary</option>
+                                    <option value="Turtle">
+                                        Turtle / Tortoise
+                                    </option>
+                                    <option value="Gecko">Gecko</option>
+                                    <option value="Iguana">Iguana</option>
+                                    <option value="Snake">
+                                        Snake (non-venomous)
+                                    </option>
                                 </select>
                                 <input
                                     v-model="form.breed"
@@ -75,14 +100,14 @@
                             </div>
                         </div>
 
-                        <!-- Appointment Details -->
-                        <div>
-                            <h4 class="text-lg font-medium text-gray-900 mb-4">
+                        <!-- Right Side: Appointment Details -->
+                        <div class="flex-1 p-6">
+                            <h4
+                                class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-100"
+                            >
                                 Appointment Details
                             </h4>
-                            <div
-                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4"
-                            >
+                            <div class="space-y-4">
                                 <input
                                     v-model="form.appointment_date"
                                     type="date"
@@ -115,28 +140,222 @@
                                         {{ service.name }}
                                     </option>
                                 </select>
+                                <textarea
+                                    v-model="form.notes"
+                                    placeholder="Notes (Optional)"
+                                    rows="4"
+                                    class="input resize-none"
+                                ></textarea>
                             </div>
-                            <textarea
-                                v-model="form.notes"
-                                placeholder="Notes (Optional)"
-                                rows="4"
-                                class="input resize-none"
-                            ></textarea>
                         </div>
                     </div>
 
-                    <!-- Buttons -->
-                    <div class="flex gap-3 mt-8">
-                        <button
-                            type="button"
-                            @click="$emit('close')"
-                            class="btn-cancel"
+                    <!-- Mobile: Step-by-Step -->
+                    <div class="md:hidden flex-1 flex flex-col">
+                        <!-- Step Indicator -->
+                        <div
+                            class="flex items-center justify-center p-4 bg-gray-50"
                         >
-                            Cancel
-                        </button>
-                        <button type="submit" class="btn-submit">
-                            Schedule Appointment
-                        </button>
+                            <div class="flex items-center space-x-2">
+                                <div
+                                    :class="[
+                                        'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
+                                        currentStep === 1
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-300 text-gray-600',
+                                    ]"
+                                >
+                                    1
+                                </div>
+                                <div class="w-8 h-0.5 bg-gray-300"></div>
+                                <div
+                                    :class="[
+                                        'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
+                                        currentStep === 2
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-300 text-gray-600',
+                                    ]"
+                                >
+                                    2
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Pet Information -->
+                        <div v-show="currentStep === 1" class="flex-1 p-6">
+                            <h4
+                                class="text-lg font-semibold text-gray-900 mb-6"
+                            >
+                                Pet Information
+                            </h4>
+                            <div class="space-y-4">
+                                <input
+                                    v-model="form.name"
+                                    type="text"
+                                    placeholder="Pet Name *"
+                                    required
+                                    class="input"
+                                />
+                                <select
+                                    v-model="form.species"
+                                    required
+                                    class="input"
+                                >
+                                    <option value="">
+                                        -- Select Species --
+                                    </option>
+                                    <option value="Dog">Dog</option>
+                                    <option value="Cat">Cat</option>
+                                    <option value="Rabbit">Rabbit</option>
+                                    <option value="Guinea Pig">
+                                        Guinea Pig
+                                    </option>
+                                    <option value="Hamster">Hamster</option>
+                                    <option value="Ferret">Ferret</option>
+                                    <option value="Parakeet">
+                                        Parakeet (Budgie)
+                                    </option>
+                                    <option value="Lovebird">Lovebird</option>
+                                    <option value="Cockatiel">Cockatiel</option>
+                                    <option value="Canary">Canary</option>
+                                    <option value="Turtle">
+                                        Turtle / Tortoise
+                                    </option>
+                                    <option value="Gecko">Gecko</option>
+                                    <option value="Iguana">Iguana</option>
+                                    <option value="Snake">
+                                        Snake (non-venomous)
+                                    </option>
+                                </select>
+                                <input
+                                    v-model="form.breed"
+                                    type="text"
+                                    placeholder="Breed (optional)"
+                                    class="input"
+                                />
+                                <select
+                                    v-model="form.sex"
+                                    required
+                                    class="input"
+                                >
+                                    <option value="">-- Select Sex --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                                <input
+                                    v-model="form.date_of_birth"
+                                    type="date"
+                                    class="input"
+                                    :max="today"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Appointment Details -->
+                        <div v-show="currentStep === 2" class="flex-1 p-6">
+                            <h4
+                                class="text-lg font-semibold text-gray-900 mb-6"
+                            >
+                                Appointment Details
+                            </h4>
+                            <div class="space-y-4">
+                                <input
+                                    v-model="form.appointment_date"
+                                    type="date"
+                                    required
+                                    :min="today"
+                                    class="input"
+                                    @change="updateTimeRange"
+                                />
+                                <input
+                                    v-model="form.appointment_time"
+                                    type="time"
+                                    required
+                                    :min="minTime"
+                                    :max="maxTime"
+                                    class="input"
+                                />
+                                <select
+                                    v-model="form.reason"
+                                    required
+                                    class="input"
+                                >
+                                    <option value="">
+                                        -- Select Service --
+                                    </option>
+                                    <option
+                                        v-for="service in services"
+                                        :key="service.id"
+                                        :value="service.id"
+                                    >
+                                        {{ service.name }}
+                                    </option>
+                                </select>
+                                <textarea
+                                    v-model="form.notes"
+                                    placeholder="Notes (Optional)"
+                                    rows="4"
+                                    class="input resize-none"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Navigation -->
+                        <div class="p-4 border-t border-gray-200">
+                            <div
+                                v-if="currentStep === 1"
+                                class="flex justify-end"
+                            >
+                                <button
+                                    type="button"
+                                    @click="nextStep"
+                                    :disabled="!canProceedToStep2"
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                            <div
+                                v-if="currentStep === 2"
+                                class="flex justify-between"
+                            >
+                                <button
+                                    type="button"
+                                    @click="prevStep"
+                                    class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    type="submit"
+                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg"
+                                >
+                                    Schedule
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--  Updated footer with right-aligned buttons and proper padding -->
+                    <!-- Desktop Footer -->
+                    <div
+                        class="hidden md:block border-t border-gray-200 px-6 py-4"
+                    >
+                        <div class="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                @click="$emit('close')"
+                                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                class="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
+                            >
+                                Schedule Appointment
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -145,7 +364,7 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref, computed } from "vue";
 import axios from "axios";
 
 const props = defineProps({
@@ -153,6 +372,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["close", "appointment-added"]);
+
+//  Added mobile step navigation state
+const currentStep = ref(1);
 
 const form = reactive({
     name: "",
@@ -183,6 +405,21 @@ const services = [
 const minTime = "08:00";
 const maxTime = "17:00";
 
+//  Added step validation and navigation functions
+const canProceedToStep2 = computed(() => {
+    return form.name && form.species && form.sex;
+});
+
+function nextStep() {
+    if (canProceedToStep2.value) {
+        currentStep.value = 2;
+    }
+}
+
+function prevStep() {
+    currentStep.value = 1;
+}
+
 function updateTimeRange() {
     // optional future validation
 }
@@ -208,6 +445,7 @@ async function submitAppointment() {
 
             // reset form
             Object.keys(form).forEach((key) => (form[key] = ""));
+            currentStep.value = 1; //  Reset step on form reset
         });
     } catch (error) {
         console.error(
@@ -228,16 +466,15 @@ async function submitAppointment() {
 <style scoped>
 .input {
     width: 100%;
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
-.btn-cancel {
-    flex: 1;
-}
-.btn-submit {
-    flex: 1;
-    background: linear-gradient(to right, #2563eb, #1d4ed8);
-    color: #fff;
+
+.input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 </style>
