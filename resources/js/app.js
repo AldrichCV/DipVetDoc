@@ -32,6 +32,7 @@ import * as directives from "vuetify/directives";
 import "vuetify/styles";
 
 import Consultations from "./components/consultations/Consultations.vue";
+import Appointments from "./components/appointments/AppointmentPage.vue";
 import Users from "./components/users/UserPage.vue";
 
 // -----------------------
@@ -49,6 +50,7 @@ const app = createApp({});
 
 // Register components globally
 app.component("consultations", Consultations);
+app.component("appointments", Appointments);
 app.component("users", Users);
 
 // Install Vuetify

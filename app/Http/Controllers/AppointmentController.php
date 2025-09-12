@@ -9,36 +9,36 @@ use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
-    public function appointments()
-    {
-        $query = DB::table('user_appointments as ua')
-            ->leftJoin('pets as p', 'ua.pet_code', '=', 'p.pet_code')
-            ->leftJoin('services as s', 'ua.reason', '=', 's.id') // Join services table
-            ->orderBy('ua.appointment_date', 'desc');
+    // public function appointments()
+    // {
+    //     $query = DB::table('user_appointments as ua')
+    //         ->leftJoin('pets as p', 'ua.pet_code', '=', 'p.pet_code')
+    //         ->leftJoin('services as s', 'ua.reason', '=', 's.id') // Join services table
+    //         ->orderBy('ua.appointment_date', 'desc');
 
-        // If admin, include owner name
-        if (auth()->user()->role === 'admin') {
-            $query->leftJoin('users as u', 'ua.client_id', '=', 'u.id')
-                ->select(
-                    'ua.*',
-                    'p.name as pet_name',
-                    'u.name as owner_name',
-                    's.name as reason_name' // Service name from services table
-                );
-        } else {
-            // Regular users only see their own appointments
-            $query->where('ua.client_id', auth()->id())
-                ->select(
-                    'ua.*',
-                    'p.name as pet_name',
-                    's.name as reason_name' // Service name for display
-                );
-        }
+    //     // If admin, include owner name
+    //     if (auth()->user()->role === 'admin') {
+    //         $query->leftJoin('users as u', 'ua.client_id', '=', 'u.id')
+    //             ->select(
+    //                 'ua.*',
+    //                 'p.name as pet_name',
+    //                 'u.name as owner_name',
+    //                 's.name as reason_name' // Service name from services table
+    //             );
+    //     } else {
+    //         // Regular users only see their own appointments
+    //         $query->where('ua.client_id', auth()->id())
+    //             ->select(
+    //                 'ua.*',
+    //                 'p.name as pet_name',
+    //                 's.name as reason_name' // Service name for display
+    //             );
+    //     }
 
-        $appointments = $query->get();
+    //     $appointments = $query->get();
 
-        return view('user_appointments', compact('appointments'));
-    }
+    //     return view('vet_appointments', compact('appointments'));
+    // }
 
 
     public function store(Request $request)

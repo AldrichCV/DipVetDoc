@@ -108,8 +108,8 @@
                 </a>
                 
                 <!-- Appointments -->
-                <a href="{{ auth()->user()->role === 'user' ? route('my_appointments.index') : route('appointments') }}"
-                   class="flex flex-col items-center text-sm {{ request()->routeIs(auth()->user()->role === 'user' ? 'my_appointments.index' : 'appointments') ? 'text-blue-600' : 'text-gray-500' }}">
+                <a href="{{ auth()->user()->role === 'user' ? route('appointments') : route('appointments') }}"
+                   class="flex flex-col items-center text-sm {{ request()->routeIs(auth()->user()->role === 'user' ? 'appointments' : 'appointments') ? 'text-blue-600' : 'text-gray-500' }}">
                     <i class="fa fa-calendar text-lg"></i>
                 </a>
 

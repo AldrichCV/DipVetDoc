@@ -21,9 +21,9 @@
             <span x-show="sidebarExpanded" class="ml-3">Dashboard</span>
         </a>
 
-        <a href="{{ auth()->user()->role === 'user' ? route('my_appointments.index') : route('appointments') }}" 
+        <a href="{{ auth()->user()->role === 'user' ? route('appointments') : route('appointments') }}" 
            class="flex items-center px-3 py-2 rounded-lg hover:bg-blue-50 
-                  {{ request()->routeIs('my_appointments.index') || request()->routeIs('appointments') ? 'bg-blue-100 text-blue-600' : 'text-gray-700' }}">
+                  {{ request()->routeIs('appointments') || request()->routeIs('appointments') ? 'bg-blue-100 text-blue-600' : 'text-gray-700' }}">
             <i class="fa fa-calendar w-6 text-center"></i>
             <span x-show="sidebarExpanded" class="ml-3">Appointments</span>
         </a>
