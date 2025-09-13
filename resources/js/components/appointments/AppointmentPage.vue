@@ -105,11 +105,50 @@ function closeAssignVetModal() {
     selectedAppointment.value = null;
     showAssignVet.value = false;
 }
+// Vue / JS
+async function assignVet({ vet, appointment }) {
+    try {
+        const payload = {
+            appointment_id: appointment.id,
+            vet_id: vet.id,
+        };
 
-function assignVet({ vet, appointment }) {
-    appointment.vet_name = vet.name;
-    appointment.vet_id = vet.id;
-    closeAssignVetModal();
+        // Assign the vet
+        const response = await axios.post(
+            `/api/appointments/assign-vet/${appointment.id}`,
+            payload,
+            { withCredentials: true } // ensures session/auth cookies are sent
+        );
+
+        if (response.data.success) {
+            const updated = response.data.appointment;
+
+            // Replace old appointment with full updated object
+            const index = appointments.value.findIndex(
+                (a) => a.id === updated.id
+            );
+            if (index !== -1) {
+                appointments.value[index] = updated;
+            } else {
+                appointments.value.push(updated);
+            }
+
+            // Optional: short delay to ensure DB commit before refetch
+            await new Promise((resolve) => setTimeout(resolve, 50));
+
+            // Refetch all appointments for consistency
+            await fetchAppointments();
+
+            closeAssignVetModal();
+        }
+    } catch (err) {
+        console.error("Failed to assign vet:", err);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Failed to assign vet or refresh appointments.",
+        });
+    }
 }
 
 function openVetDetailsModal(appointment) {

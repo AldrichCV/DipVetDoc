@@ -132,16 +132,28 @@ const emit = defineEmits(["assign-vet", "show-vet"]);
 const searchTerm = ref("");
 const statusFilter = ref("");
 
-const isAdmin = computed(() => props.mode === "admin");
-
 const filteredAppointments = computed(() => {
     return props.appointments.filter((a) => {
-        const matchesSearch = a.pet_name
+        const matchesSearch = (a.pet_name || "") // fallback to empty string
             .toLowerCase()
             .includes(searchTerm.value.toLowerCase());
+
         const matchesStatus =
-            !statusFilter.value || a.status === statusFilter.value;
+            !statusFilter.value ||
+            (a.status || "").toLowerCase() === statusFilter.value.toLowerCase();
+
         return matchesSearch && matchesStatus;
     });
 });
+
+// const filteredAppointments = computed(() => {
+//     return props.appointments.filter((a) => {
+//         const matchesSearch = a.pet_name
+//             .toLowerCase()
+//             .includes(searchTerm.value.toLowerCase());
+//         const matchesStatus =
+//             !statusFilter.value || a.status === statusFilter.value;
+//         return matchesSearch && matchesStatus;
+//     });
+// });
 </script>
