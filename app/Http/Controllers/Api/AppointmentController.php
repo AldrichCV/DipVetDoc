@@ -11,69 +11,137 @@ use Illuminate\Http\JsonResponse;
 
 class AppointmentController extends Controller
 {
+    // public function index(): JsonResponse
+    // {
+    //     $baseSelect = [
+    //         'ua.id as appointment_id',
+    //         'ua.*',
+    //         'p.id as pet_id',
+    //         'p.name as pet_name',
+    //         'p.breed',
+    //         'p.species',
+    //         'p.sex',
+    //         'p.date_of_birth',
+    //         's.name as reason_name',
+    //         DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
+    //         DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+    //                 "user_id", u.id,
+    //                 "name", u.name,
+    //                 "role", u.role
+    //             ))
+    //             FROM assigned_vet av
+    //             JOIN users u ON av.user_id = u.id
+    //             WHERE av.appointment_id = ua.id) as assigned_personnel')
+    //     ];
+
+    //     $query = DB::table('user_appointments as ua')
+    //         ->leftJoin('pets as p', 'ua.pet_code', '=', 'p.pet_code')
+    //         ->leftJoin('services as s', 'ua.reason', '=', 's.id')
+    //         ->orderBy('ua.appointment_date', 'desc');
+
+    //     if (auth()->user()->role === 'admin') {
+    //         $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
+    //             ->addSelect('owner.id as owner_id', 'owner.name as owner_name')
+    //             ->addSelect($baseSelect);
+
+    //     } elseif (auth()->user()->role === 'vet') {
+    //         $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
+    //             ->whereIn('ua.id', function ($sub) {
+    //                 $sub->select('appointment_id')
+    //                     ->from('assigned_vet')
+    //                     ->where('user_id', auth()->id());
+    //             })
+    //             ->addSelect('owner.id as owner_id', 'owner.name as owner_name')
+    //             ->addSelect($baseSelect);
+
+    //     } else {
+    //         $query->where('ua.client_id', auth()->id())
+    //             ->addSelect($baseSelect);
+    //     }
+
+    //     $appointments = $query->get();
+
+    //     // Decode JSON for assigned personnel
+    //     $appointments->transform(function ($appointment) {
+    //         $assigned = json_decode($appointment->assigned_personnel, true) ?? [];
+    //         $appointment->vet_name = $assigned[0]['name'] ?? null;
+    //         $appointment->specialization = $assigned[0]['specialization'] ?? 'General Practice';
+    //         return $appointment;
+    //     });
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'data' => $appointments
+    //     ]);
+    // }
+
     public function index(): JsonResponse
-    {
-        $baseSelect = [
-            'ua.id as appointment_id',
-            'ua.*',
-            'p.id as pet_id',
-            'p.name as pet_name',
-            'p.breed',
-            'p.species',
-            'p.sex',
-            'p.date_of_birth',
-            's.name as reason_name',
-            DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
-            DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                    "user_id", u.id,
-                    "name", u.name,
-                    "role", u.role
-                ))
-                FROM assigned_vet av
-                JOIN users u ON av.user_id = u.id
-                WHERE av.appointment_id = ua.id) as assigned_personnel')
-        ];
+{
+    $perPage = request()->get('per_page', 10); // Default 10 items per page
 
-        $query = DB::table('user_appointments as ua')
-            ->leftJoin('pets as p', 'ua.pet_code', '=', 'p.pet_code')
-            ->leftJoin('services as s', 'ua.reason', '=', 's.id')
-            ->orderBy('ua.appointment_date', 'desc');
+    $baseSelect = [
+        'ua.id as appointment_id',
+        'ua.*',
+        'p.id as pet_id',
+        'p.name as pet_name',
+        'p.breed',
+        'p.species',
+        'p.sex',
+        'p.date_of_birth',
+        's.name as reason_name',
+        DB::raw('TIMESTAMPDIFF(YEAR, p.date_of_birth, CURDATE()) as age'),
+        DB::raw('(SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                "user_id", u.id,
+                "name", u.name,
+                "role", u.role
+            ))
+            FROM assigned_vet av
+            JOIN users u ON av.user_id = u.id
+            WHERE av.appointment_id = ua.id) as assigned_personnel')
+    ];
 
-        if (auth()->user()->role === 'admin') {
-            $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
-                ->addSelect('owner.id as owner_id', 'owner.name as owner_name')
-                ->addSelect($baseSelect);
+    $query = DB::table('user_appointments as ua')
+        ->leftJoin('pets as p', 'ua.pet_code', '=', 'p.pet_code')
+        ->leftJoin('services as s', 'ua.reason', '=', 's.id')
+        ->orderBy('ua.appointment_date', 'desc');
 
-        } elseif (auth()->user()->role === 'vet') {
-            $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
-                ->whereIn('ua.id', function ($sub) {
-                    $sub->select('appointment_id')
-                        ->from('assigned_vet')
-                        ->where('user_id', auth()->id());
-                })
-                ->addSelect('owner.id as owner_id', 'owner.name as owner_name')
-                ->addSelect($baseSelect);
+    if (auth()->user()->role === 'admin') {
+        $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
+            ->addSelect('owner.id as owner_id', 'owner.name as owner_name')
+            ->addSelect($baseSelect);
 
-        } else {
-            $query->where('ua.client_id', auth()->id())
-                ->addSelect($baseSelect);
-        }
+    } elseif (auth()->user()->role === 'vet') {
+        $query->leftJoin('users as owner', 'ua.client_id', '=', 'owner.id')
+            ->whereIn('ua.id', function ($sub) {
+                $sub->select('appointment_id')
+                    ->from('assigned_vet')
+                    ->where('user_id', auth()->id());
+            })
+            ->addSelect('owner.id as owner_id', 'owner.name as owner_name')
+            ->addSelect($baseSelect);
 
-        $appointments = $query->get();
-
-        // Decode JSON for assigned personnel
-        $appointments->transform(function ($appointment) {
-            $assigned = json_decode($appointment->assigned_personnel, true) ?? [];
-            $appointment->vet_name = $assigned[0]['name'] ?? null;
-            $appointment->specialization = $assigned[0]['specialization'] ?? 'General Practice';
-            return $appointment;
-        });
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $appointments
-        ]);
+    } else {
+        $query->where('ua.client_id', auth()->id())
+            ->addSelect($baseSelect);
     }
+
+    // Apply pagination
+    $appointments = $query->paginate($perPage);
+
+    // Decode JSON for assigned personnel
+    $appointments->getCollection()->transform(function ($appointment) {
+        $assigned = json_decode($appointment->assigned_personnel, true) ?? [];
+        $appointment->vet_name = $assigned[0]['name'] ?? null;
+        $appointment->specialization = $assigned[0]['specialization'] ?? 'General Practice';
+        return $appointment;
+    });
+
+    return response()->json([
+        'status' => 'success',
+        'data' => $appointments
+    ]);
+}
+
 
     
     public function store(Request $request)

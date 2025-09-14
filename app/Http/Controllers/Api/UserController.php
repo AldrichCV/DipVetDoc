@@ -10,7 +10,7 @@ class UserController extends Controller
 {
 
     // GET /api/users?page=1
-    public function index(Request $request)
+    public function index(Request $request) 
     {
         $users = User::paginate(9); // 9 users per page
         return response()->json($users);

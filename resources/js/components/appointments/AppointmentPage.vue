@@ -21,6 +21,19 @@
                 @assign-vet="openAssignVetModal"
                 @show-vet="openVetDetailsModal"
             ></appointments-table>
+
+            <!-- Vuetify Pagination -->
+
+            <v-pagination
+                v-if="pagination.last_page > 1"
+                v-model="pagination.current_page"
+                :length="pagination.last_page"
+                :total-visible="7"
+                color="primary"
+                rounded
+                class="mt-4"
+                @update:modelValue="fetchAppointments"
+            ></v-pagination>
         </div>
 
         <!-- Modals -->
@@ -43,15 +56,14 @@
             :visible="showVetDetails"
             :appointment="selectedAppointment"
             :vets="[selectedAppointment?.vet]"
-        >
-            @close="closeVetDetailsModal" @assign="reassignVet"
-            ></assign-vet-modal
-        >
+            @close="closeVetDetailsModal"
+            @assign="reassignVet"
+        ></assign-vet-modal>
     </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import NewAppointmentModal from "./NewAppointment.vue";
 import AppointmentsTable from "./AppointmentsTable.vue";
@@ -64,30 +76,36 @@ const props = defineProps({
     availableVets: Array,
 });
 
-// State
-const appointments = ref([...props.initialAppointments]);
+const appointments = ref([...(props.initialAppointments || [])]);
+
+const pagination = ref({
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+});
 
 const showNewAppointmentModal = ref(false);
 const showAssignVet = ref(false);
 const showVetDetails = ref(false);
 const selectedAppointment = ref(null);
 
-// Methods
-async function fetchAppointments() {
+// Fetch appointments with pagination
+async function fetchAppointments(page = pagination.value.current_page) {
     try {
-        const response = await axios.get("/api/appointments");
-        appointments.value = response.data.data; // reactive replacement
-
-        // ✅ Show SweetAlert after fetching appointments
-        Swal.fire({
-            icon: "success",
-            title: "Appointments refreshed",
-            text: "The table has been updated successfully!",
-            timer: 1500,
-            showConfirmButton: false,
+        const response = await axios.get("/api/appointments", {
+            params: { page, per_page: pagination.value.per_page },
         });
-    } catch (error) {
-        console.error("Failed to fetch appointments:", error);
+
+        const paginator = response.data.data;
+
+        appointments.value = paginator.data; // Array of appointments
+        pagination.value.current_page = paginator.current_page;
+        pagination.value.last_page = paginator.last_page;
+        pagination.value.per_page = paginator.per_page;
+        pagination.value.total = paginator.total;
+    } catch (err) {
+        console.error("Failed to fetch appointments:", err);
         Swal.fire({
             icon: "error",
             title: "Error",
@@ -96,16 +114,16 @@ async function fetchAppointments() {
     }
 }
 
+// Open/Close Modals
 function openAssignVetModal(appointment) {
     selectedAppointment.value = appointment;
     showAssignVet.value = true;
 }
-
 function closeAssignVetModal() {
     selectedAppointment.value = null;
     showAssignVet.value = false;
 }
-// Vue / JS
+
 async function assignVet({ vet, appointment }) {
     try {
         const payload = {
@@ -113,30 +131,22 @@ async function assignVet({ vet, appointment }) {
             vet_id: vet.id,
         };
 
-        // Assign the vet
         const response = await axios.post(
             `/api/appointments/assign-vet/${appointment.id}`,
             payload,
-            { withCredentials: true } // ensures session/auth cookies are sent
+            { withCredentials: true }
         );
 
         if (response.data.success) {
             const updated = response.data.appointment;
 
-            // Replace old appointment with full updated object
             const index = appointments.value.findIndex(
                 (a) => a.id === updated.id
             );
-            if (index !== -1) {
-                appointments.value[index] = updated;
-            } else {
-                appointments.value.push(updated);
-            }
+            if (index !== -1) appointments.value[index] = updated;
+            else appointments.value.push(updated);
 
-            // Optional: short delay to ensure DB commit before refetch
             await new Promise((resolve) => setTimeout(resolve, 50));
-
-            // Refetch all appointments for consistency
             await fetchAppointments();
 
             closeAssignVetModal();
@@ -155,15 +165,16 @@ function openVetDetailsModal(appointment) {
     selectedAppointment.value = appointment;
     showVetDetails.value = true;
 }
-
 function closeVetDetailsModal() {
     selectedAppointment.value = null;
     showVetDetails.value = false;
 }
-
 function reassignVet({ vet, appointment }) {
     appointment.vet_name = vet.name;
     appointment.vet_id = vet.id;
     closeVetDetailsModal();
 }
+
+// Initial fetch
+onMounted(() => fetchAppointments());
 </script>
