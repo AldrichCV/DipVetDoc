@@ -40,24 +40,15 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased bg-gray-50">
-    <div  x-data="{ sidebarExpanded: true }" class="flex h-screen">
-      
-        <!-- Sidebar (desktop only) -->
-        @auth
-        <aside 
-            :class="sidebarExpanded ? 'w-64' : 'w-16'" 
-            class="hidden lg:flex bg-white shadow-lg border-r border-gray-200 h-screen fixed flex-col transition-all duration-300 ease-in-out">
-            @include('layouts.sidebar')
-        </aside>
-        @endauth
+    <div class="min-h-screen flex justify-center">
 
-        <!-- Main content -->
-<div 
-    :class="sidebarExpanded ? 'lg:ml-64' : 'lg:ml-16'"
-    class="flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ease-in-out"
->
-        
-            <!-- Navbar (top, desktop only) -->
+        <!-- Page wrapper (centered container) -->
+    <div class="w-full max-w-[1550px] mx-auto flex flex-col h-screen bg-white shadow-md"
+     x-data="{ sidebarExpanded: true }">
+
+
+
+            <!-- Navbar -->
             @auth
                 <div class="hidden lg:block">
                     @include('layouts.navigation')
@@ -74,46 +65,56 @@
                 </div>
             </div>
             
-            <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto">
-                @yield('content')
-            </main>
+            <!-- Content area with sidebar + main -->
+            <div class="flex flex-1 overflow-hidden">
+
+                <!-- Sidebar -->
+                @auth
+               <aside 
+                    class="hidden lg:flex bg-white border-r border-gray-200 flex-col transition-all duration-300"
+                    :class="sidebarExpanded ? 'w-64' : 'w-16'">
+                    
+                    <!-- Sidebar content -->
+                    <div class="flex-1 overflow-y-auto">
+                        @include('layouts.sidebar')
+                    </div>
+                </aside>
+
+                @endauth
+
+                <!-- Main content -->
+                <main id="main-content" class="flex-1 overflow-y-auto p-4">
+    @yield('content')
+</main>
+
+            </div>
         </div>
 
         <!-- Mobile Bottom Navbar -->
         @auth
         <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md z-50">
             <div class="flex justify-around items-center py-2">
-
-                <!-- Admin-only: Users -->
                 @if(Auth::user()->role === 'admin')
                 <a href="{{ route('users') }}" 
                    class="flex flex-col items-center text-sm {{ request()->routeIs('users') ? 'text-blue-600' : 'text-gray-500' }}">
                     <i class="fa fa-users text-lg"></i>
                 </a>
-                @endif
-
-                <!-- Admin-only: Vets -->
-                @if(Auth::user()->role === 'admin')
                 <a href="{{ route('vet_team') }}" 
                    class="flex flex-col items-center text-sm {{ request()->routeIs('vet_team') ? 'text-blue-600' : 'text-gray-500' }}">
                     <i class="fa fa-shield-halved text-lg"></i>
                 </a>
                 @endif
 
-                <!-- Home / Dashboard -->
                 <a href="{{ route('dashboard') }}" 
                    class="flex flex-col items-center text-sm {{ request()->routeIs('dashboard') ? 'text-blue-600' : 'text-gray-500' }}">
                     <i class="fa fa-home text-lg"></i>
                 </a>
                 
-                <!-- Appointments -->
-                <a href="{{ auth()->user()->role === 'user' ? route('appointments') : route('appointments') }}"
-                   class="flex flex-col items-center text-sm {{ request()->routeIs(auth()->user()->role === 'user' ? 'appointments' : 'appointments') ? 'text-blue-600' : 'text-gray-500' }}">
+                <a href="{{ route('appointments') }}"
+                   class="flex flex-col items-center text-sm {{ request()->routeIs('appointments') ? 'text-blue-600' : 'text-gray-500' }}">
                     <i class="fa fa-calendar text-lg"></i>
                 </a>
 
-                <!-- Vet & Admin: Consultations -->
                 @if(Auth::user()->role === 'vet' || Auth::user()->role === 'admin')
                 <a href="{{ route('consultations.index') }}" 
                    class="flex flex-col items-center text-sm {{ request()->routeIs('consultations.index') ? 'text-blue-600' : 'text-gray-500' }}">
@@ -124,21 +125,20 @@
         </nav>
         @endauth
     </div>
+
     @if(isset($triggerLogoutEvent) && $triggerLogoutEvent)
-<script>
-    // Broadcast logout to other tabs
-    localStorage.setItem("forceLogout", Date.now());
-</script>
-@endif
+    <script>
+        localStorage.setItem("forceLogout", Date.now());
+    </script>
+    @endif
 
-<script>
-    window.addEventListener("storage", (event) => {
-        if (event.key === "forceLogoutOthers") {
-            window.location.href = "{{ route('logged-out') }}";
-        }
-    });
-</script>
-
+    <script>
+        window.addEventListener("storage", (event) => {
+            if (event.key === "forceLogoutOthers") {
+                window.location.href = "{{ route('logged-out') }}";
+            }
+        });
+    </script>
 
     <!-- JS Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

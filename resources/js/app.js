@@ -1,14 +1,13 @@
 import "./bootstrap";
 import Alpine from "alpinejs";
 import { userStatusControl } from "./user_status_control";
+import "./ajax-navigation.js";
 
 import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import "vuetify/styles";
-// import axios from "./plugins/axios";
-// app.config.globalProperties.$axios = axios;*/
 
 import Consultations from "./components/consultations/Consultations.vue";
 import Appointments from "./components/appointments/AppointmentPage.vue";
@@ -23,20 +22,36 @@ const vuetify = createVuetify({
 });
 
 // -----------------------
-// 2️⃣ Create Vue app
+// 2️⃣ Expose a function to mount Vue
 // -----------------------
-const app = createApp({});
+function mountVueApp() {
+    if (document.querySelector("#app")) {
+        // Unmount any existing app
+        if (window.vueApp) {
+            window.vueApp.unmount();
+        }
 
-// Register components globally
-app.component("consultations", Consultations);
-app.component("appointments", Appointments);
-app.component("users", Users);
+        // Create a fresh Vue app
+        window.vueApp = createApp({});
 
-// Install Vuetify
-app.use(vuetify);
+        // Register components globally
+        window.vueApp.component("consultations", Consultations);
+        window.vueApp.component("appointments", Appointments);
+        window.vueApp.component("users", Users);
 
-// Mount **once** on the root element
-app.mount("#app");
+        // Install Vuetify
+        window.vueApp.use(vuetify);
+
+        // Mount
+        window.vueApp.mount("#app");
+    }
+}
+
+// Mount once on initial page load
+mountVueApp();
+
+// Make available for AJAX script
+window.mountVueApp = mountVueApp;
 
 // -----------------------
 // 3️⃣ Alpine.js setup

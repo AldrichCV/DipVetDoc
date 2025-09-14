@@ -7,13 +7,19 @@
             <button @click="sidebarExpanded = !sidebarExpanded" 
                     class="hidden lg:block p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
 
+                    
                 <!-- Hamburger Icon -->
                 <x-heroicon-o-bars-3 x-show="!sidebarExpanded" class="w-5 h-5 text-gray-600" />
 
                 <!-- Close Icon -->
                 <x-heroicon-o-x-mark x-show="sidebarExpanded" class="w-5 h-5 text-gray-600" />
             </button>
-               @yield('header')
+            <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
+    <img src="{{ asset('dipvetAssets/images/vetlogo1.png') }}" 
+         alt="Logo" class="h-12 w-12"> <!-- bigger logo -->
+    <span class="font-bold text-blue-600 text-2xl">DipVetDoc</span> <!-- bigger text -->
+</a>
+    
             </div>
             
             <div class="flex items-center space-x-4">
@@ -105,6 +111,5 @@
             </div>
         </div>
     </div>
-       <x-second-layer-nav page="{{ $page ?? null }}" />
 </nav>
 
