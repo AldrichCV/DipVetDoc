@@ -1,7 +1,8 @@
 import "./bootstrap";
 import Alpine from "alpinejs";
 import { userStatusControl } from "./user_status_control";
-import "./ajax-navigation.js";
+//import "./ajax-navigation.js";
+import "./sidebar-state.js";
 
 import { createApp } from "vue";
 import { createVuetify } from "vuetify";

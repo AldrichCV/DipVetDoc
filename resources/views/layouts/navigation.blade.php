@@ -4,15 +4,11 @@
             <div class="flex items-center space-x-4">
                        
             <!-- Toggle Button -->
-            <button @click="sidebarExpanded = !sidebarExpanded" 
-                    class="hidden lg:block p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
-
-                <!-- Hamburger Icon -->
-                <x-heroicon-o-bars-3 x-show="!sidebarExpanded" class="w-5 h-5 text-gray-600" />
-
-                <!-- Close Icon -->
-                <x-heroicon-o-x-mark x-show="sidebarExpanded" class="w-5 h-5 text-gray-600" />
-            </button>
+           <button @click="$store.sidebar.toggle()" 
+        class="hidden lg:block p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+    <x-heroicon-o-bars-3 x-show="!$store.sidebar.expanded" class="w-5 h-5 text-gray-600" />
+    <x-heroicon-o-x-mark x-show="$store.sidebar.expanded" class="w-5 h-5 text-gray-600" />
+</button>
 
             <!-- Logo -->
             <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">

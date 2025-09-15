@@ -3,6 +3,7 @@
 /**
  * Bind AJAX links with `data-ajax` attribute
  */
+
 function bindAjaxLinks() {
     console.log("Binding AJAX links...");
     document.querySelectorAll("a[data-ajax]").forEach((link) => {
