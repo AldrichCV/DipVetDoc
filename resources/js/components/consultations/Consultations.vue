@@ -1,5 +1,5 @@
 <template>
-    <div class="py-6 sm:py-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div>
         <!-- Empty state -->
         <div v-if="consultations.length === 0" class="text-center py-16">
             <div class="mx-auto h-24 w-24 text-gray-300 mb-4">
@@ -34,7 +34,7 @@
                         v-model="selectedSpecies"
                         class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     >
-                        <option value="">All Species</option>
+                        <option value="">All</option>
                         <option
                             v-for="species in allSpecies"
                             :key="species"
@@ -54,7 +54,7 @@
                         v-model="selectedVisitRange"
                         class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     >
-                        <option value="">All Visits</option>
+                        <option value="">All</option>
                         <option value="1">1 Visit</option>
                         <option value="2-5">2-5 Visits</option>
                         <option value="6+">6+ Visits</option>

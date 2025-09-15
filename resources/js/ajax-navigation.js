@@ -30,7 +30,40 @@ function updateSidebarActive() {
 }
 
 /**
- * Handle AJAX navigation
+ * Swap new content and re-initialize Vue + Alpine
+ */
+function swapContent(newContent, url = null) {
+    const container = document.querySelector("#main-content");
+    if (!container) {
+        console.error("❌ No #main-content container found!");
+        return;
+    }
+
+    container.innerHTML = newContent;
+
+    if (url) {
+        window.history.pushState({}, "", url);
+    }
+
+    // Re-bind AJAX links inside the new content
+    bindAjaxLinks();
+
+    // Re-mount Vue app
+    if (typeof window.mountVueApp === "function") {
+        window.mountVueApp();
+    }
+
+    // Re-initialize Alpine for new DOM
+    if (window.Alpine) {
+        Alpine.initTree(container);
+    }
+
+    // Update sidebar active state
+    updateSidebarActive();
+}
+
+/**
+ * Handle AJAX navigation click
  */
 function handleAjaxClick(e) {
     e.preventDefault();
@@ -45,15 +78,7 @@ function handleAjaxClick(e) {
             const newContent = doc.querySelector("#main-content")?.innerHTML;
 
             if (newContent) {
-                document.querySelector("#main-content").innerHTML = newContent;
-                window.history.pushState({}, "", url);
-                bindAjaxLinks();
-
-                if (typeof window.mountVueApp === "function") {
-                    window.mountVueApp();
-                }
-
-                updateSidebarActive();
+                swapContent(newContent, url);
             } else {
                 console.error("❌ No #main-content found in response!");
             }
@@ -75,14 +100,9 @@ window.addEventListener("popstate", () => {
             const newContent = doc.querySelector("#main-content")?.innerHTML;
 
             if (newContent) {
-                document.querySelector("#main-content").innerHTML = newContent;
-                bindAjaxLinks();
-
-                if (typeof window.mountVueApp === "function") {
-                    window.mountVueApp();
-                }
-
-                updateSidebarActive();
+                swapContent(newContent);
+            } else {
+                console.error("❌ No #main-content found in response!");
             }
         })
         .catch((err) => console.error("Popstate fetch failed:", err));

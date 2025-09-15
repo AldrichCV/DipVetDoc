@@ -1,10 +1,11 @@
 <template>
-    <div class="py-6 lg:py-4">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Header -->
+    <div>
+        <div>
+            <!-- Header 
             <div
                 class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
-            >
+            >-->
+            <div>
                 <button
                     v-if="!isAdmin"
                     @click="showNewAppointmentModal = true"

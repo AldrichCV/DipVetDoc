@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 
     <link rel="icon" type="image/png" href="{{ asset('dipvetAssets/images/vetlogo1.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('dipvetAssets/images/vetlogo1.png') }}">
@@ -35,10 +38,11 @@
 
     <!-- Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
 </head>
+
 <body class="font-sans antialiased bg-gray-50">
     <div class="min-h-screen flex justify-center">
 
@@ -84,9 +88,8 @@
 
                 <!-- Main content -->
                 <main id="main-content" class="flex-1 overflow-y-auto p-4">
-    @yield('content')
-</main>
-
+                    @yield('content')
+                </main>
             </div>
         </div>
 
@@ -139,6 +142,38 @@
             }
         });
     </script>
+
+    <script>
+    const isAuthenticated = @json(auth()->check());
+
+    // Catch browser back/forward navigation (bfcache restore)
+    window.addEventListener("pageshow", function (event) {
+        if (event.persisted && !isAuthenticated) {
+            window.location.href = "{{ route('logged-out') }}";
+        }
+    });
+
+    // Catch normal back button navigation
+    window.addEventListener("popstate", function () {
+        if (!isAuthenticated) {
+            window.location.href = "{{ route('logged-out') }}";
+        }
+    });
+
+    // Prevent navigating back into a protected page after logout
+    if (!isAuthenticated) {
+        history.pushState(null, null, location.href);
+    }
+
+    // Sync logout across tabs
+    window.addEventListener("storage", (event) => {
+        if (event.key === "forceLogout") {
+            window.location.href = "{{ route('logged-out') }}";
+        }
+    });
+</script>
+
+
 
     <!-- JS Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

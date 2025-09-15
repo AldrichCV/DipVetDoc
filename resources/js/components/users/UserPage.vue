@@ -1,5 +1,5 @@
 <template>
-    <div class="py-6 sm:py-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div>
         <!-- Users Grid -->
         <UsersGrid :users="paginatedUsers" @open-modal="openModal" />
 
