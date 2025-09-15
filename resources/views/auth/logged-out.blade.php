@@ -1,7 +1,7 @@
-@extends('layouts.app') {{-- Or your master layout --}}
+@extends('layouts.app')
 
 @section('content')
-<div class="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light">
+<div class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-light">
     <div class="card shadow p-5">
         <h2 class="text-center text-danger">You are logged out</h2>
         <p class="text-center text-muted">Your session has ended. Please log in again to continue.</p>
@@ -11,6 +11,7 @@
     </div>
 </div>
 @endsection
+
 @if(isset($initiator) && $initiator)
 <script>
     // This tab triggered logout → go straight to login
@@ -27,4 +28,3 @@
     });
 </script>
 @endif
-

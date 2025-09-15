@@ -10,6 +10,9 @@
 
 @section('content')
 <div id="app">
-   <consultations :consultations='@json($consultations)'></consultations>
+   <consultations 
+       :consultations='@json($consultations)'
+       :all-species='@json($allSpecies)'
+   ></consultations>
 </div>
 @endsection

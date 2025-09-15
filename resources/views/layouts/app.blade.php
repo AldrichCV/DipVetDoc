@@ -50,8 +50,6 @@
     <div class="w-full max-w-[1550px] mx-auto flex flex-col h-screen bg-white shadow-md"
      x-data="{ sidebarExpanded: true }">
 
-
-
             <!-- Navbar -->
             @auth
                 <div class="hidden lg:block">
@@ -75,7 +73,7 @@
                 <!-- Sidebar -->
                 @auth
                <aside 
-                    class="hidden lg:flex bg-white border-r border-gray-200 flex-col transition-all duration-300"
+                    class="hidden lg:flex bg-white flex-col transition-all duration-300"
                     :class="sidebarExpanded ? 'w-64' : 'w-16'">
                     
                     <!-- Sidebar content -->

@@ -7,19 +7,23 @@
             <div class="flex items-start justify-between mb-3">
                 <div class="flex-1 min-w-0">
                     <h3 class="text-lg font-semibold text-gray-900 truncate">
-                        {{ firstConsult.pet_name }}
+                        {{ consultation.pet_name }}
                     </h3>
                     <p class="text-sm text-gray-600 mt-1">
-                        {{ firstConsult.pet_species }} •
-                        {{ firstConsult.pet_breed }}
+                        {{ consultation.pet_species }} •
+                        {{ consultation.pet_breed }}
                     </p>
                 </div>
                 <div class="flex-shrink-0 ml-3">
                     <span
                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                     >
-                        {{ consultationCount }}
-                        {{ consultationCount > 1 ? "visits" : "visit" }}
+                        {{ consultation.visit_count || 1 }}
+                        {{
+                            (consultation.visit_count || 1) > 1
+                                ? "visits"
+                                : "visit"
+                        }}
                     </span>
                 </div>
             </div>
@@ -39,7 +43,7 @@
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                         />
                     </svg>
-                    <span class="truncate">{{ firstConsult.owner_name }}</span>
+                    <span class="truncate">{{ consultation.owner_name }}</span>
                 </div>
                 <div class="flex items-center text-sm text-gray-500">
                     <svg
@@ -76,7 +80,7 @@
             class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
         >
             <ConsultationModal
-                :consultations="consultations"
+                :consultations="[consultation]"
                 @close="openConsultationModal = false"
             />
         </div>
@@ -88,25 +92,23 @@ import { ref, computed } from "vue";
 import ConsultationModal from "./ConsultationModal.vue";
 
 const props = defineProps({
-    consultations: { type: Array, required: true },
-});
-
-const firstConsult = props.consultations[0];
-const consultationCount = props.consultations.length;
-
-const lastConsultDateFormatted = computed(() => {
-    const last = props.consultations
-        .slice()
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-    return new Date(last.created_at).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    });
+    consultation: { type: Object, required: true }, // single consultation object
 });
 
 const openConsultationModal = ref(false);
 function openModal() {
     openConsultationModal.value = true;
 }
+
+// Format last visit date
+const lastConsultDateFormatted = computed(() => {
+    return new Date(props.consultation.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+});
+
+// Aliases for template
+const consultation = props.consultation;
 </script>

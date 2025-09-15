@@ -15,48 +15,45 @@ class ConsultationController extends Controller
  public function index()
 {
     $consultations = DB::table('user_appointments as ua')
-        ->join('assigned_vet as av', 'ua.id', '=', 'av.appointment_id') 
-        ->join('pets', 'ua.pet_code', '=', 'pets.pet_code')
-        ->join('users as owners', 'pets.owner_id', '=', 'owners.id')
-        ->leftJoin('medical_consultations as mc', 'pets.id', '=', 'mc.pet_id')
-        ->join('users as vets', 'av.user_id', '=', 'vets.id')
-        ->select(
-            'pets.id as pet_id',
-            'pets.pet_code',
-            'pets.name as pet_name',
-            'pets.species as pet_species',
-            'pets.breed as pet_breed',
-            'pets.sex as pet_sex',
-            'pets.date_of_birth',
-            'owners.name as owner_name',
-            'vets.name as vet_name',
-            'mc.id as consultation_id',
-            'mc.body_weight',
-            'mc.respiratory_rate',
-            'mc.temperature',
-            'mc.complaint',
-            'mc.medication',
-            'mc.prescription',
-            'mc.status',
-            'mc.created_at',
-            DB::raw('TIMESTAMPDIFF(YEAR, pets.date_of_birth, CURDATE()) as pet_age')
-        )
-        ->when(auth()->user()->role !== 'admin', function ($query) {
-            return $query->where('av.user_id', Auth::id());
-        })
-        ->orderBy('mc.created_at', 'desc')
-        ->get()
-        ->groupBy('pet_id')
-        ->map(function ($c) {
-            return $c->values();
-        })
-        ->values();
+    ->join('assigned_vet as av', 'ua.id', '=', 'av.appointment_id') 
+    ->join('pets', 'ua.pet_code', '=', 'pets.pet_code')
+    ->join('users as owners', 'pets.owner_id', '=', 'owners.id')
+    ->leftJoin('medical_consultations as mc', 'pets.id', '=', 'mc.pet_id')
+    ->join('users as vets', 'av.user_id', '=', 'vets.id')
+    ->select(
+        'pets.id as pet_id',
+        'pets.pet_code',
+        'pets.name as pet_name',
+        'pets.species as pet_species',
+        'pets.breed as pet_breed',
+        'pets.sex as pet_sex',
+        'pets.date_of_birth',
+        'owners.name as owner_name',
+        'vets.name as vet_name',
+        'mc.id as consultation_id',
+        'mc.body_weight',
+        'mc.respiratory_rate',
+        'mc.temperature',
+        'mc.complaint',
+        'mc.medication',
+        'mc.prescription',
+        'mc.status',
+        'mc.created_at',
+        DB::raw('TIMESTAMPDIFF(YEAR, pets.date_of_birth, CURDATE()) as pet_age')
+    )
+    ->when(auth()->user()->role !== 'admin', function ($query) {
+        return $query->where('av.user_id', Auth::id());
+    })
+    ->orderBy('mc.created_at', 'desc')
+    ->get()
+    ->groupBy('pet_id')
+    ->map(fn($group) => $group->sortByDesc('created_at')->first())
+    ->values();
 
-    // If AJAX request, return only the inner Blade (no full layout)
-  
+$allSpecies = DB::table('pets')->select('species')->distinct()->pluck('species');
 
-    // Otherwise return full page
-    return view('consultations', compact('consultations'));
+return view('consultations', compact('consultations', 'allSpecies'));
+
 }
 
     public function store(Request $request)
