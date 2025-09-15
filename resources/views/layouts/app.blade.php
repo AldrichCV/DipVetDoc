@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-role" content="{{ Auth::user()->role }}">
+
 
     @include('layouts.partials.head-assets')
 
@@ -19,9 +21,7 @@
 
 <body class="font-sans antialiased bg-white" x-data>
     <!-- Loader (optional, prevents white flash) -->
-    <div id="loader" class="fixed inset-0 bg-white flex items-center justify-center z-50" x-cloak>
-        <span class="text-blue-600 font-bold text-lg">Loading...</span>
-    </div>
+ 
 
     <div class="min-h-screen flex justify-center" x-cloak>
         <!-- Page wrapper -->
@@ -103,23 +103,7 @@
 
     <!-- Alpine + SPA navigation -->
     <script>
-        document.addEventListener('alpine:init', () => {
-            document.getElementById('loader')?.remove(); // hide loader
-        });
-
-        // Handle AJAX sidebar navigation
-        document.querySelectorAll('.sidebar-link').forEach(link => {
-            link.addEventListener('click', async e => {
-                e.preventDefault();
-                const url = link.dataset.url;
-                const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                const html = await response.text();
-                document.getElementById('main-content').innerHTML = html;
-                history.pushState(null, '', url); // Update URL
-                document.getElementById('main-content').scrollTop = 0;
-            });
-        });
-
+      
         // Sync logout and handle back/forward
         const isAuthenticated = @json(auth()->check());
         window.addEventListener("pageshow", event => {

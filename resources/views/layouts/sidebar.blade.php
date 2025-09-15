@@ -8,7 +8,6 @@
         <!-- Dashboard -->
         <template x-for="link in links" :key="link.name">
             <a :href="link.url"
-               @click.prevent="loadPage(link.url)"
                :class="activeRoute === link.url ? 'bg-blue-100 text-blue-800' : 'text-gray-700 hover:bg-blue-100'"
                class="flex items-center px-3 py-2 rounded-lg transition-colors animate-nav-item"
                :aria-current="activeRoute === link.url ? 'page' : undefined"
@@ -27,7 +26,7 @@
 
     </nav>
 
-    <div class="p-4 border-t border-gray-200">
+    <div class="p-4 border-gray-200">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit"
@@ -67,17 +66,6 @@
                     window.addEventListener('popstate', () => {
                         this.activeRoute = window.location.pathname;
                     });
-                },
-
-                loadPage(url) {
-                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                        .then(res => res.text())
-                        .then(html => {
-                            document.getElementById('main-content').innerHTML = html;
-                            this.activeRoute = new URL(url, window.location.origin).pathname;
-                            history.pushState(null, '', url);
-                            document.getElementById('main-content').scrollTop = 0;
-                        });
                 }
             }
         }
