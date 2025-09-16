@@ -18,6 +18,3 @@
 </div>
 @endsection
 
-@push('scripts')
-<script type="module" src="{{ mix('resources/js/app.js') }}"></script>
-@endpush

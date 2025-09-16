@@ -21,7 +21,6 @@
 
 <body class="font-sans antialiased bg-white" x-data>
     <!-- Loader (optional, prevents white flash) -->
- 
 
     <div class="min-h-screen flex justify-center" x-cloak>
         <!-- Page wrapper -->
