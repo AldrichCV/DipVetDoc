@@ -97,4 +97,44 @@ class UserController extends Controller
         }
     }
 
+       public function updateStatus(Request $request, User $user)
+    {
+        // Validate the incoming status
+        $request->validate([
+            'status' => 'required|in:active,inactive,rejected',
+        ]);
+
+        // Update and save
+        $user->status = $request->status;
+        $user->save();
+
+        // Return JSON response
+        return response()->json([
+            'message' => 'User status updated successfully',
+            'user' => $user,
+        ]);
+    }
+    
+    public function activate(Request $request, User $user)
+    {
+        $user->status = 'active';
+        $user->save();
+
+        return response()->json([
+            'message' => 'User activated successfully',
+            'user' => $user
+        ]);
+    }
+
+    public function deactivate(Request $request, User $user)
+    {
+        $user->status = 'inactive';
+        $user->save();
+
+        return response()->json([
+            'message' => 'User deactivated successfully',
+            'user' => $user
+        ]);
+    }
 }
+

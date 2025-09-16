@@ -1,57 +1,35 @@
-<nav class="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-40">
+<nav class="bg-white shadow-sm sticky top-0 z-40">
     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <div class="flex items-center space-x-4">
                        
             <!-- Toggle Button -->
-            <button @click="sidebarExpanded = !sidebarExpanded" 
-                    class="hidden lg:block p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+           <button @click="$store.sidebar.toggle()" 
+        class="hidden lg:block p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:outline-none">
+    <x-heroicon-o-bars-3 x-show="!$store.sidebar.expanded" class="w-5 h-5 text-gray-600" />
+    <x-heroicon-o-x-mark x-show="$store.sidebar.expanded" class="w-5 h-5 text-gray-600" />
+</button>
 
-                <!-- Hamburger Icon -->
-                <x-heroicon-o-bars-3 x-show="!sidebarExpanded" class="w-5 h-5 text-gray-600" />
-
-                <!-- Close Icon -->
-                <x-heroicon-o-x-mark x-show="sidebarExpanded" class="w-5 h-5 text-gray-600" />
-            </button>
-               @yield('header')
+            <!-- Logo -->
+            <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
+                <img src="{{ asset('dipvetAssets/images/dip_vet_doc.png') }}" 
+                     alt="Logo" class="h-12 w-12">
+                <span class="font-bold text-blue-600 text-2xl">DipVetDoc</span>
+            </a>
+    
             </div>
             
             <div class="flex items-center space-x-4">
-                <div class="hidden md:block relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </div>
-                    <form action="{{ route('search') }}" method="GET">
-                    <input type="text" name="q" placeholder="Search..." class="block w-64 pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors duration-200">
-                    </form>
-                </div>
 
+               <!-- Notifications -->
                <div class="relative">
-                    <button class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
-                        <!-- Bell Icon -->
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 
-                                    6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 
-                                    6.165 6 8.388 6 11v3.159c0 .538-.214 
-                                    1.055-.595 1.436L4 17h5m6 0v1a3 3 0 
-                                    11-6 0v-1m6 0H9" />
-                        </svg>
-
-                        <!-- Notification Badge -->
-                        @if((!empty($pendingCount) && $pendingCount > 0) || (!empty($pendingAppointmentCount) && $pendingAppointmentCount > 0))
-                            <span class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs 
-                                        rounded-full flex items-center justify-center animate-pulse">
-                                {{ ($pendingCount ?? 0) + ($pendingAppointmentCount ?? 0) }}
-                            </span>
-                        @endif
-                    </button>
+                   <x-notifications />
                 </div>
+
+                <!-- User Dropdown -->
                 <x-dropdown align="right" width="64">
                     <x-slot name="trigger">
-                        <button class="flex items-center space-x-3 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
+                        <button class="flex items-center space-x-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition-all duration-200">
                             <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </div>
@@ -67,7 +45,7 @@
 
                     <x-slot name="content">
                         <div class="py-2">
-                            <div class="px-4 py-3 border-b border-gray-100">
+                            <div class="px-4 py-3">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
                                         {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
@@ -79,8 +57,9 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="py-2">
-                                <x-dropdown-link :href="route('profile.edit')" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <x-dropdown-link :href="route('profile.edit')" data-ajax class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                     <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
@@ -94,8 +73,6 @@
                                     </svg>
                                     {{ __('Preferences') }}
                                 </x-dropdown-link>
-
-                                <div class="border-t border-gray-100 my-2"></div>
 
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
@@ -115,4 +92,3 @@
         </div>
     </div>
 </nav>
-

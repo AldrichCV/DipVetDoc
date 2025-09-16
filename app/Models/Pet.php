@@ -20,9 +20,23 @@ class Pet extends Model
     'owner_id'
 ];
 
+    protected $casts = [
+        'date_of_birth' => 'date', // or 'datetime'
+    ];
+
+ public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
     public function consultations()
     {
-        return $this->hasMany(Consultation::class);
+        return $this->hasMany(MedicalConsultation::class);
+    }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'pet_code', 'pet_code');
     }
 
     //

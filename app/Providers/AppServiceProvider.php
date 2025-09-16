@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->vetCount();
         $this->appointmentCount();
+        
     }
 
     function vetCount()
