@@ -1,8 +1,17 @@
 <template>
-    <div>
+    <div class="relative min-h-screen">
+        <!-- Loader -->
+        <div
+            v-if="loading"
+            class="absolute inset-0 flex items-center justify-center bg-white z-50"
+        >
+            <div
+                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"
+            ></div>
+        </div>
         <!-- Empty state -->
         <div
-            v-if="props.consultations.length === 0"
+            v-else-if="props.consultations.length === 0"
             class="text-center py-8 sm:py-12 lg:py-16"
         >
             <div class="mx-auto h-24 w-24 text-gray-300 mb-4">
@@ -74,7 +83,6 @@
 
                 <!-- Clear Filters -->
                 <div class="lg:w-auto">
-                    <!-- Empty label for alignment -->
                     <label class="block text-sm font-medium text-gray-700 mb-2"
                         >&nbsp;</label
                     >
@@ -104,10 +112,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ConsultationCard from "./ConsultationCard.vue";
 
-// Note: Ensure Font Awesome is included in your project (e.g., via CDN: <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">)
+const loading = ref(true);
 
 // Props from Blade
 const props = defineProps({
@@ -145,13 +153,9 @@ const filteredConsultations = computed(() => {
 
         const matchesSearch = search
             ? consultation.pet_name?.toLowerCase()?.includes(search) ||
-              false ||
               consultation.owner_name?.toLowerCase()?.includes(search) ||
-              false ||
               consultation.pet_species?.toLowerCase()?.includes(search) ||
-              false ||
-              consultation.pet_breed?.toLowerCase()?.includes(search) ||
-              false
+              consultation.pet_breed?.toLowerCase()?.includes(search)
             : true;
 
         return matchesSpecies && matchesSearch;
@@ -162,4 +166,11 @@ function clearFilters() {
     searchTerm.value = "";
     selectedSpecies.value = "";
 }
+
+// ✅ Delay so loader actually shows (adjust 300ms as needed)
+onMounted(() => {
+    setTimeout(() => {
+        loading.value = false;
+    }, 300);
+});
 </script>

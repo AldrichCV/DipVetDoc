@@ -4,8 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="user-role" content="{{ Auth::user()->role }}">
-
 
     @include('layouts.partials.head-assets')
 
@@ -20,11 +18,11 @@
 </head>
 
 <body class="font-sans antialiased bg-white" x-data>
-    <!-- Loader (optional, prevents white flash) -->
-
     <div class="min-h-screen flex justify-center" x-cloak>
         <!-- Page wrapper -->
-        <div class="w-full max-w-[1550px] mx-auto flex flex-col h-screen bg-white shadow-md" x-data="{ sidebarExpanded: true }" x-cloak>
+        <div class="w-full max-w-[1550px] mx-auto flex flex-col h-screen bg-white shadow-md" 
+             x-data="{ sidebarExpanded: true }" 
+             x-cloak>
 
             <!-- Mobile Header -->
             <div class="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-3 relative z-10" x-cloak>
@@ -63,8 +61,20 @@
                 @endauth
 
                 <!-- Main content -->
-                <main id="main-content" class="flex-1 overflow-y-auto p-4" x-cloak>
-                    @yield('content')
+                <main id="main-content" class="flex-1 overflow-y-auto p-4 relative" 
+                      x-data="{ loading: true }" 
+                      x-init="window.addEventListener('load', () => loading = false)">
+                    
+                    <!-- Preloader -->
+                    <div x-show="loading" 
+                         class="absolute inset-0 flex items-center justify-center bg-white z-50">
+                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                    </div>
+
+                    <!-- Actual content -->
+                    <div x-show="!loading" x-cloak>
+                        @yield('content')
+                    </div>
                 </main>
             </div>
         </div>
@@ -102,8 +112,6 @@
 
     <!-- Alpine + SPA navigation -->
     <script>
-      
-        // Sync logout and handle back/forward
         const isAuthenticated = @json(auth()->check());
         window.addEventListener("pageshow", event => {
             if (event.persisted && !isAuthenticated) location.href = "{{ route('logged-out') }}";

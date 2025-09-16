@@ -1,6 +1,14 @@
 <template>
     <div>
         <div>
+            <div
+                v-if="loading"
+                class="absolute inset-0 flex items-center justify-center bg-white z-50"
+            >
+                <div
+                    class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"
+                ></div>
+            </div>
             <!-- Header 
             <div
                 class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
@@ -90,6 +98,7 @@ const showNewAppointmentModal = ref(false);
 const showAssignVet = ref(false);
 const showVetDetails = ref(false);
 const selectedAppointment = ref(null);
+const loading = ref(true);
 
 // Fetch appointments with pagination
 async function fetchAppointments(page = pagination.value.current_page) {
@@ -112,6 +121,8 @@ async function fetchAppointments(page = pagination.value.current_page) {
             title: "Error",
             text: "Failed to fetch appointments.",
         });
+    } finally {
+        loading.value = false;
     }
 }
 
