@@ -14,7 +14,7 @@ class UserController extends Controller
 {
     public function pets()
     {
-        $pets = Pet::where('owner_id', auth()->id())->get();
+        $pets = Pet::where('owner_id', Auth::user()->id)->get();
         return view('user_pets', compact('pets'));
     }
 

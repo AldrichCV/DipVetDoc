@@ -7,10 +7,13 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PetController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductRequestController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\DB;
 
 require __DIR__.'/auth.php';
 
@@ -87,17 +90,35 @@ Route::post('/assigned-vet/remove', [AdminController::class, 'remove']);
 Route::get('/consultations', [AdminController::class, 'consultations'])->name('consultations');
 
 
+use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\MedicalController;
+
 Route::prefix('consultations')->middleware(['auth'])->group(function () {
     Route::get('/', [ConsultationController::class, 'index'])->name('consultations.index');
     
-}); 
+});
 
+Route::prefix('consultations')->middleware(['auth'])->group(function () {
+    Route::get('/', [ConsultationController::class, 'index'])->name('consultations.index');
+});
 
-use App\Http\Controllers\ConsultationController;
-use App\Http\Controllers\MedicalController;
 Route::resource('consultations', ConsultationController::class);
 Route::resource('medical', MedicalController::class);
 Route::get('consultations/{consultation}/download', [ConsultationController::class, 'download'])
     ->name('consultations.download');
 Route::get('/search', [AdminController::class, 'search'])->name('search');
 
+// Product routes
+Route::get('/products', [ProductController::class, 'index'])->name('Products.ProductList');
+Route::get('/products/search', [ProductController::class, 'search'])->name('Products.ProductSearch');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('Products.ProductView');
+
+// Authenticated routes
+Route::middleware('auth')->group(function () {
+    // Customer product request routes
+    Route::get('/product-requests', [ProductRequestController::class, 'index'])->name('ProductRequests.ProductRequestList');
+    Route::get('/product-requests/create/{product}', [ProductRequestController::class, 'create'])->name('ProductRequests.ProductCreateRequest');
+    Route::post('/product-requests', [ProductRequestController::class, 'store'])->name('product-requests.store');
+    Route::get('/product-requests/{productRequest}', [ProductRequestController::class, 'show'])->name('product-requests.show');
+    Route::patch('/product-requests/{productRequest}/cancel', [ProductRequestController::class, 'cancel'])->name('product-requests.cancel');
+});

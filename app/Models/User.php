@@ -61,5 +61,23 @@ class User extends Authenticatable
         return $this->hasOne(Veterinarian::class);
     }
 
-    
+     public function productRequests()
+    {
+        return $this->hasMany(ProductRequest::class, 'customer_id');
+    }
+
+    public function approvedRequests()
+    {
+        return $this->hasMany(ProductRequest::class, 'approved_by');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isStaff()
+    {
+        return in_array($this->role, ['admin', 'staff']);
+    }
 }
