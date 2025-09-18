@@ -10,11 +10,7 @@
 
 @section('content')
 <div id="app">
-    <appointments
-        :initial-appointments='@json($appointments)'
-        :is-admin='@json(auth()->user()->role === "admin")'
-        :available-vets='@json(\App\Models\User::where("role", "vet")->get())'
-    ></appointments>
+    <appointments></appointments>
 </div>
 @endsection
 

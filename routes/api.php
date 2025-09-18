@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AppointmentController;
 
 Route::middleware('auth')->post('/appointments', [AppointmentController::class, 'store']);
 Route::get('/appointments', [AppointmentController::class, 'index']);
+Route::get('/appointments/assign-vet', [AppointmentController::class, 'vets']);
 Route::post('/appointments/assign-vet/{id}', [AppointmentController::class, 'assignVet']);
 Route::patch('/appointments/{appointment}/status/{status}', [AppointmentController::class, 'updateStatus']);
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Appointment;
 use App\Models\Pet;
+use App\Models\Veterinarian;
 use Illuminate\Http\JsonResponse;
 
 class AppointmentController extends Controller
@@ -138,11 +139,10 @@ class AppointmentController extends Controller
 
     return response()->json([
         'status' => 'success',
+        'is_admin' => auth()->user()->role === 'admin',
         'data' => $appointments
     ]);
 }
-
-
     
     public function store(Request $request)
     {
@@ -205,38 +205,91 @@ class AppointmentController extends Controller
         return 'PET' . $today . '-' . str_pad($countToday, 3, '0', STR_PAD_LEFT);
     }
 
-    public function assignVet(Request $request, $id)
-{
-    try {
-        $data = $request->validate([
-            'vet_id'        => 'required|integer|exists:vet_profile,user_id',
-            'appointment_id'=> 'required|integer|exists:user_appointments,id',
-        ]);
+    public function vets()
+    {
+        try {
+        $approvedVets = Veterinarian::with('user')
+        ->whereHas('user', function ($query) {
+            $query->where('role', 'vet') // or whatever your role value is
+                ->where('status', 'active');   // or whatever status is stored
+        })
+        ->get()
+        ->map(fn ($vet) => [
+            'id'             => $vet->id,
+            'user_id'        => $vet->user?->id,
+            'name'           => $vet->user?->name,
+            'email'          => $vet->user?->email,
+            'specialization' => $vet->specialization ?? 'N/A',
+            'license_number' => $vet->license_number,
+            'clinic_name'    => $vet->clinic_name ?? 'N/A',
+            'is_active'      => $vet->is_active ? 'Active' : 'Inactive',
+        ])
+        ->values();
+        
+            return response()->json([
+                'status' => 'success',
+                'approved_vets' => $approvedVets,
+            ]);
 
-        $inserted = DB::table('assigned_vet')->insert([
-            'user_id'       => $data['vet_id'],
-            'appointment_id'=> $data['appointment_id'],
-        ]);
-
-        // Fetch the updated appointment to return to JS
-        $appointment = DB::table('user_appointments')
-            ->where('id', $data['appointment_id'])
-            ->first();
-
-        return response()->json([
-            'success'     => (bool) $inserted,
-            'message'     => $inserted ? 'Vet assigned successfully.' : 'Failed to assign vet.',
-            'appointment' => $appointment, // ✅ included for JS
-        ], $inserted ? 200 : 400);
-
-    } catch (\Throwable $e) {
-        \Log::error('AssignVet Error:', ['exception' => $e]); // log full error
-        return response()->json([
-            'success' => false,
-            'message' => 'An error occurred while assigning the vet.',
-            'error'   => $e->getMessage(),
-        ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
-}
+        
+        public function assignVet(Request $request, $id)
+    {
+        try {
+            $data = $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            ]);
 
+            // Check if appointment exists
+            $appointment = DB::table('user_appointments')->where('id', $id)->first();
+            if (!$appointment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Appointment not found.',
+                ], 404);
+            }
+
+            // Check for existing assignment
+            if (DB::table('assigned_vet')->where('appointment_id', $id)->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vet already assigned.',
+                ], 400);
+            }
+
+            // Insert assignment
+            $inserted = DB::table('assigned_vet')->insert([
+                'user_id' => $data['user_id'],
+                'appointment_id' => $id,
+            ]);
+
+            // Fetch updated appointment
+            $updatedAppointment = DB::table('user_appointments')->where('id', $id)->first();
+
+            return response()->json([
+                'success' => $inserted,
+                'message' => $inserted ? 'Vet assigned.' : 'Assignment failed.',
+                'appointment' => $updatedAppointment,
+            ], $inserted ? 200 : 400);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Throwable $e) {
+            \Log::error('AssignVet Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error.',
+            ], 500);
+        }
+    }
 }

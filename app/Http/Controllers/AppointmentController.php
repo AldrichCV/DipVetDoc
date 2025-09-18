@@ -9,151 +9,151 @@ use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
-    public function store(Request $request)
-    {
-       $request->validate([
-            // Pet data
-            'name' => 'required|string|max:100',
-            'species' => 'required|string|max:100',
-            'breed' => 'nullable|string|max:100',
-            'sex' => 'required|in:Male,Female',
-            'date_of_birth' => 'nullable|date',
+    // public function store(Request $request)
+    // {
+    //    $request->validate([
+    //         // Pet data
+    //         'name' => 'required|string|max:100',
+    //         'species' => 'required|string|max:100',
+    //         'breed' => 'nullable|string|max:100',
+    //         'sex' => 'required|in:Male,Female',
+    //         'date_of_birth' => 'nullable|date',
 
-            // Appointment data
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
-            'reason' => 'required|string|max:255',
-            'notes' => 'nullable|string',
-        ]);
+    //         // Appointment data
+    //         'appointment_date' => 'required|date',
+    //         'appointment_time' => 'required',
+    //         'reason' => 'required|string|max:255',
+    //         'notes' => 'nullable|string',
+    //     ]);
 
-        DB::transaction(function () use ($request) {
-            // 1. Generate Pet Code (based on date + daily counter)
-            $petCode = $this->generatePetCode();
+    //     DB::transaction(function () use ($request) {
+    //         // 1. Generate Pet Code (based on date + daily counter)
+    //         $petCode = $this->generatePetCode();
 
-            // 2. Create Pet
-            $pet = Pet::create([
-                'pet_code' => $petCode,
-                'name' => $request->name,
-                'species' => $request->species,
-                'breed' => $request->breed,
-                'sex' => $request->sex,
-                'date_of_birth' => $request->date_of_birth,
-                'owner_id' => auth()->id() 
-            ]);
+    //         // 2. Create Pet
+    //         $pet = Pet::create([
+    //             'pet_code' => $petCode,
+    //             'name' => $request->name,
+    //             'species' => $request->species,
+    //             'breed' => $request->breed,
+    //             'sex' => $request->sex,
+    //             'date_of_birth' => $request->date_of_birth,
+    //             'owner_id' => auth()->id() 
+    //         ]);
 
-            // 3. Create Appointment (linked via pet_code)
-            Appointment::create([
-                'pet_code' => $petCode,
-                'client_id' => auth()->id(),
-                'appointment_date' => $request->appointment_date,
-                'appointment_time' => $request->appointment_time,
-                'reason' => $request->reason,
-                'notes' => $request->notes,
-                'status' => 'pending',
-            ]);
-        });
+    //         // 3. Create Appointment (linked via pet_code)
+    //         Appointment::create([
+    //             'pet_code' => $petCode,
+    //             'client_id' => auth()->id(),
+    //             'appointment_date' => $request->appointment_date,
+    //             'appointment_time' => $request->appointment_time,
+    //             'reason' => $request->reason,
+    //             'notes' => $request->notes,
+    //             'status' => 'pending',
+    //         ]);
+    //     });
 
-        return redirect()->route('my_appointments.index')->with('success', 'Appointment created successfully.');
-    }
+    //     return redirect()->route('my_appointments.index')->with('success', 'Appointment created successfully.');
+    // }
 
-    protected function generatePetCode(): string
-    {
-        $today = now()->format('Ymd');
-        $countToday = Pet::whereDate('created_at', today())->count() + 1;
+    // protected function generatePetCode(): string
+    // {
+    //     $today = now()->format('Ymd');
+    //     $countToday = Pet::whereDate('created_at', today())->count() + 1;
 
-        return 'PET' . $today . '-' . str_pad($countToday, 3, '0', STR_PAD_LEFT);
-    }
+    //     return 'PET' . $today . '-' . str_pad($countToday, 3, '0', STR_PAD_LEFT);
+    // }
   
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
-            'reason' => 'required|integer',
-            'notes'
+    // public function update(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'appointment_date' => 'required|date',
+    //         'appointment_time' => 'required',
+    //         'reason' => 'required|integer',
+    //         'notes'
            
-        ]);
+    //     ]);
 
-        $appointment = Appointment::findOrFail($id);
+    //     $appointment = Appointment::findOrFail($id);
 
-        if ($appointment->client_id !== auth()->id()) {
-            abort(403);
-        }
+    //     if ($appointment->client_id !== auth()->id()) {
+    //         abort(403);
+    //     }
 
-        $appointment->update([
-            'appointment_date' => $request->appointment_date,
-            'appointment_time' => $request->appointment_time,
-            'reason' => $request->reason,
-            'notes'=>$request->notes,
-        ]);
+    //     $appointment->update([
+    //         'appointment_date' => $request->appointment_date,
+    //         'appointment_time' => $request->appointment_time,
+    //         'reason' => $request->reason,
+    //         'notes'=>$request->notes,
+    //     ]);
 
-         return redirect()->back()->with('success', 'Appointment updated successfully.');
-    }
+    //      return redirect()->back()->with('success', 'Appointment updated successfully.');
+    // }
 
-    public function updateStatus(Request $request, Appointment $appointment, $status)
-    {
-        $validStatuses = ['approved', 'cancelled', 'pending', 'completed'];
-        if (!in_array($status, $validStatuses)) {
-            return redirect()->back()->with('error', 'Invalid status.');
-        }
+    // public function updateStatus(Request $request, Appointment $appointment, $status)
+    // {
+    //     $validStatuses = ['approved', 'cancelled', 'pending', 'completed'];
+    //     if (!in_array($status, $validStatuses)) {
+    //         return redirect()->back()->with('error', 'Invalid status.');
+    //     }
 
-        $appointment->status = $status;
-        $appointment->save();
+    //     $appointment->status = $status;
+    //     $appointment->save();
 
-        // Insert consultation only if approved
-        if ($status === 'approved') {
-            DB::table('consultations')->insert([
-                'appointment_id' => $appointment->id,
-                'user_id' => $request->user_id,  // comes from hidden input
-                'vet_id' => auth()->id(),
-                'pet_id' => $request->pet_id,
-                'diagnosis' => null,
-                'treatment' => null,
-                'status' => 'ongoing',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+    //     // Insert consultation only if approved
+    //     if ($status === 'approved') {
+    //         DB::table('consultations')->insert([
+    //             'appointment_id' => $appointment->id,
+    //             'user_id' => $request->user_id,  // comes from hidden input
+    //             'vet_id' => auth()->id(),
+    //             'pet_id' => $request->pet_id,
+    //             'diagnosis' => null,
+    //             'treatment' => null,
+    //             'status' => 'ongoing',
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ]);
+    //     }
 
-        return redirect()->back()->with('success', "Appointment marked as {$status}.");
-    }
+    //     return redirect()->back()->with('success', "Appointment marked as {$status}.");
+    // }
 
-    public function destroy($id)
-    {
-        $appointment = Appointment::findOrFail($id);
-        $appointment->delete();
+    // public function destroy($id)
+    // {
+    //     $appointment = Appointment::findOrFail($id);
+    //     $appointment->delete();
 
-        return redirect()->back()->with('success', 'Appointment removed successfully.');
-    }
+    //     return redirect()->back()->with('success', 'Appointment removed successfully.');
+    // }
 
-    public function assignVet(Request $request, $id)
-    {
-    try {
-        $data = $request->validate([
-            'vet_id'        => 'required|integer|exists:vet_profile,user_id',
-            'appointment_id'=> 'required|integer|exists:user_appointments,id',
-        ]);
+    // public function assignVet(Request $request, $id)
+    // {
+    // try {
+    //     $data = $request->validate([
+    //         'vet_id'        => 'required|integer|exists:vet_profile,user_id',
+    //         'appointment_id'=> 'required|integer|exists:user_appointments,id',
+    //     ]);
 
-        $inserted = DB::table('assigned_vet')->insert([
-            'user_id'       => $data['vet_id'],
-            'appointment_id'=> $data['appointment_id'],
-        ]);
+    //     $inserted = DB::table('assigned_vet')->insert([
+    //         'user_id'       => $data['vet_id'],
+    //         'appointment_id'=> $data['appointment_id'],
+    //     ]);
 
-        return response()->json([
-            'success' => (bool) $inserted,
-            'message' => $inserted
-                ? 'Vet assigned successfully.'
-                : 'Failed to assign vet.',
-        ], $inserted ? 200 : 400);
+    //     return response()->json([
+    //         'success' => (bool) $inserted,
+    //         'message' => $inserted
+    //             ? 'Vet assigned successfully.'
+    //             : 'Failed to assign vet.',
+    //     ], $inserted ? 200 : 400);
 
-    } catch (\Throwable $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'An error occurred while assigning the vet.',
-            'error'   => $e->getMessage(), // ⚡ useful for debugging
-        ], 500);
-    }
-    }
+    // } catch (\Throwable $e) {
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'An error occurred while assigning the vet.',
+    //         'error'   => $e->getMessage(), // ⚡ useful for debugging
+    //     ], 500);
+    // }
+    // }
 
 }
 

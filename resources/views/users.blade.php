@@ -10,6 +10,6 @@
 
 @section('content')
 <div id="app">
-    <users :initial-users='@json($usersData)' page="users"></users>
+    <users></users>
 </div>
 @endsection

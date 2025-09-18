@@ -22,121 +22,119 @@ class AdminController extends Controller
 
    public function index()
     {
-        $usersData = User::paginate(9); // 9 users per page
-        return view('users', compact('usersData'));
+        return view('users');
     }
 
     public function appointments()
     {
-        $appointments = Appointment::all();
-        return view('vet_appointments', compact('appointments'));
+        return view('vet_appointments');
     }
 
-    // In VetController.php
-    public function getAvailableVets()
-    {
-        $vets = DB::table('users as u')
-            ->join('vet_profile as vp', 'vp.user_id', '=', 'u.id')
-            ->select(
-                'u.id',
-                'u.name',
-                'vp.specialization'
-            )
-            ->where('u.role', 'vet')
-            ->get();
+    // // In VetController.php
+    // public function getAvailableVets()
+    // {
+    //     $vets = DB::table('users as u')
+    //         ->join('vet_profile as vp', 'vp.user_id', '=', 'u.id')
+    //         ->select(
+    //             'u.id',
+    //             'u.name',
+    //             'vp.specialization'
+    //         )
+    //         ->where('u.role', 'vet')
+    //         ->get();
 
-        return response()->json($vets);
-    }
+    //     return response()->json($vets);
+    // }
     
-    public function veterinarians()
-    {
-        $pendingVets = DB::table('users as u')
-            ->leftJoin('vet_profile as vp', 'vp.user_id', '=', 'u.id')
-            ->select(
-                'u.*',
-                'vp.specialization',
-                'vp.is_active'
-            )
-            ->where('u.role', 'vet')
-            ->where('u.status', 'pending')
-            ->get();
+    // public function veterinarians()
+    // {
+    //     $pendingVets = DB::table('users as u')
+    //         ->leftJoin('vet_profile as vp', 'vp.user_id', '=', 'u.id')
+    //         ->select(
+    //             'u.*',
+    //             'vp.specialization',
+    //             'vp.is_active'
+    //         )
+    //         ->where('u.role', 'vet')
+    //         ->where('u.status', 'pending')
+    //         ->get();
 
-        $approvedVets = DB::table('users as u')
-            ->leftJoin('vet_profile as vp', 'vp.user_id', '=', 'u.id')
-            ->select(
-                'u.*',
-                'vp.specialization',
-                DB::raw("(CASE WHEN vp.is_active = 1 THEN 'Active' ELSE 'Inactive' END) as is_active")
-            )
-            ->where('u.role', 'vet')
-            ->where('u.status', 'approved')
-            ->get();
+    //     $approvedVets = DB::table('users as u')
+    //         ->leftJoin('vet_profile as vp', 'vp.user_id', '=', 'u.id')
+    //         ->select(
+    //             'u.*',
+    //             'vp.specialization',
+    //             DB::raw("(CASE WHEN vp.is_active = 1 THEN 'Active' ELSE 'Inactive' END) as is_active")
+    //         )
+    //         ->where('u.role', 'vet')
+    //         ->where('u.status', 'approved')
+    //         ->get();
 
-        return view('dipvet_veterinarians', compact('pendingVets', 'approvedVets'));
-    }
+    //     return view('dipvet_veterinarians', compact('pendingVets', 'approvedVets'));
+    // }
 
-    // AdminController.php
-    public function assignVet(Request $request)
-    {
-        if (!$request->expectsJson()) {
-            return response()->json(['message' => 'Only JSON requests allowed'], 406);
-        }
+    // // AdminController.php
+    // public function assignVet(Request $request)
+    // {
+    //     if (!$request->expectsJson()) {
+    //         return response()->json(['message' => 'Only JSON requests allowed'], 406);
+    //     }
 
-        $request->validate([
-            'vet_id' => 'required|integer|exists:vet_profile,user_id',
-            'appointment_id' => 'required|integer|exists:user_appointments,id',
-        ]);
+    //     $request->validate([
+    //         'vet_id' => 'required|integer|exists:vet_profile,user_id',
+    //         'appointment_id' => 'required|integer|exists:user_appointments,id',
+    //     ]);
 
-        // Insert into assigned_vet table
-        $inserted = DB::table('assigned_vet')->insert([
-            'user_id' => $request->vet_id,
-            'appointment_id' => $request->appointment_id,
-        ]);
+    //     // Insert into assigned_vet table
+    //     $inserted = DB::table('assigned_vet')->insert([
+    //         'user_id' => $request->vet_id,
+    //         'appointment_id' => $request->appointment_id,
+    //     ]);
 
-        return response()->json([
-            'success' => (bool) $inserted,
-            'message' => $inserted
-                ? 'Vet assigned successfully.'
-                : 'Failed to assign vet.',
-        ], $inserted ? 200 : 400);
-    }
+    //     return response()->json([
+    //         'success' => (bool) $inserted,
+    //         'message' => $inserted
+    //             ? 'Vet assigned successfully.'
+    //             : 'Failed to assign vet.',
+    //     ], $inserted ? 200 : 400);
+    // }
 
-    public function remove(Request $request)
-    {
-        $request->validate([
-            'vet_id' => 'required|integer|exists:vet_profile,user_id',
-            'appointment_id' => 'required|integer|exists:user_appointments,id',
-        ]);
+    // public function remove(Request $request)
+    // {
+    //     $request->validate([
+    //         'vet_id' => 'required|integer|exists:vet_profile,user_id',
+    //         'appointment_id' => 'required|integer|exists:user_appointments,id',
+    //     ]);
 
-        DB::table('assigned_vet')
-            ->where('appointment_id', $request->appointment_id)
-            ->where('user_id', $request->vet_id)
-            ->delete();
+    //     DB::table('assigned_vet')
+    //         ->where('appointment_id', $request->appointment_id)
+    //         ->where('user_id', $request->vet_id)
+    //         ->delete();
 
-        return response()->json(['success' => true]);
-    }
+    //     return response()->json(['success' => true]);
+    // }
 
-    public function search(Request $request)
-    {
-        $query = $request->input('q');
+    // public function search(Request $request)
+    // {
+    //     $query = $request->input('q');
 
-        $pets = \App\Models\Pet::where('name', 'like', "%{$query}%")
-                    ->orWhere('breed', 'like', "%{$query}%")
-                    ->get();
+    //     $pets = \App\Models\Pet::where('name', 'like', "%{$query}%")
+    //                 ->orWhere('breed', 'like', "%{$query}%")
+    //                 ->get();
 
-        $owners = \App\Models\User::where('role', 'user')
-                    ->where('name', 'like', "%{$query}%")
-                    ->get();
+    //     $owners = \App\Models\User::where('role', 'user')
+    //                 ->where('name', 'like', "%{$query}%")
+    //                 ->get();
 
-        $vets = \App\Models\User::where('role', 'vet')
-                    ->where('name', 'like', "%{$query}%")
-                    ->get();
+    //     $vets = \App\Models\User::where('role', 'vet')
+    //                 ->where('name', 'like', "%{$query}%")
+    //                 ->get();
 
-        // Merge them into one collection
-        $results = $pets->concat($owners)->concat($vets);
+    //     // Merge them into one collection
+    //     $results = $pets->concat($owners)->concat($vets);
 
-        return view('search_result', compact('query', 'results'));
-    }
+    //     return view('search_result', compact('query', 'results'));
+    // }
 }
 
 

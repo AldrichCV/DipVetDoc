@@ -12,7 +12,7 @@
                 rounded
                 total-visible="7"
                 @update:model-value="fetchUsers"
-            ></v-pagination>
+            />
         </div>
 
         <!-- User Modal -->
@@ -26,21 +26,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import UsersGrid from "./UsersGrid.vue";
 import UserModal from "./UserModal.vue";
 
-// Props
-const props = defineProps({
-    initialUsers: { type: Object, required: true }, // Laravel paginated response
-    page: { type: String, default: "users" },
-});
-
-// State
-const paginatedUsers = ref([...props.initialUsers.data]);
-const totalPages = ref(props.initialUsers.last_page || 1);
-const currentPage = ref(props.initialUsers.current_page || 1);
+const paginatedUsers = ref([]);
+const totalPages = ref(1);
+const currentPage = ref(1);
 const modalUser = ref(null);
 
 // Axios instance
@@ -61,14 +54,14 @@ const fetchUsers = async (page = 1) => {
         totalPages.value = res.data.last_page;
         currentPage.value = res.data.current_page;
     } catch (err) {
-        console.error(err);
-        Swal.fire({
-            title: "Error",
-            text: err.response?.data?.message || err.message,
-            icon: "error",
-        });
+        console.error("Error fetching users:", err);
     }
 };
+
+// Call on mount
+onMounted(() => {
+    fetchUsers();
+});
 
 // Open modal
 const openModal = (user) => {

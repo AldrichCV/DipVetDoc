@@ -58,7 +58,7 @@ class User extends Authenticatable
 
     public function vetProfile()
     {
-        return $this->hasOne(Veterinarian::class);
+        return $this->hasOne(Veterinarian::class, 'user_id');
     }
 
     

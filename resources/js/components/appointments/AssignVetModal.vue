@@ -28,9 +28,10 @@
                     v-for="vet in vets"
                     :key="vet.id"
                     @click="assign(vet)"
-                    class="w-full p-4 text-left border rounded-lg"
+                    class="w-full p-4 text-left border rounded-lg hover:bg-blue-50"
                 >
-                    {{ vet.name }} - {{ vet.specialization }}
+                    {{ vet.name }} —
+                    {{ vet.specialization ?? "No specialization" }}
                 </button>
             </div>
         </div>
@@ -38,14 +39,51 @@
 </template>
 
 <script setup>
+import { defineProps, defineEmits, ref } from "vue";
+import axios from "axios";
+
 const props = defineProps({
     visible: Boolean,
     appointment: Object,
     vets: Array,
 });
-const emit = defineEmits(["close", "assign"]);
 
-function assign(vet) {
-    emit("assign", { vet, appointment: props.appointment });
+const emit = defineEmits(["close", "assigned"]); // <-- add "assigned"
+const loading = ref(false);
+
+async function assign(vet) {
+    if (!vet?.user_id || !props.appointment?.id) {
+        alert("Missing vet or appointment information.");
+        return;
+    }
+
+    loading.value = true;
+
+    try {
+        const payload = { user_id: vet.user_id };
+
+        const response = await axios.post(
+            `/api/appointments/assign-vet/${props.appointment.id}`,
+            payload,
+            { withCredentials: true }
+        );
+
+        if (response.data.success) {
+            alert("Vet assigned successfully!");
+            emit("assigned"); // <-- emit this to notify parent
+            emit("close"); // <-- close the modal
+        } else {
+            alert(response.data.message || "Failed to assign vet.");
+        }
+    } catch (err) {
+        let message = err.response?.data?.message || err.message;
+        if (err.response?.status === 422 && err.response.data.errors) {
+            message = Object.values(err.response.data.errors).flat().join("\n");
+        }
+        alert("Error assigning vet:\n" + message);
+        console.error("Assign vet error:", err.response?.data || err);
+    } finally {
+        loading.value = false;
+    }
 }
 </script>

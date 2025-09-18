@@ -7,10 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class AssignedVet extends Model
 {
 
-    protected $table = 'assigned_vet';
-    
-   public function vet()
+     protected $table = 'assign_vet';
+
+
+    public function appointment()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(Appointment::class);
     }
+
+    public function vet()
+    {
+        return $this->belongsTo(Veterinarian::class, 'vet_id');
+    }   
 }
