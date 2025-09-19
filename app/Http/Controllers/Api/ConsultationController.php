@@ -13,47 +13,49 @@ class ConsultationController extends Controller
     public function index()
 {
     $consultations = Appointment::with([
-            'pet.owner',
-            'pet.consultations' => fn($q) => $q->latest()->limit(1),
-            'assignedVet.vet',
-        ])
-        ->when(auth()->user()->role !== 'admin', fn($q) =>
-            $q->whereHas('assignedVet', fn($sub) =>
-                $sub->where('user_id', auth()->id())
-            )
+        'pet.owner',
+        'pet.consultations' => fn($q) => $q->latest(),
+        'assignedVet.vet',
+    ])
+    ->when(auth()->user()->role !== 'admin', fn($q) =>
+        $q->whereHas('assignedVet', fn($sub) =>
+            $sub->where('user_id', auth()->id())
         )
-        ->latest()
-        ->get()
-        ->unique('pet.id')
-        ->map(function ($appointment) {
-            $pet = $appointment->pet;
-            $consultation = $pet->consultations->first(); // latest only
+    )
+    ->latest()
+    ->get()
+    ->unique('pet.id')
+    ->map(function ($appointment) {
+        $pet = $appointment->pet;
 
-            return [
-                'pet_id'        => $pet->id,
-                'pet_code'      => $pet->pet_code,
-                'pet_name'      => $pet->name,
-                'pet_species'   => $pet->species,
-                'pet_breed'     => $pet->breed,
-                'pet_sex'       => $pet->sex,
-                'date_of_birth' => $pet->date_of_birth,
-                'pet_age'       => $pet->date_of_birth ? $pet->date_of_birth->diffInYears(now()) : null,
+        return [
+            'pet_id'        => $pet->id,
+            'pet_code'      => $pet->pet_code,
+            'pet_name'      => $pet->name,
+            'pet_species'   => $pet->species,
+            'pet_breed'     => $pet->breed,
+            'pet_sex'       => $pet->sex,
+            'date_of_birth' => $pet->date_of_birth,
+            'pet_age'       => $pet->date_of_birth ? $pet->date_of_birth->diffInYears(now()) : null,
 
-                'owner_name'    => $pet->owner->name ?? null,
-                'vet_name'      => $appointment->assignedVet->vet->name ?? null,
+            'owner_name'    => $pet->owner->name ?? null,
+            'vet_name'      => $appointment->assignedVet->vet->name ?? null,
 
-                'consultation_id'   => $consultation->id ?? null,
-                'body_weight'       => $consultation->body_weight ?? null,
-                'respiratory_rate'  => $consultation->respiratory_rate ?? null,
-                'temperature'       => $consultation->temperature ?? null,
-                'complaint'         => $consultation->complaint ?? null,
-                'medication'        => $consultation->medication ?? null,
-                'prescription'      => $consultation->prescription ?? null,
-                'status'            => $consultation->status ?? null,
-                'created_at'        => $consultation->created_at ?? null,
-            ];
-        })
-        ->values();
+            // Pass full history
+            'consultations' => $pet->consultations->map(fn($c) => [
+                'id'               => $c->id,
+                'body_weight'      => $c->body_weight,
+                'respiratory_rate' => $c->respiratory_rate,
+                'temperature'      => $c->temperature,
+                'complaint'        => $c->complaint,
+                'medication'       => $c->medication,
+                'prescription'     => $c->prescription,
+                'status'           => $c->status,
+                'created_at'       => $c->created_at,
+            ]),
+        ];
+    })
+    ->values();
 
     $allSpecies = Pet::distinct()->pluck('species');
 
@@ -63,5 +65,32 @@ class ConsultationController extends Controller
         'all_species'   => $allSpecies,
     ]);
 }
+
+public function store(Request $request)
+{
+    $request->validate([
+        'pet_id'    => 'required|exists:pets,id',
+        'diagnosis' => 'nullable|string',
+        'treatment' => 'nullable|string',
+    ]);
+
+    $pet = Pet::findOrFail($request->pet_id);
+
+    $consultation = Consultation::create([
+        'pet_id'    => $pet->id,
+        'user_id'   => $pet->owner_id,
+        'vet_id'    => Auth::id(),
+        'diagnosis' => $request->diagnosis,
+        'treatment' => $request->treatment,
+        'status'    => 'ongoing',
+    ]);
+
+    return response()->json([
+        'success'      => true,
+        'message'      => 'Consultation created successfully.',
+        'consultation' => $consultation,
+    ], 201); // 201 = Created
+}
+
 
 }
