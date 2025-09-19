@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AssignedVet extends Model
 {
 
-     protected $table = 'assign_vet';
+     protected $table = 'assigned_vet';
 
 
     public function appointment()

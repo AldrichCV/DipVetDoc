@@ -9,9 +9,10 @@
                 class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"
             ></div>
         </div>
+
         <!-- Empty state -->
         <div
-            v-else-if="props.consultations.length === 0"
+            v-else-if="consultations.length === 0"
             class="text-center py-8 sm:py-12 lg:py-16"
         >
             <div class="mx-auto h-24 w-24 text-gray-300 mb-4">
@@ -46,7 +47,7 @@
                     >
                         <option value="">All Species</option>
                         <option
-                            v-for="species in props.allSpecies"
+                            v-for="species in allSpecies"
                             :key="species"
                             :value="species"
                         >
@@ -113,38 +114,34 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import axios from "axios";
 import ConsultationCard from "./ConsultationCard.vue";
 
 const loading = ref(true);
-
-// Props from Blade
-const props = defineProps({
-    consultations: {
-        type: Array,
-        default: () => [],
-        validator: (consultations) => {
-            return consultations.every(
-                (c) =>
-                    typeof c === "object" &&
-                    "pet_id" in c &&
-                    "pet_name" in c &&
-                    "owner_name" in c &&
-                    "pet_species" in c &&
-                    "pet_breed" in c
-            );
-        },
-    },
-    allSpecies: { type: Array, default: () => [] },
-});
+const consultations = ref([]);
+const allSpecies = ref([]);
 
 const searchTerm = ref("");
 const selectedSpecies = ref("");
+
+// Fetch consultations + species from API
+async function fetchData() {
+    try {
+        const { data } = await axios.get("/api/consultations");
+        consultations.value = data.consultations || [];
+        allSpecies.value = data.all_species || [];
+    } catch (error) {
+        console.error("Failed to fetch consultations:", error);
+    } finally {
+        loading.value = false;
+    }
+}
 
 // Filtered consultations
 const filteredConsultations = computed(() => {
     const search = searchTerm.value.trim().toLowerCase();
 
-    return props.consultations.filter((consultation) => {
+    return consultations.value.filter((consultation) => {
         if (!consultation) return false;
 
         const matchesSpecies = selectedSpecies.value
@@ -167,10 +164,8 @@ function clearFilters() {
     selectedSpecies.value = "";
 }
 
-// ✅ Delay so loader actually shows (adjust 300ms as needed)
+// ✅ Load on mount
 onMounted(() => {
-    setTimeout(() => {
-        loading.value = false;
-    }, 300);
+    fetchData();
 });
 </script>

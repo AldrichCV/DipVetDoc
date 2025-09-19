@@ -14,99 +14,62 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ConsultationController extends Controller
 {
-//  public function index()
-// {
-//     $consultations = DB::table('user_appointments as ua')
-//     ->join('assigned_vet as av', 'ua.id', '=', 'av.appointment_id') 
-//     ->join('pets', 'ua.pet_code', '=', 'pets.pet_code')
-//     ->join('users as owners', 'pets.owner_id', '=', 'owners.id')
-//     ->leftJoin('medical_consultations as mc', 'pets.id', '=', 'mc.pet_id')
-//     ->join('users as vets', 'av.user_id', '=', 'vets.id')
-//     ->select(
-//         'pets.id as pet_id',
-//         'pets.pet_code',
-//         'pets.name as pet_name',
-//         'pets.species as pet_species',
-//         'pets.breed as pet_breed',
-//         'pets.sex as pet_sex',
-//         'pets.date_of_birth',
-//         'owners.name as owner_name',
-//         'vets.name as vet_name',
-//         'mc.id as consultation_id',
-//         'mc.body_weight',
-//         'mc.respiratory_rate',
-//         'mc.temperature',
-//         'mc.complaint',
-//         'mc.medication',
-//         'mc.prescription',
-//         'mc.status',
-//         'mc.created_at',
-//         DB::raw('TIMESTAMPDIFF(YEAR, pets.date_of_birth, CURDATE()) as pet_age')
-//     )
-//     ->when(auth()->user()->role !== 'admin', function ($query) {
-//         return $query->where('av.user_id', Auth::id());
-//     })
-//     ->orderBy('mc.created_at', 'desc')
-//     ->get()
-//     ->groupBy('pet_id')
-//     ->map(fn($group) => $group->sortByDesc('created_at')->first())
-//     ->values();
 
-// $allSpecies = DB::table('pets')->select('species')->distinct()->pluck('species');
+    // public function index()
+    // {
+    //     $consultations = Appointment::with([
+    //             'pet.owner',
+    //             'pet.consultations' => fn($q) => $q->latest()->limit(1),
+    //             'assignedVet.vet',
+    //         ])
+    //         ->when(auth()->user()->role !== 'admin', fn($q) =>
+    //             $q->whereHas('assignedVet', fn($sub) =>
+    //                 $sub->where('user_id', auth()->id())
+    //             )
+    //         )
+    //         ->latest()
+    //         ->get()
+    //         ->unique('pet.id')
+    //         ->map(function ($appointment) {
+    //             $pet = $appointment->pet;
+    //             $consultation = $pet->consultations->first(); // latest only
 
-// return view('consultations', compact('consultations', 'allSpecies'));
+    //             return [
+    //                 'pet_id'        => $pet->id,
+    //                 'pet_code'      => $pet->pet_code,
+    //                 'pet_name'      => $pet->name,
+    //                 'pet_species'   => $pet->species,
+    //                 'pet_breed'     => $pet->breed,
+    //                 'pet_sex'       => $pet->sex,
+    //                 'date_of_birth' => $pet->date_of_birth,
+    //                 'pet_age'       => $pet->date_of_birth ? $pet->date_of_birth->diffInYears(now()) : null,
 
-// }
+    //                 'owner_name'    => $pet->owner->name ?? null,
+    //                 'vet_name'      => $appointment->assignedVet->vet->name ?? null,
 
-public function index()
-{
-    $consultations = Appointment::with([
-            'pet.owner',
-            'pet.consultations' => fn($q) => $q->latest()->limit(1),
-            'assignedVet.vet',
-        ])
-        ->when(auth()->user()->role !== 'admin', fn($q) =>
-            $q->whereHas('assignedVet', fn($sub) =>
-                $sub->where('user_id', auth()->id())
-            )
-        )
-        ->latest()
-        ->get()
-        ->unique('pet.id')
-        ->map(function ($appointment) {
-            $pet = $appointment->pet;
-            $consultation = $pet->consultations->first(); // latest only
+    //                 'consultation_id'   => $consultation->id ?? null,
+    //                 'body_weight'       => $consultation->body_weight ?? null,
+    //                 'respiratory_rate'  => $consultation->respiratory_rate ?? null,
+    //                 'temperature'       => $consultation->temperature ?? null,
+    //                 'complaint'         => $consultation->complaint ?? null,
+    //                 'medication'        => $consultation->medication ?? null,
+    //                 'prescription'      => $consultation->prescription ?? null,
+    //                 'status'            => $consultation->status ?? null,
+    //                 'created_at'        => $consultation->created_at ?? null,
+    //             ];
+    //         })
+    //         ->values();
 
-            return [
-                'pet_id'        => $pet->id,
-                'pet_code'      => $pet->pet_code,
-                'pet_name'      => $pet->name,
-                'pet_species'   => $pet->species,
-                'pet_breed'     => $pet->breed,
-                'pet_sex'       => $pet->sex,
-                'date_of_birth' => $pet->date_of_birth,
-                'pet_age'       => $pet->date_of_birth ? $pet->date_of_birth->diffInYears(now()) : null,
+    //     $allSpecies = Pet::distinct()->pluck('species');
 
-                'owner_name'    => $pet->owner->name ?? null,
-                'vet_name'      => $appointment->assignedVet->vet->name ?? null,
+    //     return view('consultations', compact('consultations', 'allSpecies'));
+    // }
 
-                'consultation_id'   => $consultation->id ?? null,
-                'body_weight'       => $consultation->body_weight ?? null,
-                'respiratory_rate'  => $consultation->respiratory_rate ?? null,
-                'temperature'       => $consultation->temperature ?? null,
-                'complaint'         => $consultation->complaint ?? null,
-                'medication'        => $consultation->medication ?? null,
-                'prescription'      => $consultation->prescription ?? null,
-                'status'            => $consultation->status ?? null,
-                'created_at'        => $consultation->created_at ?? null,
-            ];
-        })
-        ->values();
-
-    $allSpecies = Pet::distinct()->pluck('species');
-
-    return view('consultations', compact('consultations', 'allSpecies'));
-}
+    
+    public function index()
+    {
+        return view('consultations');
+    }
 
     public function store(Request $request)
     {
