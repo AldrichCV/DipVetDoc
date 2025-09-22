@@ -17,46 +17,46 @@
                 @click="$emit('close')"
                 class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
-                <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                    />
-                </svg>
+                <i class="bi bi-x-lg text-xl"></i>
             </button>
         </div>
 
-        <!-- Tabs -->
+        <!-- Tabs + Download PDF -->
         <div class="border-b border-gray-200 print:hidden">
-            <nav class="flex px-4 sm:px-6">
-                <button
-                    @click="activeTab = 'info'"
-                    :class="tabClass('info')"
-                    class="py-3 px-4 border-b-2 font-medium text-sm transition-colors"
-                >
-                    Patient Info
-                </button>
-                <button
-                    @click="activeTab = 'history'"
-                    :class="tabClass('history')"
-                    class="py-3 px-4 border-b-2 font-medium text-sm transition-colors"
-                >
-                    Consultation History
-                </button>
-                <button
-                    @click="activeTab = 'new'"
-                    :class="tabClass('new', true)"
-                    class="py-3 px-4 border-b-2 font-medium text-sm transition-colors"
-                >
-                    + New Consultation
-                </button>
+            <nav class="flex items-center px-4 sm:px-6 w-full">
+                <div class="flex">
+                    <button
+                        @click="activeTab = 'info'"
+                        :class="tabClass('info')"
+                        class="py-3 px-4 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        Patient Info
+                    </button>
+                    <button
+                        @click="activeTab = 'history'"
+                        :class="tabClass('history')"
+                        class="py-3 px-4 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        Consultation History
+                    </button>
+                    <button
+                        @click="activeTab = 'new'"
+                        :class="tabClass('new', true)"
+                        class="py-3 px-4 border-b-2 font-medium text-sm transition-colors"
+                    >
+                        + New Consultation
+                    </button>
+                </div>
+
+                <!-- Download PDF button on the far right -->
+                <div class="ml-auto">
+                    <a
+                        :href="downloadLink"
+                        class="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+                    >
+                        <i class="bi bi-download text-lg"></i>
+                    </a>
+                </div>
             </nav>
         </div>
 
@@ -215,19 +215,7 @@
                                 <div
                                     class="flex items-center text-sm text-gray-600"
                                 >
-                                    <svg
-                                        class="w-4 h-4 mr-2"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                        />
-                                    </svg>
+                                    <i class="bi bi-person-circle mr-2"></i>
                                     <span
                                         ><strong>Veterinarian:</strong>
                                         {{ c.vet_name }}</span
@@ -252,34 +240,33 @@
             <!-- New Consultation -->
             <div v-show="activeTab === 'new'" class="p-4 sm:p-6">
                 <form class="space-y-6" @submit.prevent="saveConsultation">
-                    <input
+                    <textarea
                         v-model="form.complaint"
-                        type="text"
                         placeholder="Complaint"
                         class="border p-2 rounded w-full"
-                    />
-                    <input
+                        rows="3"
+                    ></textarea>
+
+                    <textarea
                         v-model="form.medication"
-                        type="text"
                         placeholder="Medication"
                         class="border p-2 rounded w-full"
-                    />
-                    <input
+                        rows="3"
+                    ></textarea>
+
+                    <textarea
                         v-model="form.prescription"
-                        type="text"
                         placeholder="Prescription"
                         class="border p-2 rounded w-full"
-                    />
-                    <button
-                        type="submit"
-                        class="bg-green-600 text-white px-4 py-2 rounded"
-                    >
-                        Save
-                    </button>
+                        rows="3"
+                    ></textarea>
+
+                    <div class="flex justify-end">
+                        <button class="btn btn-green">Save Changes</button>
+                    </div>
                 </form>
             </div>
         </div>
-
         <!-- Modal Footer -->
         <div
             class="border-t border-gray-200 p-4 sm:p-6 bg-gray-50 print:hidden"
@@ -290,27 +277,6 @@
                         consultations.filter((c) => c.consultation_id).length
                     }}</span>
                     total consultations
-                </div>
-                <div class="flex gap-2">
-                    <a
-                        :href="downloadLink"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                    >
-                        <svg
-                            class="w-4 h-4 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                        </svg>
-                        Download PDF
-                    </a>
                 </div>
             </div>
         </div>
@@ -387,7 +353,6 @@ const downloadLink = computed(() =>
 );
 </script>
 
-<!-- Reusable Subcomponents -->
 <script>
 export default {
     components: {

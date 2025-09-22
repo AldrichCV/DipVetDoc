@@ -1,0 +1,85 @@
+/* theme.css */
+
+/* 🌞 Light Theme */
+:root {
+    --light-background: #fffffe;
+    --light-headline: #094067;
+    --light-paragraph: #5f6c7b;
+
+    --light-button: #3da9fc;
+    --light-button-text: #fffffe;
+
+    --light-illustration-stroke: #094067;
+
+    --light-main: #fffffe;
+    --light-highlight: #3da9fc;
+    --light-secondary: #90b4ce;
+    --light-tertiary: #ef4565;
+}
+
+/* 🌙 Alt Theme */
+:root {
+    --alt-background: #16161a;
+    --alt-headline: #fffffe;
+    --alt-paragraph: #94a1b2;
+
+    --alt-button: #7f5af0;
+    --alt-button-text: #fffffe;
+
+    --alt-illustration-stroke: #010101;
+
+    --alt-main: #fffffe;
+    --alt-highlight: #7f5af0;
+    --alt-secondary: #72757e;
+    --alt-tertiary: #15803d;
+}
+
+/* ✅ Utility Classes (Light by default) */
+.bg-background {
+    background-color: var(--light-background);
+}
+.bg-main {
+    background-color: var(--light-main);
+}
+.bg-highlight {
+    background-color: var(--light-highlight);
+}
+.bg-secondary {
+    background-color: var(--light-secondary);
+}
+.bg-tertiary {
+    background-color: var(--light-tertiary);
+}
+
+.text-headline {
+    color: var(--light-headline);
+}
+.text-paragraph {
+    color: var(--light-paragraph);
+}
+.text-button {
+    color: var(--light-button-text);
+}
+
+/* ✅ Buttons */
+.btn {
+    background-color: var(--light-button);
+    color: var(--light-button-text);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-green {
+    background-color: var(--alt-tertiary);
+    color: var(--alt-button-text);
+    transition: background-color 0.2s ease-in-out, transform 0.15s ease-in-out;
+}
+
+.btn-green:hover {
+    background-color: #25b764; /* slightly darker green */
+    color: var(--alt-button-text); /* ✅ keep text color fixed */
+    transform: translateY(-2px); /* subtle lift effect */
+}

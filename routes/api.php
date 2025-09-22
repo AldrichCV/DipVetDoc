@@ -9,6 +9,7 @@ Route::get('/appointments', [AppointmentController::class, 'index']);
 Route::get('/appointments/assign-vet', [AppointmentController::class, 'vets']);
 Route::post('/appointments/assign-vet/{id}', [AppointmentController::class, 'assignVet']);
 Route::patch('/appointments/{appointment}/status/{status}', [AppointmentController::class, 'updateStatus']);
+Route::get('/appointments/services', [AppointmentController::class, 'services']);
 
 Route::get('/users', [UserController::class, 'index']);
 Route::patch('/users/{user}/activate', [UserController::class, 'activate']);

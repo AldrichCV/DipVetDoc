@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Appointment;
 use App\Models\Pet;
 use App\Models\Veterinarian;
+use App\Models\service;
 use Illuminate\Http\JsonResponse;
 
 class AppointmentController extends Controller
@@ -229,4 +230,12 @@ class AppointmentController extends Controller
             ], 500);
         }
     }
+
+       public function services()
+    {
+        $services = Service::orderBy('name')->get();
+
+        return response()->json($services);
+    }
+
 }

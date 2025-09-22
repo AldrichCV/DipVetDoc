@@ -17,8 +17,7 @@
 <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
 <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
 
-<!-- Main CSS -->
-<link href="{{ asset('assets/css/main.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/palette.css') }}">
 
 <!-- FontAwesome & Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
