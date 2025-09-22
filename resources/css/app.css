@@ -1,11 +1,7 @@
-@import url("./palette.css");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-    [x-cloak] {
-        display: none !important;
-    }
+[x-cloak] {
+    display: none;
 }

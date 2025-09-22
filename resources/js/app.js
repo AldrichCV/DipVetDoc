@@ -1,62 +1,23 @@
-import "./bootstrap";
-import Alpine from "alpinejs";
-import { userStatusControl } from "./user_status_control";
-//import "./ajax-navigation.js";
-import "./sidebar-state.js";
+import './bootstrap';
+import '../css/app.css';
 
-import { createApp } from "vue";
-import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
-import "vuetify/styles";
+import { createApp, h } from 'vue';
+import { createInertiaApp } from '@inertiajs/vue3';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 
-import Consultations from "./components/consultations/Consultations.vue";
-import Appointments from "./components/appointments/AppointmentPage.vue";
-import Users from "./components/users/UserPage.vue";
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-// -----------------------
-// 1️⃣ Create Vuetify instance
-// -----------------------
-const vuetify = createVuetify({
-    components,
-    directives,
+createInertiaApp({
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
+    setup({ el, App, props, plugin }) {
+        return createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .use(ZiggyVue)
+            .mount(el);
+    },
+    progress: {
+        color: '#4B5563',
+    },
 });
-
-// -----------------------
-// 2️⃣ Expose a function to mount Vue
-// -----------------------
-function mountVueApp() {
-    if (document.querySelector("#app")) {
-        // Unmount any existing app
-        if (window.vueApp) {
-            window.vueApp.unmount();
-        }
-
-        // Create a fresh Vue app
-        window.vueApp = createApp({});
-
-        // Register components globally
-        window.vueApp.component("consultations", Consultations);
-        window.vueApp.component("appointments", Appointments);
-        window.vueApp.component("users", Users);
-
-        // Install Vuetify
-        window.vueApp.use(vuetify);
-
-        // Mount
-        window.vueApp.mount("#app");
-    }
-}
-
-// Mount once on initial page load
-mountVueApp();
-
-// Make available for AJAX script
-window.mountVueApp = mountVueApp;
-
-// -----------------------
-// 3️⃣ Alpine.js setup
-// -----------------------
-window.Alpine = Alpine;
-Alpine.data("userStatusControl", userStatusControl);
-Alpine.start();
