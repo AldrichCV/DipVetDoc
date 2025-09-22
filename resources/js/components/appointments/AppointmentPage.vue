@@ -195,6 +195,7 @@ function clearFilters() {
     selectedDate.value = "";
     dateDisplay.value = "";
     selectedService.value = "";
+    searchTerm.value = ""; // <-- reset the search bar
     currentPage.value = 1;
     fetchAppointments(currentPage.value);
 }
