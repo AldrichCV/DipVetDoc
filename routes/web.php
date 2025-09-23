@@ -19,3 +19,19 @@ Route::middleware([
     })->name('dashboard');
 });
 
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    // Pass a flag so the view knows this was the "logout initiator"
+    return response()->view('auth.logged-out', [
+        'initiator' => true,
+    ]);
+})->name('logout');
+
+
+Route::get('/logged-out', function () {
+    return view('auth.logged-out');
+})->name('logged-out');
+

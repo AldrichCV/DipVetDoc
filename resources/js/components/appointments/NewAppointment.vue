@@ -424,6 +424,43 @@ function updateTimeRange() {
     // optional future validation
 }
 
+// async function submitAppointment() {
+//     try {
+//         const payload = { ...form };
+
+//         const response = await axios.post("/api/appointments", payload);
+
+//         console.log("Saved!", response.data);
+
+//         // Show success alert
+//         await Swal.fire({
+//             title: "Appointment Scheduled!",
+//             text: "Your appointment has been saved successfully.",
+//             icon: "success",
+//             confirmButtonText: "OK",
+//         }).then(() => {
+//             // only runs after user clicks OK
+//             emit("appointment-added");
+//             emit("close");
+
+//             // reset form
+//             Object.keys(form).forEach((key) => (form[key] = ""));
+//             currentStep.value = 1; //  Reset step on form reset
+//         });
+//     } catch (error) {
+//         console.error(
+//             "Error saving appointment",
+//             error.response?.data || error
+//         );
+
+//         Swal.fire({
+//             title: "Error!",
+//             text: error.response?.data?.message || "Something went wrong.",
+//             icon: "error",
+//             confirmButtonText: "OK",
+//         });
+//     }
+// }
 async function submitAppointment() {
     try {
         const payload = { ...form };
@@ -432,33 +469,21 @@ async function submitAppointment() {
 
         console.log("Saved!", response.data);
 
-        // Show success alert
-        await Swal.fire({
-            title: "Appointment Scheduled!",
-            text: "Your appointment has been saved successfully.",
-            icon: "success",
-            confirmButtonText: "OK",
-        }).then(() => {
-            // only runs after user clicks OK
-            emit("appointment-added");
-            emit("close");
+        // Emit events and reset form without Swal
+        emit("appointment-added");
+        emit("close");
 
-            // reset form
-            Object.keys(form).forEach((key) => (form[key] = ""));
-            currentStep.value = 1; //  Reset step on form reset
-        });
+        // reset form
+        Object.keys(form).forEach((key) => (form[key] = ""));
+        currentStep.value = 1; // Reset step on form reset
     } catch (error) {
         console.error(
             "Error saving appointment",
             error.response?.data || error
         );
 
-        Swal.fire({
-            title: "Error!",
-            text: error.response?.data?.message || "Something went wrong.",
-            icon: "error",
-            confirmButtonText: "OK",
-        });
+        // Optional: handle error in your UI here instead of Swal
+        // e.g., set an error variable to show a message in template
     }
 }
 </script>

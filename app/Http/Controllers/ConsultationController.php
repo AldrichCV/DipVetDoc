@@ -10,13 +10,16 @@ use App\Models\Appointment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Inertia\Inertia;
 
 
 class ConsultationController extends Controller
 {
     public function index()
     {
-        return view('consultations');
+         return Inertia::render('Consultations', [
+            'title' => 'Consultations', // optional props
+        ]);
     }
 
     // public function store(Request $request)

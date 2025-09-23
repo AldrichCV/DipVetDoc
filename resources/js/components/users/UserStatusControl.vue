@@ -76,13 +76,6 @@ watch(internalValue, (val) => emit("update:modelValue", val));
 const close = () => (internalValue.value = false);
 
 // Axios instance with CSRF token
-const token = document.querySelector('meta[name="csrf-token"]').content;
-const api = axios.create({
-    headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-TOKEN": token,
-    },
-});
 
 // Deactivate user
 const deactivateUser = async (userId) => {

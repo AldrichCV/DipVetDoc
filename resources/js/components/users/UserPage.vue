@@ -30,26 +30,17 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import UsersGrid from "./UsersGrid.vue";
 import UserModal from "./UserModal.vue";
+import { VPagination } from "vuetify/components";
 
 const paginatedUsers = ref([]);
 const totalPages = ref(1);
 const currentPage = ref(1);
 const modalUser = ref(null);
 
-// Axios instance
-const token = document.querySelector('meta[name="csrf-token"]').content;
-const api = axios.create({
-    baseURL: "http://127.0.0.1:8000",
-    headers: {
-        "X-CSRF-TOKEN": token,
-        "Content-Type": "application/json",
-    },
-});
-
 // Fetch users
 const fetchUsers = async (page = 1) => {
     try {
-        const res = await api.get(`/api/users?page=${page}`);
+        const res = await axios.get(`/api/users?page=${page}`);
         paginatedUsers.value = res.data.data;
         totalPages.value = res.data.last_page;
         currentPage.value = res.data.current_page;

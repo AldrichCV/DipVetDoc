@@ -48,7 +48,6 @@
                     </button>
                 </div>
 
-                <!-- Download PDF button on the far right -->
                 <div class="ml-auto">
                     <a
                         :href="downloadLink"
@@ -226,7 +225,6 @@
                     </div>
                 </div>
 
-                <!-- Empty state -->
                 <div v-else class="text-center py-12">
                     <h3 class="text-lg font-medium text-gray-900 mb-2">
                         No consultation history
@@ -246,14 +244,12 @@
                         class="border p-2 rounded w-full"
                         rows="3"
                     ></textarea>
-
                     <textarea
                         v-model="form.medication"
                         placeholder="Medication"
                         class="border p-2 rounded w-full"
                         rows="3"
                     ></textarea>
-
                     <textarea
                         v-model="form.prescription"
                         placeholder="Prescription"
@@ -267,6 +263,7 @@
                 </form>
             </div>
         </div>
+
         <!-- Modal Footer -->
         <div
             class="border-t border-gray-200 p-4 sm:p-6 bg-gray-50 print:hidden"
@@ -291,6 +288,11 @@
 <script setup>
 import { ref, computed } from "vue";
 import axios from "axios";
+
+// Import dissected components
+import InfoField from "./InfoField.vue";
+import VitalField from "./VitalField.vue";
+import ClinicalField from "./ClinicalField.vue";
 
 const props = defineProps({
     consultations: { type: Array, required: true },
@@ -335,7 +337,7 @@ async function saveConsultation() {
 
         if (response.data.success) {
             const newConsultation = response.data.consultation;
-            props.consultations.push(newConsultation); // update immediately
+            props.consultations.push(newConsultation);
             activeTab.value = "history";
             selected.value = newConsultation.created_at;
             form.value = { complaint: "", medication: "", prescription: "" };
@@ -351,44 +353,4 @@ const downloadLink = computed(() =>
         ? `/consultations/download/${props.consultations[0].pet_id}`
         : "#"
 );
-</script>
-
-<script>
-export default {
-    components: {
-        InfoField: {
-            props: ["label", "value"],
-            template: `
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ label }}</label>
-                    <div class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-900">
-                        {{ value || 'Not available' }}
-                    </div>
-                </div>
-            `,
-        },
-        VitalField: {
-            props: ["label", "value"],
-            template: `
-                <div class="bg-gray-50 rounded-lg p-3">
-                    <label class="block text-xs font-medium text-gray-600 mb-1">{{ label }}</label>
-                    <div class="text-sm font-medium text-gray-900">
-                        {{ value || 'Not recorded' }}
-                    </div>
-                </div>
-            `,
-        },
-        ClinicalField: {
-            props: ["label", "value"],
-            template: `
-                <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ label }}</label>
-                    <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-900 min-h-[60px]">
-                        {{ value || 'No ' + label.toLowerCase() + ' recorded' }}
-                    </div>
-                </div>
-            `,
-        },
-    },
-};
 </script>

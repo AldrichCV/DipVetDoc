@@ -129,6 +129,7 @@ import axios from "axios";
 import AppointmentsTable from "./AppointmentsTable.vue";
 import AssignVetModal from "./AssignVetModal.vue";
 import NewAppointment from "./NewAppointment.vue";
+import { VDatePicker, VPagination } from "vuetify/components";
 
 // --- State ---
 const appointments = ref([]);

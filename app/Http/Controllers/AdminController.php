@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Appointment;
 use Illuminate\Support\Facades\DB;
 use App\Providers\PersonnelAssignment;
+use Inertia\Inertia;
 
 class AdminController extends Controller
 {
@@ -22,12 +23,17 @@ class AdminController extends Controller
 
    public function index()
     {
-        return view('users');
+        return Inertia::render('Users', [
+            'title' => 'Users', // optional props
+        ]);
     }
 
     public function appointments()
     {
-        return view('vet_appointments');
+         // Render the Appointments.vue page via Inertia
+        return Inertia::render('Appointments', [
+            'title' => 'Appointments', // optional props
+        ]);
     }
 
     // // In VetController.php
