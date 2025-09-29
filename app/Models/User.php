@@ -56,6 +56,16 @@ class User extends Authenticatable
         ];
     }
 
+        // if prof is empty...
+    public function isProfileComplete(): bool
+{
+    return !empty($this->first_name)
+        && !empty($this->last_name)
+        && !empty($this->contact_number)
+        && !empty($this->address);
+}
+
+
     public function vetProfile()
     {
         return $this->hasOne(Veterinarian::class);

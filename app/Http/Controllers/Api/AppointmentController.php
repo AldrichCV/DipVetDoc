@@ -144,55 +144,64 @@ class AppointmentController extends Controller
 
 
     
+  //if profile is not complete schedule appointment will disable//
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            // Pet data
-            'name' => 'required|string|max:100',
-            'species' => 'required|string|max:100',
-            'breed' => 'nullable|string|max:100',
-            'sex' => 'required|in:Male,Female',
-            'date_of_birth' => 'nullable|date',
+{
+    $user = auth()->user();
 
-            // Appointment data
-            'appointment_date' => 'required|date',
-            'appointment_time' => 'required',
-            'reason' => 'required|integer|exists:services,id',
-            'notes' => 'nullable|string',
+    //  Backend protection
+    if (! $user->isProfileComplete()) {
+        return response()->json([
+            'message' => 'Please complete your profile before scheduling an appointment.'
+        ], 422);
+    }
+
+    $validated = $request->validate([
+        // Pet data
+        'name' => 'required|string|max:100',
+        'species' => 'required|string|max:100',
+        'breed' => 'nullable|string|max:100',
+        'sex' => 'required|in:Male,Female',
+        'date_of_birth' => 'nullable|date',
+
+        // Appointment data
+        'appointment_date' => 'required|date',
+        'appointment_time' => 'required',
+        'reason' => 'required|integer|exists:services,id',
+        'notes' => 'nullable|string',
+    ]);
+
+    $appointment = DB::transaction(function () use ($validated, $user) {
+        $petCode = $this->generatePetCode();
+
+        $pet = Pet::create([
+            'pet_code' => $petCode,
+            'name' => $validated['name'],
+            'species' => $validated['species'],
+            'breed' => $validated['breed'] ?? null,
+            'sex' => $validated['sex'],
+            'date_of_birth' => $validated['date_of_birth'] ?? null,
+            'owner_id' => $user->id,
         ]);
 
-        $appointment = DB::transaction(function () use ($validated) {
-            // 1. Generate Pet Code
-            $petCode = $this->generatePetCode();
+        return Appointment::create([
+            'pet_code' => $petCode,
+            'client_id' => $user->id,
+            'appointment_date' => $validated['appointment_date'],
+            'appointment_time' => $validated['appointment_time'],
+            'reason' => $validated['reason'],
+            'notes' => $validated['notes'] ?? null,
+            'status' => 'pending',
+        ]);
+    });
 
-            // 2. Create Pet
-            $pet = Pet::create([
-                'pet_code' => $petCode,
-                'name' => $validated['name'],
-                'species' => $validated['species'],
-                'breed' => $validated['breed'] ?? null,
-                'sex' => $validated['sex'],
-                'date_of_birth' => $validated['date_of_birth'] ?? null,
-                'owner_id' => auth()->id(), // assumes API auth
-            ]);
+    return response()->json([
+        'message' => 'Appointment created successfully',
+        'appointment' => $appointment,
+    ], 201);
+}
 
-            // 3. Create Appointment
-            return Appointment::create([
-                'pet_code' => $petCode,
-                'client_id' => auth()->id(), // assumes API auth
-                'appointment_date' => $validated['appointment_date'],
-                'appointment_time' => $validated['appointment_time'],
-                'reason' => $validated['reason'],
-                'notes' => $validated['notes'] ?? null,
-                'status' => 'pending',
-            ]);
-        });
 
-        return response()->json([
-            'message' => 'Appointment created successfully',
-            'appointment' => $appointment,
-        ], 201);
-    }
 
     /**
      * Generate a unique pet code based on today's date and counter

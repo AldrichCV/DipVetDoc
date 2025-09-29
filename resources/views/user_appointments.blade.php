@@ -3,13 +3,52 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" x-data="{ showNewAppointmentModal: false }">
             <h2 class="font-bold text-2xl text-gray-900 leading-tight">
                 {{ __('Pet Appointments') }}
+
+
+        <!-- <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('My Appointments') }}
+        </h2>
+        </x-slot>
+
+        <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Appointments</h3>
+
+                    @php
+                        $user = auth()->user();
+                        $profileIncomplete = empty($user->first_name)
+                            || empty($user->last_name)
+                            || empty($user->contact_number)
+                            || empty($user->address);
+                    @endphp -->
+
+
             </h2>
-            @if(auth()->user()->role !== 'admin')
-                <button 
-                    @click="showNewAppointmentModal = true"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                 @if(auth()->user()->role !== 'admin')
+                        @if ($profileIncomplete)
+                            
+                            <button disabled
+                                class="inline-flex items-center px-4 py-2 bg-gray-400 text-white font-medium rounded-lg shadow-sm cursor-not-allowed">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                New Appointment
+                            </button>
+                            <p class="mt-2 text-sm text-red-600">
+                                ⚠️ Please complete your profile (First name, Last Name, Contact Number, Address) before making an appointment.  
+                                <a href="{{ route('profile.edit') }}" class="underline text-blue-600">Update Profile</a>
+                            </p>
+                        @else
+                            
+                            <button 
+                                @click="showNewAppointmentModal = true"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     New Appointment
                 </button> 
@@ -453,6 +492,8 @@
                             </div>
                         </div>
 
+
+                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Service</label>
                             <select name="reason" x-model="selectedAppointment.reason"
@@ -632,6 +673,7 @@
             };
         }
 
+</script>
 </x-app-layout>
 
 
